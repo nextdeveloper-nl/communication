@@ -1,11 +1,16 @@
 <?php
 
+use NextDeveloper\Communication\Services\Delivery\Mail;
+
 return [
     'from'  =>  [
         'name'  =>  'PlusClouds LEO',
         'email' =>  'leo@plusclouds.com',
         'reply_to'  =>  'support@plusclouds.com',
         'reply_to_name' =>  'PlusClouds Support'
+    ],
+    'defaults'  =>  [
+        'mailer'    =>  Mail::class,
     ],
     'labeling'  =>  [
         'logo'      =>  'https://plusclouds.com.tr/assets/frontend/images/logos/plusclouds-logo.png',
