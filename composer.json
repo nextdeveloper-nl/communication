@@ -1,0 +1,52 @@
+{
+  "name": "nextdeveloper/communication",
+  "description": "NextDeveloper Communication Package",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Harun Barış Bulut",
+      "email": "baris.bulut@plusclouds.com"
+    }
+  ],
+  "homepage": "https://github.com/nextdeveloper-nl/communication",
+  "support": {
+    "issues": "https://github.com/nextdeveloper-nl/communication/issues",
+    "source": "https://github.com/nextdeveloper-nl/communication"
+  },
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "git@github.com:nextdeveloper-nl/communication.git"
+    }
+  ],
+  "require": {
+    "php": ">=8.2.0",
+    "league/fractal": "*",
+    "monolog/monolog": "*"
+  },
+  "require-dev": {
+    "illuminate/support": "5.5.*",
+    "illuminate/database": "5.5.*",
+    "illuminate/validation": "5.5.*",
+    "guzzlehttp/guzzle": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "NextDeveloper\\Communication\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "NextDeveloper\\Tests\\": "tests/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "NextDeveloper\\Communication\\CommunicationServiceProvider"
+      ]
+    }
+  },
+  "suggest": {}
+}
