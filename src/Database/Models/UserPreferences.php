@@ -6,17 +6,17 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Model;
 use NextDeveloper\Commons\Database\Traits\Filterable;
-use NextDeveloper\Communication\Database\Observers\EmailsObserver;
+use NextDeveloper\Communication\Database\Observers\UserPreferencesObserver;
 use NextDeveloper\Commons\Database\Traits\UuidId;
 use NextDeveloper\Commons\Common\Cache\Traits\CleanCache;
 use NextDeveloper\Commons\Database\Traits\Taggable;
 
 /**
- * Class Emails.
+ * Class UserPreferences.
  *
  * @package NextDeveloper\Communication\Database\Models
  */
-class Emails extends Model
+class UserPreferences extends Model
 {
     use Filterable, UuidId, CleanCache, Taggable;
     use SoftDeletes;
@@ -24,7 +24,7 @@ class Emails extends Model
 
     public $timestamps = true;
 
-    protected $table = 'communication_emails';
+    protected $table = 'communication_user_preferences';
 
 
     /**
@@ -52,16 +52,14 @@ class Emails extends Model
      @var array
      */
     protected $casts = [
-    'id'                 => 'integer',
-    'uuid'               => 'string',
-    'email_address'      => 'string',
-    'recipient_name'     => 'string',
-    'subject'            => 'string',
-    'body'               => 'string',
-    'is_marketing_email' => 'boolean',
-    'created_at'         => 'datetime',
-    'updated_at'         => 'datetime',
-    'deleted_at'         => 'datetime',
+    'id'                        => 'integer',
+    'uuid'                      => 'string',
+    'is_system_email_optout'    => 'boolean',
+    'is_phone_optout'           => 'boolean',
+    'is_marketing_email_optout' => 'boolean',
+    'created_at'                => 'datetime',
+    'updated_at'                => 'datetime',
+    'deleted_at'                => 'datetime',
     ];
 
     /**
@@ -95,7 +93,7 @@ class Emails extends Model
         parent::boot();
 
         //  We create and add Observer even if we wont use it.
-        parent::observe(EmailsObserver::class);
+        parent::observe(UserPreferencesObserver::class);
 
         self::registerScopes();
     }
@@ -103,7 +101,7 @@ class Emails extends Model
     public static function registerScopes()
     {
         $globalScopes = config('communication.scopes.global');
-        $modelScopes = config('communication.scopes.communication_emails');
+        $modelScopes = config('communication.scopes.communication_user_preferences');
 
         if(!$modelScopes) { $modelScopes = [];
         }
@@ -122,16 +120,10 @@ class Emails extends Model
         }
     }
 
-    public function accounts() : \Illuminate\Database\Eloquent\Relations\BelongsTo
-    {
-        return $this->belongsTo(\NextDeveloper\IAM\Database\Models\Accounts::class);
-    }
-    
     public function users() : \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(\NextDeveloper\IAM\Database\Models\Users::class);
     }
     
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
-
 }
