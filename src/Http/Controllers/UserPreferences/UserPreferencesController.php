@@ -4,7 +4,7 @@ namespace NextDeveloper\Communication\Http\Controllers\UserPreferences;
 
 use Illuminate\Http\Request;
 use NextDeveloper\Communication\Http\Controllers\AbstractController;
-use NextDeveloper\Generator\Http\Traits\ResponsableFactory;
+use NextDeveloper\Commons\Http\Response\ResponsableFactory;
 use NextDeveloper\Communication\Http\Requests\UserPreferences\UserPreferencesUpdateRequest;
 use NextDeveloper\Communication\Database\Filters\UserPreferencesQueryFilter;
 use NextDeveloper\Communication\Database\Models\UserPreferences;

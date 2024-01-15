@@ -4,7 +4,7 @@ namespace NextDeveloper\Communication\Http\Controllers\Remindables;
 
 use Illuminate\Http\Request;
 use NextDeveloper\Communication\Http\Controllers\AbstractController;
-use NextDeveloper\Generator\Http\Traits\ResponsableFactory;
+use NextDeveloper\Commons\Http\Response\ResponsableFactory;
 use NextDeveloper\Communication\Http\Requests\Remindables\RemindablesUpdateRequest;
 use NextDeveloper\Communication\Database\Filters\RemindablesQueryFilter;
 use NextDeveloper\Communication\Database\Models\Remindables;

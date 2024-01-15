@@ -4,7 +4,7 @@ namespace NextDeveloper\Communication\Http\Controllers\Emails;
 
 use Illuminate\Http\Request;
 use NextDeveloper\Communication\Http\Controllers\AbstractController;
-use NextDeveloper\Generator\Http\Traits\ResponsableFactory;
+use NextDeveloper\Commons\Http\Response\ResponsableFactory;
 use NextDeveloper\Communication\Http\Requests\Emails\EmailsUpdateRequest;
 use NextDeveloper\Communication\Database\Filters\EmailsQueryFilter;
 use NextDeveloper\Communication\Database\Models\Emails;
