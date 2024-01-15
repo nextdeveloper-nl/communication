@@ -4,7 +4,7 @@ namespace NextDeveloper\Communication\Http\Controllers\Notifications;
 
 use Illuminate\Http\Request;
 use NextDeveloper\Communication\Http\Controllers\AbstractController;
-use NextDeveloper\Generator\Http\Traits\ResponsableFactory;
+use NextDeveloper\Commons\Http\Response\ResponsableFactory;
 use NextDeveloper\Communication\Http\Requests\Notifications\NotificationsUpdateRequest;
 use NextDeveloper\Communication\Database\Filters\NotificationsQueryFilter;
 use NextDeveloper\Communication\Database\Models\Notifications;
