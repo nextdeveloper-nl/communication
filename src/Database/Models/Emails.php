@@ -59,6 +59,8 @@ class Emails extends Model
     'subject'            => 'string',
     'body'               => 'string',
     'is_marketing_email' => 'boolean',
+    'deliver_at'         => 'datetime',
+    'delivered_at'       => 'datetime',
     'created_at'         => 'datetime',
     'updated_at'         => 'datetime',
     'deleted_at'         => 'datetime',
@@ -70,6 +72,8 @@ class Emails extends Model
      @var array
      */
     protected $dates = [
+    'deliver_at',
+    'delivered_at',
     'created_at',
     'updated_at',
     'deleted_at',
@@ -133,5 +137,7 @@ class Emails extends Model
     }
     
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
+
 
 }

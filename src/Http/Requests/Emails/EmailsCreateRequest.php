@@ -19,6 +19,8 @@ class EmailsCreateRequest extends AbstractFormRequest
         'body'               => 'required|string',
         'delivery_results'   => 'nullable',
         'is_marketing_email' => 'boolean',
+        'deliver_at'         => 'nullable|date',
+        'delivered_at'       => 'nullable|date',
         ];
     }
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
