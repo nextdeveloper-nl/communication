@@ -62,6 +62,8 @@ trait CommunicationEmailTestTraits
                 'recipient_name'  =>  'a',
                 'subject'  =>  'a',
                 'body'  =>  'a',
+                    'deliver_at'  =>  now(),
+                    'delivered_at'  =>  now(),
                             ],
                 ['http_errors' => false]
             ]
@@ -420,6 +422,44 @@ trait CommunicationEmailTestTraits
         $this->assertTrue(true);
     }
 
+    public function test_communicationemail_event_deliver_at_filter_start()
+    {
+        try {
+            $request = new Request(
+                [
+                'deliver_atStart'  =>  now()
+                ]
+            );
+
+            $filter = new CommunicationEmailQueryFilter($request);
+
+            $model = \NextDeveloper\Communication\Database\Models\CommunicationEmail::filter($filter)->first();
+        } catch (\Exception $e) {
+            $this->assertFalse(false, $e->getMessage());
+        }
+
+        $this->assertTrue(true);
+    }
+
+    public function test_communicationemail_event_delivered_at_filter_start()
+    {
+        try {
+            $request = new Request(
+                [
+                'delivered_atStart'  =>  now()
+                ]
+            );
+
+            $filter = new CommunicationEmailQueryFilter($request);
+
+            $model = \NextDeveloper\Communication\Database\Models\CommunicationEmail::filter($filter)->first();
+        } catch (\Exception $e) {
+            $this->assertFalse(false, $e->getMessage());
+        }
+
+        $this->assertTrue(true);
+    }
+
     public function test_communicationemail_event_created_at_filter_start()
     {
         try {
@@ -477,6 +517,44 @@ trait CommunicationEmailTestTraits
         $this->assertTrue(true);
     }
 
+    public function test_communicationemail_event_deliver_at_filter_end()
+    {
+        try {
+            $request = new Request(
+                [
+                'deliver_atEnd'  =>  now()
+                ]
+            );
+
+            $filter = new CommunicationEmailQueryFilter($request);
+
+            $model = \NextDeveloper\Communication\Database\Models\CommunicationEmail::filter($filter)->first();
+        } catch (\Exception $e) {
+            $this->assertFalse(false, $e->getMessage());
+        }
+
+        $this->assertTrue(true);
+    }
+
+    public function test_communicationemail_event_delivered_at_filter_end()
+    {
+        try {
+            $request = new Request(
+                [
+                'delivered_atEnd'  =>  now()
+                ]
+            );
+
+            $filter = new CommunicationEmailQueryFilter($request);
+
+            $model = \NextDeveloper\Communication\Database\Models\CommunicationEmail::filter($filter)->first();
+        } catch (\Exception $e) {
+            $this->assertFalse(false, $e->getMessage());
+        }
+
+        $this->assertTrue(true);
+    }
+
     public function test_communicationemail_event_created_at_filter_end()
     {
         try {
@@ -521,6 +599,46 @@ trait CommunicationEmailTestTraits
             $request = new Request(
                 [
                 'deleted_atEnd'  =>  now()
+                ]
+            );
+
+            $filter = new CommunicationEmailQueryFilter($request);
+
+            $model = \NextDeveloper\Communication\Database\Models\CommunicationEmail::filter($filter)->first();
+        } catch (\Exception $e) {
+            $this->assertFalse(false, $e->getMessage());
+        }
+
+        $this->assertTrue(true);
+    }
+
+    public function test_communicationemail_event_deliver_at_filter_start_and_end()
+    {
+        try {
+            $request = new Request(
+                [
+                'deliver_atStart'  =>  now(),
+                'deliver_atEnd'  =>  now()
+                ]
+            );
+
+            $filter = new CommunicationEmailQueryFilter($request);
+
+            $model = \NextDeveloper\Communication\Database\Models\CommunicationEmail::filter($filter)->first();
+        } catch (\Exception $e) {
+            $this->assertFalse(false, $e->getMessage());
+        }
+
+        $this->assertTrue(true);
+    }
+
+    public function test_communicationemail_event_delivered_at_filter_start_and_end()
+    {
+        try {
+            $request = new Request(
+                [
+                'delivered_atStart'  =>  now(),
+                'delivered_atEnd'  =>  now()
                 ]
             );
 

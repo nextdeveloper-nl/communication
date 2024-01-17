@@ -34,6 +34,8 @@ class AbstractEmailsTransformer extends AbstractTransformer
             'iam_user_id'  =>  $iamUserId ? $iamUserId->uuid : null,
             'iam_account_id'  =>  $iamAccountId ? $iamAccountId->uuid : null,
             'is_marketing_email'  =>  $model->is_marketing_email == 1 ? true : false,
+            'deliver_at'  =>  $model->deliver_at ? $model->deliver_at->toIso8601String() : null,
+            'delivered_at'  =>  $model->delivered_at ? $model->delivered_at->toIso8601String() : null,
             'created_at'  =>  $model->created_at ? $model->created_at->toIso8601String() : null,
             'updated_at'  =>  $model->updated_at ? $model->updated_at->toIso8601String() : null,
             'deleted_at'  =>  $model->deleted_at ? $model->deleted_at->toIso8601String() : null,
@@ -42,5 +44,7 @@ class AbstractEmailsTransformer extends AbstractTransformer
     }
 
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
+
 
 }

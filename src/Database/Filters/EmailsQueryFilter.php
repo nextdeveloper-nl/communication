@@ -42,6 +42,26 @@ class EmailsQueryFilter extends AbstractQueryFilter
         return $this->builder->where('is_marketing_email', true);
     }
     
+    public function deliverAtStart($date) 
+    {
+        return $this->builder->where('deliver_at', '>=', $date);
+    }
+
+    public function deliverAtEnd($date) 
+    {
+        return $this->builder->where('deliver_at', '<=', $date);
+    }
+
+    public function deliveredAtStart($date) 
+    {
+        return $this->builder->where('delivered_at', '>=', $date);
+    }
+
+    public function deliveredAtEnd($date) 
+    {
+        return $this->builder->where('delivered_at', '<=', $date);
+    }
+
     public function createdAtStart($date) 
     {
         return $this->builder->where('created_at', '>=', $date);
