@@ -11,6 +11,7 @@ return [
     ],
     'defaults'  =>  [
         'mailer'    =>  env('COMMUNICATION_DEFAULT_MAILER', Mail::class),
+        'view'      =>  env('COMMUNICATION_DEFAULT_VIEW', 'Communication::emails.generic'),
     ],
     'labeling'  =>  [
         'logo'      =>  'https://plusclouds.com.tr/assets/frontend/images/logos/plusclouds-logo.png',
