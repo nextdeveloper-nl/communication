@@ -1,16 +1,17 @@
 <?php
 
-namespace NextDeveloper\Communication\Actions\Emails;
+namespace NextDeveloper\Communication\Jobs;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use NextDeveloper\Commons\Actions\AbstractAction;
+use NextDeveloper\Communication\Actions\Emails\Deliver;
 use NextDeveloper\Communication\Database\Models\Emails;
 use NextDeveloper\CRM\Database\Models\Users;
 
-class Send extends AbstractAction
+class DeliverAllEmails extends AbstractAction
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -26,10 +27,8 @@ class Send extends AbstractAction
      *
      * @param Emails $emails
      */
-    public function __construct(Emails $email)
+    public function __construct(Emails $email = null)
     {
-        $this->email = $email;
-
         return parent::__construct();
     }
 
@@ -37,13 +36,24 @@ class Send extends AbstractAction
     {
         $mailer = config('communication.defaults.mailer');
 
+        /**
+         * 1)   Gönderilmemiş tüm mailleri çek
+         * 2)   Gönderilmemiş maillerin sayısını bul
+         * 3)   Gönderilmemiş mailleri gönder ve %yi hesapla ve kaydet
+         */
+
         if(class_exists($mailer)) {
-            /**
-             * This is a pseude code that will be used to send emails. You need to change this code according to the
-             * requirements.
-             */
-            $mailer = new $mailer();
-            $mailer->send();
+            $emails = Emails::withoutGlobalScope()->where('is_sent', false)->get();
+
+            $mailCount = $emails->count();
+            $sentMail = 0;
+
+            foreach ($emails as $email) {
+                (new Deliver($email))->handle();
+                $sentMail++;
+
+                $this->setProgress(ceil($sentMail / $mailCount) * 100, 'Sending emails');
+            }
         } else {
             throw new \DeliveryMethodNotFoundException('Cannot find the delivery method you required.');
         }

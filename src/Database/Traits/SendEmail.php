@@ -2,6 +2,8 @@
 
 namespace NextDeveloper\Communication\Database\Traits;
 
+use NextDeveloper\Communication\Database\Models\Emails;
+
 /**
  * This traits handles the email sending process for the customer
  */
@@ -17,22 +19,29 @@ trait SendEmail
      * @param $body
      * @return void
      */
-    public function sendEmail($subject, $body)
+    public function sendEmail($subject, $body, $schedule = null)
     {
+        if(!$schedule) {
+            $schedule = now();
+        }
+
         /**
-         * This function will take subject and body, then save it to database with a is_sent = 0 flag. And then
-         * trigger mail sending action.
+         * This function will take subject and body, then save it to database with a is_sent = 0 flag.
          */
     }
 
-    public function sendWithView($subject, $view, $data) {
+    public function sendWithView($subject, $view, $data, $schedule = null) {
+        if(!$schedule) {
+            $schedule = now();
+        }
+
         /**
          * This function will take subject, view and data, then build the html and then save it to the database.
          */
 
         //  Here we will be creating the html from the view and data.
         $html = view($view, $data)->render();
-        return self::sendHtmlEmail($subject, $html);
+        return self::sendHtmlEmail($subject, $html, $schedule);
     }
 
     /**
@@ -43,8 +52,16 @@ trait SendEmail
      * @param $html
      * @return void
      */
-    public function sendHtmlEmail($subject, $html)
+    public function sendHtmlEmail($subject, $html, $schedule = null)
     {
+        if(!$schedule) {
+            $schedule = now();
+        }
+
+        Emails::create([
+            //  ...
+        ]);
+
         /**
          * This function will take subject and body, then save it to the database.
          */
