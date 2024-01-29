@@ -10,7 +10,7 @@ return [
         'reply_to_name' =>  'PlusClouds Support'
     ],
     'defaults'  =>  [
-        'mailer'    =>  Mail::class,
+        'mailer'    =>  env('COMMUNICATION_DEFAULT_MAILER', Mail::class),
     ],
     'labeling'  =>  [
         'logo'      =>  'https://plusclouds.com.tr/assets/frontend/images/logos/plusclouds-logo.png',

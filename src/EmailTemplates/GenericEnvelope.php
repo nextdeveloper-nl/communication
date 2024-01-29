@@ -1,8 +1,7 @@
 <?php
 
-namespace NextDeveloper\Communication\Mails;
+namespace NextDeveloper\Communication\EmailTemplates;
 
-use Helpers\i18n;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Address;
@@ -10,24 +9,29 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use NextDeveloper\Commons\Database\Models\Languages;
+use NextDeveloper\Communication\Database\Models\Emails;
+use NextDeveloper\I18n\Helpers\i18n;
 use NextDeveloper\IAM\Database\Models\Users;
 
-class Generic extends Mailable
+class GenericEnvelope extends Mailable
 {
     use Queueable, SerializesModels;
 
     public $language;
 
+    private $email;
+
     /**
      * Create a new message instance.
      */
-    public function __construct(public Users $users, public $subject, public $body)
+    public function __construct(Emails $email)
     {
-        $language = Languages::where('id', $users->common_language_id)->first();
-        $this->language = $language;
-
-        $this->subject = I18n::t($this->subject, $language->code);
-        $this->body = I18n::t($this->body, $language->code);
+        /**
+         * Here we get all the information of the email from the database, and then we will use it to send the email.
+         *
+         * You don't need to make anything extra as a content to send this email.
+         */
+        $this->email = $email;
     }
 
     /**
@@ -38,15 +42,28 @@ class Generic extends Mailable
         return new Envelope(
             subject: i18n::t($this->subject, $this->language->code),
             from: new Address(
-                config('communication.from.email'),
-                config('communication.from.name')
+                //  ...
             ),
-            replyTo: [
+            to: [
                 new Address(
-                    config('communication.from.reply_to'),
-                    config('communication.from.reply_to_name')
+                //  ...
                 )
             ],
+            cc: [
+                new Address(
+                //  ...
+                )
+            ],
+            bcc: [
+                new Address(
+                //  ...
+                )
+            ],
+            replyTo: [
+                new Address(
+                //  ...
+                )
+            ]
         );
     }
 
@@ -57,6 +74,9 @@ class Generic extends Mailable
     {
         return new Content(
             view: 'Communication::emails.generic',
+            with: [
+                'data'  =>  '', //   Here will be body from the email.
+            ]
         );
     }
 

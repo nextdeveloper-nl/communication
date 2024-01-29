@@ -14,4 +14,11 @@ trait SendEmail
          * trigger mail sending action.
          */
     }
+
+    public function sendRawEmail($subject, $body)
+    {
+        /**
+         * This function will take subject and body, then send it to the email address directly.
+         */
+    }
 }
