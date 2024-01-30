@@ -19,17 +19,14 @@ class Deliver extends AbstractAction
      * https://.../communication/emails/{email-id}/actions/send
      */
 
-    private $email;
 
     /**
      * This action takes an email and sends it to the user.
      *
-     * @param Emails $emails
+     * @param $model
      */
-    public function __construct(Emails $email = null)
+    public function __construct(public $model)
     {
-        $this->email = $email;
-
         return parent::__construct();
     }
 
@@ -43,7 +40,7 @@ class Deliver extends AbstractAction
              * requirements.
              */
             $mailer = new $mailer();
-            $mailer->send();
+            $mailer->send($this->model);
         } else {
             throw new \DeliveryMethodNotFoundException('Cannot find the delivery method you required.');
         }
