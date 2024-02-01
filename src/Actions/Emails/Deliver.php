@@ -7,18 +7,10 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use NextDeveloper\Commons\Actions\AbstractAction;
-use NextDeveloper\Communication\Database\Models\Emails;
-use NextDeveloper\CRM\Database\Models\Users;
 
 class Deliver extends AbstractAction
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-
-    /**
-     * Sample action;
-     * https://.../communication/emails/{email-id}/actions/send
-     */
-
 
     /**
      * This action takes an email and sends it to the user.
