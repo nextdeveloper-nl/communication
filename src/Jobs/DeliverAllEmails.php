@@ -7,9 +7,9 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use NextDeveloper\Commons\Actions\AbstractAction;
-use NextDeveloper\Commons\Database\Models\Actions;
 use NextDeveloper\Communication\Actions\Emails\Deliver;
 use NextDeveloper\Communication\Database\Models\Emails;
+use NextDeveloper\CRM\Database\Models\Users;
 
 class DeliverAllEmails extends AbstractAction
 {
@@ -20,13 +20,14 @@ class DeliverAllEmails extends AbstractAction
      * https://.../communication/emails/{email-id}/actions/send
      */
 
+    private $email;
 
     /**
      * This action takes an email and sends it to the user.
      *
-     * @param $mnodel
+     * @param Emails $emails
      */
-    public function __construct(public $model)
+    public function __construct(Emails $email = null)
     {
         return parent::__construct();
     }
@@ -49,25 +50,12 @@ class DeliverAllEmails extends AbstractAction
             $mailCount = $emails->count();
             $sentMail = 0;
 
-            $this->setAction(Actions::create([
-                'action'        =>  get_class($this),
-                'progress'      =>  0,
-                'runtime'       =>  0,
-                'object_id'     =>  $this->model->id,
-                'object_type'   =>  get_class($this->model)
-            ]));
-
             foreach ($emails as $email) {
                 (new Deliver($email))->handle();
-                $email->delivered_at = now();
-                $email->save();
-
                 $sentMail++;
 
                 $this->setProgress(ceil($sentMail / $mailCount) * 100, 'Sending emails');
             }
-
-            $this->setFinished();
         } else {
             throw new \DeliveryMethodNotFoundException('Cannot find the delivery method you required.');
         }

@@ -17,6 +17,9 @@ class Mail
             $message->subject($email->subject);
         });
 
+       $email->delivered_at = now();
+       $email->save();
+
     }
 
 }

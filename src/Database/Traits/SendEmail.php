@@ -2,6 +2,8 @@
 
 namespace NextDeveloper\Communication\Database\Traits;
 
+use Illuminate\Support\Facades\DB;
+use NextDeveloper\Communication\Actions\Emails\Deliver;
 use NextDeveloper\Communication\Database\Models\Emails;
 use NextDeveloper\Communication\Jobs\DeliverAllEmails;
 
@@ -35,14 +37,14 @@ trait SendEmail
             'body'                  => $body,
             'from_email_address'    => config('mail.from.address'),
             'deliver_at'            => $schedule,
-            'delivered_at'          => null,
+            'to'                    => DB::raw("ARRAY['{$this->email}']::varchar[]"),
         ]);
 
         /**
          * This function will trigger the job to send the email.
          */
 
-        $sendEmailJob = new DeliverAllEmails($email);
+        $sendEmailJob = new Deliver($email);
         dispatch($sendEmailJob);
 
         $check = Emails::where('id', $email->id)->first();
