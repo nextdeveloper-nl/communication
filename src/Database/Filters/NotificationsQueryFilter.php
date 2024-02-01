@@ -27,6 +27,21 @@ class NotificationsQueryFilter extends AbstractQueryFilter
         return $this->builder->where('data', 'like', '%' . $value . '%');
     }
 
+    public function isInfo()
+    {
+        return $this->builder->where('is_info', true);
+    }
+    
+    public function isWarning()
+    {
+        return $this->builder->where('is_warning', true);
+    }
+    
+    public function isError()
+    {
+        return $this->builder->where('is_error', true);
+    }
+    
     public function readAtStart($date) 
     {
         return $this->builder->where('read_at', '>=', $date);

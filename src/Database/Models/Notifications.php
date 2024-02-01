@@ -52,15 +52,17 @@ class Notifications extends Model
      @var array
      */
     protected $casts = [
-    'id'              => 'integer',
-    'uuid'            => 'string',
-    'notifiable_id'   => 'integer',
+    'id' => 'integer',
+    'is_info' => 'boolean',
+    'is_warning' => 'boolean',
+    'is_error' => 'boolean',
+    'notifiable_id' => 'integer',
     'notifiable_type' => 'string',
-    'data'            => 'string',
-    'read_at'         => 'datetime',
-    'created_at'      => 'datetime',
-    'updated_at'      => 'datetime',
-    'deleted_at'      => 'datetime',
+    'data' => 'string',
+    'read_at' => 'datetime',
+    'created_at' => 'datetime',
+    'updated_at' => 'datetime',
+    'deleted_at' => 'datetime',
     ];
 
     /**
@@ -123,6 +125,13 @@ class Notifications extends Model
     }
 
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
+
+
+
+
+
+
 
 
 

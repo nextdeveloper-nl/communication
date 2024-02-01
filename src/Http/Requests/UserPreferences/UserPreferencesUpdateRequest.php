@@ -13,8 +13,8 @@ class UserPreferencesUpdateRequest extends AbstractFormRequest
     public function rules()
     {
         return [
-            'is_system_email_optout'    => 'boolean',
-        'is_phone_optout'           => 'boolean',
+            'is_system_email_optout' => 'boolean',
+        'is_phone_optout' => 'boolean',
         'is_marketing_email_optout' => 'boolean',
         ];
     }

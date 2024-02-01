@@ -13,11 +13,13 @@ class NotificationsUpdateRequest extends AbstractFormRequest
     public function rules()
     {
         return [
-            'type'            => 'nullable',
-        'notifiable_id'   => 'nullable|exists:notifiables,uuid|uuid',
-        'notifiable_type' => 'nullable|string|max:255',
-        'data'            => 'nullable|string',
-        'read_at'         => 'nullable|date',
+            'is_info' => 'boolean',
+        'is_warning' => 'boolean',
+        'is_error' => 'boolean',
+        'notifiable_id' => 'nullable|exists:notifiables,uuid|uuid',
+        'notifiable_type' => 'nullable|string',
+        'data' => 'nullable|string',
+        'read_at' => 'nullable|date',
         ];
     }
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE

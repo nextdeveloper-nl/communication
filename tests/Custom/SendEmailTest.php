@@ -17,4 +17,23 @@ class SendEmailTest extends TestCase
             body: 'This is a test email'
         ));
     }
+
+    public function testGetEmailsUnitTest()
+    {
+        $emails = \NextDeveloper\Communication\Database\Models\Emails::withoutGlobalScopes()->where('id', 124)->get();
+
+        $email = $emails->first();
+
+        $email->update([
+            'to'    =>  [
+                'a@b.com',
+                'a@b.com',
+                'a@b.com',
+                'a@b.com',
+                'a@b.com'
+            ]
+        ]);
+
+        $this->assertTrue($emails->count() > 0);
+    }
 }

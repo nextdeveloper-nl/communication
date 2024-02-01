@@ -58,8 +58,7 @@ trait CommunicationEmailTestTraits
         $response = $this->http->request(
             'POST', '/communication/communicationemail', [
             'form_params'   =>  [
-                'email_address'  =>  'a',
-                'recipient_name'  =>  'a',
+                'from_email_address'  =>  'a',
                 'subject'  =>  'a',
                 'body'  =>  'a',
                     'deliver_at'  =>  now(),
@@ -346,31 +345,12 @@ trait CommunicationEmailTestTraits
         $this->assertTrue(true);
     }
 
-    public function test_communicationemail_event_email_address_filter()
+    public function test_communicationemail_event_from_email_address_filter()
     {
         try {
             $request = new Request(
                 [
-                'email_address'  =>  'a'
-                ]
-            );
-
-            $filter = new CommunicationEmailQueryFilter($request);
-
-            $model = \NextDeveloper\Communication\Database\Models\CommunicationEmail::filter($filter)->first();
-        } catch (\Exception $e) {
-            $this->assertFalse(false, $e->getMessage());
-        }
-
-        $this->assertTrue(true);
-    }
-
-    public function test_communicationemail_event_recipient_name_filter()
-    {
-        try {
-            $request = new Request(
-                [
-                'recipient_name'  =>  'a'
+                'from_email_address'  =>  'a'
                 ]
             );
 

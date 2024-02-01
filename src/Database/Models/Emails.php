@@ -28,71 +28,75 @@ class Emails extends Model
 
 
     /**
-     @var array
+     * @var array
      */
     protected $guarded = [];
 
     /**
-      Here we have the fulltext fields. We can use these for fulltext search if enabled.
+     * Here we have the fulltext fields. We can use these for fulltext search if enabled.
      */
     protected $fullTextFields = [
 
     ];
 
     /**
-     @var array
+     * @var array
      */
     protected $appends = [
 
     ];
 
     /**
-     We are casting fields to objects so that we can work on them better
+     * We are casting fields to objects so that we can work on them better
      *
-     @var array
+     * @var array
      */
     protected $casts = [
-    'id'                 => 'integer',
-    'uuid'               => 'string',
-    'email_address'      => 'string',
-    'recipient_name'     => 'string',
-    'subject'            => 'string',
-    'body'               => 'string',
-    'is_marketing_email' => 'boolean',
-    'deliver_at'         => 'datetime',
-    'delivered_at'       => 'datetime',
-    'created_at'         => 'datetime',
-    'updated_at'         => 'datetime',
-    'deleted_at'         => 'datetime',
+        'id' => 'integer',
+        'from_email_address' => 'string',
+        'subject' => 'string',
+        'body' => 'string',
+        'delivery_results' => 'array',
+        'is_marketing_email' => 'boolean',
+        'deliver_at' => 'datetime',
+        'delivered_at' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+        'deleted_at' => 'datetime',
+        'to' => \NextDeveloper\Commons\Database\Casts\TextArray::class,
+        'cc' => \NextDeveloper\Commons\Database\Casts\TextArray::class,
+        'bcc' => \NextDeveloper\Commons\Database\Casts\TextArray::class,
+        'attachments' => \NextDeveloper\Commons\Database\Casts\TextArray::class,
+        'headers' => \NextDeveloper\Commons\Database\Casts\TextArray::class,
     ];
 
     /**
-     We are casting data fields.
+     * We are casting data fields.
      *
-     @var array
+     * @var array
      */
     protected $dates = [
-    'deliver_at',
-    'delivered_at',
-    'created_at',
-    'updated_at',
-    'deleted_at',
+        'deliver_at',
+        'delivered_at',
+        'created_at',
+        'updated_at',
+        'deleted_at',
     ];
 
     /**
-     @var array
+     * @var array
      */
     protected $with = [
 
     ];
 
     /**
-     @var int
+     * @var int
      */
     protected $perPage = 20;
 
     /**
-     @return void
+     * @return void
      */
     public static function boot()
     {
@@ -109,9 +113,11 @@ class Emails extends Model
         $globalScopes = config('communication.scopes.global');
         $modelScopes = config('communication.scopes.communication_emails');
 
-        if(!$modelScopes) { $modelScopes = [];
+        if (!$modelScopes) {
+            $modelScopes = [];
         }
-        if (!$globalScopes) { $globalScopes = [];
+        if (!$globalScopes) {
+            $globalScopes = [];
         }
 
         $scopes = array_merge(
@@ -119,25 +125,14 @@ class Emails extends Model
             $modelScopes
         );
 
-        if($scopes) {
+        if ($scopes) {
             foreach ($scopes as $scope) {
                 static::addGlobalScope(app($scope));
             }
         }
     }
 
-    public function accounts() : \Illuminate\Database\Eloquent\Relations\BelongsTo
-    {
-        return $this->belongsTo(\NextDeveloper\IAM\Database\Models\Accounts::class);
-    }
-    
-    public function users() : \Illuminate\Database\Eloquent\Relations\BelongsTo
-    {
-        return $this->belongsTo(\NextDeveloper\IAM\Database\Models\Users::class);
-    }
-    
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
-
 
 
 }
