@@ -43,7 +43,9 @@ class DeliverAllEmails extends AbstractAction
          */
 
         if(class_exists($mailer)) {
-            $emails = Emails::withoutGlobalScope()->where('is_sent', false)->get();
+            $emails = Emails::withoutGlobalScopes()
+                ->where('delivered_at', null)
+                ->get();
 
             $mailCount = $emails->count();
             $sentMail = 0;

@@ -1,6 +1,6 @@
 <?php
 
-use NextDeveloper\Communication\Services\Delivery\Mail;
+use NextDeveloper\Communication\Services\Delivery\UzmanPosta;
 
 return [
     'from'  =>  [
@@ -10,7 +10,7 @@ return [
         'reply_to_name' =>  'PlusClouds Support'
     ],
     'defaults'  =>  [
-        'mailer'    =>  env('COMMUNICATION_DEFAULT_MAILER', Mail::class),
+        'mailer'    =>  env('COMMUNICATION_DEFAULT_MAILER', UzmanPosta::class),
         'view'      =>  env('COMMUNICATION_DEFAULT_VIEW', 'Communication::emails.generic'),
     ],
     'labeling'  =>  [
@@ -23,5 +23,12 @@ return [
             '\NextDeveloper\IAM\Database\Scopes\AuthorizationScope',
             '\NextDeveloper\Commons\Database\GlobalScopes\LimitScope',
         ]
+    ],
+    'services'   =>  [
+        'uzman_posta'   =>  [
+            'api_token'     =>  env('UZMAN_POSTA_API_TOKEN'),
+            'api_url'       =>  env('UZMAN_POSTA_API_URL'),
+            'api_test_url'  =>  env('UZMAN_POSTA_API_TEST_URL'),
+        ],
     ],
 ];
