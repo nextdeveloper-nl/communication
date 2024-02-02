@@ -37,7 +37,7 @@ trait SendEmail
             'body'                  => $body,
             'from_email_address'    => config('mail.from.address'),
             'deliver_at'            => $schedule,
-            'to'                    => DB::raw("ARRAY['{$this->email}']::varchar[]"),
+            'to'                    => $this->email,
         ]);
 
         /**

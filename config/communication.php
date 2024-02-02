@@ -28,7 +28,11 @@ return [
         'uzman_posta'   =>  [
             'api_token'     =>  env('UZMAN_POSTA_API_TOKEN'),
             'api_url'       =>  env('UZMAN_POSTA_API_URL'),
-            'api_test_url'  =>  env('UZMAN_POSTA_API_TEST_URL'),
+        ],
+        'mailgun'   =>  [
+            'api_key'   =>  env('MAILGUN_API_KEY'),
+            'api_url'   =>  env('MAILGUN_API_URL'),
+            'domain'    =>  env('MAILGUN_DOMAIN'),
         ],
     ],
 ];

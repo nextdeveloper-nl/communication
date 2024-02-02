@@ -35,12 +35,19 @@ class UzmanPosta
         $apiToken = config('communication.services.uzman_posta.api_token');
         $apiUrl = config('communication.services.uzman_posta.api_url');
 
+        //  If the API token or URL is not set, then throw an exception.
+        if (empty($apiToken) || empty($apiUrl)) {
+            throw new \DeliveryMethodNotFoundException('UzmanPosta api token or url is not set.');
+        }
+
+        //  Set the headers for the API requests.
         $this->header = [
             'Authorization' => $apiToken,
             'Accept' => 'application/json',
             'Content-Type' => 'application/json',
         ];
 
+        //  Create the HTTP client.
         $this->client = new Client([
             'base_uri' => $apiUrl,
         ]);
@@ -90,9 +97,10 @@ class UzmanPosta
      */
     public function send(Emails $email): void
     {
+        //  Send the email via UzmanPosta.
         $options = [
-            'from'                  => config('communication.from.email'),
-            'to'                    => $this->prepareTo($email->to),
+            'from'                  => $email->from_email_address,
+            'to'                    => $email->to,
             'reply_to'              => config('communication.from.reply_to'),
             'cc'                    => $email->cc ?? [],
             'bcc'                   => $email->bcc ?? [],
@@ -107,14 +115,20 @@ class UzmanPosta
 
         $response = $this->request('messages', 'POST', $options);
 
+        //  If the email is sent successfully, then update the email model with the delivery status.
         if ($response) {
-            $uuid = $this->extractUuidFromObject($response);
-            $emailEvent = $this->getMailStatus($uuid);
+
+            $email->update([
+                'delivery_results'   => $response,
+            ]);
+
+            $emailEvent = $this->getMailStatus($email);
+
 
             if ($emailEvent) {
                 $email->update([
-                    'delivered_at'      => now(),
-                    'delivery_results'   => $emailEvent
+                    'delivered_at'       => now(),
+                    'delivery_results'   => array_merge($email->delivery_results, $emailEvent),
                 ]);
             }
         }
@@ -129,13 +143,18 @@ class UzmanPosta
      */
     protected function extractUuidFromObject($object): string
     {
-        preg_match('/"id": "(.*?)"/', $object->id, $matches);
+        try {
 
-        if (isset($matches[1])) {
-            return $matches[1];
+            preg_match('/"id": "(.*?)"/', $object['id'], $matches);
+
+            if (isset($matches[1])) {
+                return $matches[1];
+            }
+
+            Log::error("[UzmanPosta] ID not found in response: " . json_encode($object));
+        } catch (\Exception $e) {
+            Log::error("[UzmanPosta] " . $e->getMessage());
         }
-
-        Log::error("[UzmanPosta] ID not found in response: " . json_encode($object));
 
         return '';
     }
@@ -148,24 +167,15 @@ class UzmanPosta
      * @return mixed|null The mail status from the API or null if an error occurs.
      * @throws GuzzleException
      */
-    protected function getMailStatus(string $uuid)
+    protected function getMailStatus(Emails $emails)
     {
+
+        $uuid = $this->extractUuidFromObject($emails->delivery_results);
+
         $options = ['uuid' => $uuid];
         $response = $this->request('reports/mail/events', 'GET', $options, true);
 
-        return $response ??  null;
-    }
-
-    /**
-     * Prepare the 'to' field by extracting and formatting email addresses.
-     *
-     * @param string $to The 'to' field containing email addresses.
-     *
-     * @return array The formatted array of email addresses.
-     */
-    protected function prepareTo($to): array
-    {
-        return array_filter(array_map('trim', explode(',', str_replace(['{', '}'], '', $to))), 'strlen');
+        return $response ?? null;
     }
 
 }
