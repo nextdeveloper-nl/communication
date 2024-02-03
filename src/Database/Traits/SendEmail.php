@@ -2,7 +2,9 @@
 
 namespace NextDeveloper\Communication\Database\Traits;
 
+use NextDeveloper\IAM\Envelopes\AccountCreatedEnvelope;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use NextDeveloper\Communication\Actions\Emails\Deliver;
 use NextDeveloper\Communication\Database\Models\Emails;
 use NextDeveloper\Communication\Jobs\DeliverAllEmails;
@@ -12,6 +14,24 @@ use NextDeveloper\Communication\Jobs\DeliverAllEmails;
  */
 trait SendEmail
 {
+
+
+    /**
+     * This function will take the envelope and then send the email.
+     *
+     *
+     * @param AccountCreatedEnvelope $envelope
+     * @return bool
+     */
+    public function sendWithEnvelope(AccountCreatedEnvelope $envelope)
+    {
+        Mail::mailer('smtp')
+            ->to($this->email)
+            ->send($envelope);
+
+        return true;
+    }
+
     /**
      *
      * This function will take the default view and the default content and then send the email.
@@ -46,13 +66,6 @@ trait SendEmail
 
         $sendEmailJob = new Deliver($email);
         dispatch($sendEmailJob);
-
-        $check = Emails::where('id', $email->id)->first();
-
-        //  If the email is delivered, then return true.
-        if ($check && $check->delivered_at) {
-            return true;
-        }
 
         return false;
 
