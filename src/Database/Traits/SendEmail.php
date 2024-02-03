@@ -2,32 +2,27 @@
 
 namespace NextDeveloper\Communication\Database\Traits;
 
-use NextDeveloper\IAM\Envelopes\AccountCreatedEnvelope;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Mail\Mailable;
 use Illuminate\Support\Facades\Mail;
 use NextDeveloper\Communication\Actions\Emails\Deliver;
 use NextDeveloper\Communication\Database\Models\Emails;
-use NextDeveloper\Communication\Jobs\DeliverAllEmails;
 
 /**
  * This traits handles the email sending process for the customer
  */
 trait SendEmail
 {
-
-
     /**
      * This function will take the envelope and then send the email.
      *
-     *
-     * @param AccountCreatedEnvelope $envelope
+     * @param Mailable $mailable
      * @return bool
      */
-    public function sendWithEnvelope(AccountCreatedEnvelope $envelope)
+    public function sendWithEnvelope(Mailable $mailable)
     {
         Mail::mailer('smtp')
             ->to($this->email)
-            ->send($envelope);
+            ->send($mailable);
 
         return true;
     }
