@@ -32,15 +32,25 @@ class AbstractRemindablesTransformer extends AbstractTransformer
             'snooze_datetime'  =>  $model->snooze_datetime,
             'iam_user_id'  =>  $iamUserId ? $iamUserId->uuid : null,
             'note'  =>  $model->note,
-            'status'  =>  $model->status,
-            'created_at'  =>  $model->created_at ? $model->created_at->toIso8601String() : null,
-            'updated_at'  =>  $model->updated_at ? $model->updated_at->toIso8601String() : null,
-            'deleted_at'  =>  $model->deleted_at ? $model->deleted_at->toIso8601String() : null,
+            'is_reminded'  =>  $model->is_reminded,
+            'is_acknowledged'  =>  $model->is_acknowledged,
+            'is_cancelled'  =>  $model->is_cancelled,
+            'created_at'  =>  $model->created_at,
+            'updated_at'  =>  $model->updated_at,
+            'deleted_at'  =>  $model->deleted_at,
             ]
         );
     }
 
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
+
+
+
+
+
+
+
 
 
 

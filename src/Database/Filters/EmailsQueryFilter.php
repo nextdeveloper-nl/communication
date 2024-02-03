@@ -17,14 +17,9 @@ class EmailsQueryFilter extends AbstractQueryFilter
      */
     protected $builder;
     
-    public function emailAddress($value)
+    public function fromEmailAddress($value)
     {
-        return $this->builder->where('email_address', 'like', '%' . $value . '%');
-    }
-    
-    public function recipientName($value)
-    {
-        return $this->builder->where('recipient_name', 'like', '%' . $value . '%');
+        return $this->builder->where('from_email_address', 'like', '%' . $value . '%');
     }
     
     public function subject($value)

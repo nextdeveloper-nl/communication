@@ -52,18 +52,22 @@ class Emails extends Model
      @var array
      */
     protected $casts = [
-    'id'                 => 'integer',
-    'uuid'               => 'string',
-    'email_address'      => 'string',
-    'recipient_name'     => 'string',
-    'subject'            => 'string',
-    'body'               => 'string',
+    'id' => 'integer',
+    'from_email_address' => 'string',
+    'subject' => 'string',
+    'body' => 'string',
+    'delivery_results' => 'array',
     'is_marketing_email' => 'boolean',
-    'deliver_at'         => 'datetime',
-    'delivered_at'       => 'datetime',
-    'created_at'         => 'datetime',
-    'updated_at'         => 'datetime',
-    'deleted_at'         => 'datetime',
+    'deliver_at' => 'datetime',
+    'delivered_at' => 'datetime',
+    'created_at' => 'datetime',
+    'updated_at' => 'datetime',
+    'deleted_at' => 'datetime',
+    'to' => \NextDeveloper\Commons\Database\Casts\TextArray::class,
+    'cc' => \NextDeveloper\Commons\Database\Casts\TextArray::class,
+    'bcc' => \NextDeveloper\Commons\Database\Casts\TextArray::class,
+    'attachments' => \NextDeveloper\Commons\Database\Casts\TextArray::class,
+    'headers' => \NextDeveloper\Commons\Database\Casts\TextArray::class,
     ];
 
     /**
@@ -126,16 +130,6 @@ class Emails extends Model
         }
     }
 
-    public function accounts() : \Illuminate\Database\Eloquent\Relations\BelongsTo
-    {
-        return $this->belongsTo(\NextDeveloper\IAM\Database\Models\Accounts::class);
-    }
-    
-    public function users() : \Illuminate\Database\Eloquent\Relations\BelongsTo
-    {
-        return $this->belongsTo(\NextDeveloper\IAM\Database\Models\Users::class);
-    }
-    
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
 
 

@@ -13,14 +13,18 @@ class EmailsCreateRequest extends AbstractFormRequest
     public function rules()
     {
         return [
-            'email_address'      => 'required|string|max:500',
-        'recipient_name'     => 'required|string|max:500',
-        'subject'            => 'required|string|max:500',
-        'body'               => 'required|string',
-        'delivery_results'   => 'nullable',
+            'from_email_address' => 'required|string',
+        'subject' => 'required|string',
+        'body' => 'required|string',
+        'delivery_results' => 'nullable',
         'is_marketing_email' => 'boolean',
-        'deliver_at'         => 'nullable|date',
-        'delivered_at'       => 'nullable|date',
+        'deliver_at' => 'nullable|date',
+        'delivered_at' => 'nullable|date',
+        'to' => 'nullable',
+        'cc' => 'nullable',
+        'bcc' => 'nullable',
+        'attachments' => 'nullable',
+        'headers' => 'nullable',
         ];
     }
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE

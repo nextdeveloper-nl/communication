@@ -26,24 +26,36 @@ class AbstractEmailsTransformer extends AbstractTransformer
         return $this->buildPayload(
             [
             'id'  =>  $model->uuid,
-            'email_address'  =>  $model->email_address,
-            'recipient_name'  =>  $model->recipient_name,
+            'from_email_address'  =>  $model->from_email_address,
             'subject'  =>  $model->subject,
             'body'  =>  $model->body,
             'delivery_results'  =>  $model->delivery_results,
             'iam_user_id'  =>  $iamUserId ? $iamUserId->uuid : null,
             'iam_account_id'  =>  $iamAccountId ? $iamAccountId->uuid : null,
-            'is_marketing_email'  =>  $model->is_marketing_email == 1 ? true : false,
-            'deliver_at'  =>  $model->deliver_at ? $model->deliver_at->toIso8601String() : null,
-            'delivered_at'  =>  $model->delivered_at ? $model->delivered_at->toIso8601String() : null,
-            'created_at'  =>  $model->created_at ? $model->created_at->toIso8601String() : null,
-            'updated_at'  =>  $model->updated_at ? $model->updated_at->toIso8601String() : null,
-            'deleted_at'  =>  $model->deleted_at ? $model->deleted_at->toIso8601String() : null,
+            'is_marketing_email'  =>  $model->is_marketing_email,
+            'deliver_at'  =>  $model->deliver_at,
+            'delivered_at'  =>  $model->delivered_at,
+            'created_at'  =>  $model->created_at,
+            'updated_at'  =>  $model->updated_at,
+            'deleted_at'  =>  $model->deleted_at,
+            'to'  =>  $model->to,
+            'cc'  =>  $model->cc,
+            'bcc'  =>  $model->bcc,
+            'attachments'  =>  $model->attachments,
+            'headers'  =>  $model->headers,
             ]
         );
     }
 
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
+
+
+
+
+
+
+
 
 
 

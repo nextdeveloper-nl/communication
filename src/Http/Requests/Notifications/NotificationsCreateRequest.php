@@ -13,11 +13,13 @@ class NotificationsCreateRequest extends AbstractFormRequest
     public function rules()
     {
         return [
-            'type'            => 'required',
-        'notifiable_id'   => 'required|exists:notifiables,uuid|uuid',
-        'notifiable_type' => 'required|string|max:255',
-        'data'            => 'required|string',
-        'read_at'         => 'nullable|date',
+            'is_info' => 'boolean',
+        'is_warning' => 'boolean',
+        'is_error' => 'boolean',
+        'notifiable_id' => 'required|exists:notifiables,uuid|uuid',
+        'notifiable_type' => 'required|string',
+        'data' => 'required|string',
+        'read_at' => 'nullable|date',
         ];
     }
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE

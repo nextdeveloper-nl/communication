@@ -13,12 +13,14 @@ class RemindablesCreateRequest extends AbstractFormRequest
     public function rules()
     {
         return [
-            'remindable_id'          => 'required|exists:remindables,uuid|uuid',
-        'remindable_object_type' => 'required|string|max:191',
-        'remind_datetime'        => 'nullable|date',
-        'snooze_datetime'        => 'nullable|date',
-        'note'                   => 'nullable|string',
-        'status'                 => 'nullable',
+            'remindable_id' => 'required|exists:remindables,uuid|uuid',
+        'remindable_object_type' => 'required|string',
+        'remind_datetime' => 'nullable|date',
+        'snooze_datetime' => 'nullable|date',
+        'note' => 'nullable|string',
+        'is_reminded' => 'boolean',
+        'is_acknowledged' => 'boolean',
+        'is_cancelled' => 'boolean',
         ];
     }
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE

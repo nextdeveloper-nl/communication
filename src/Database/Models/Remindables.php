@@ -52,16 +52,18 @@ class Remindables extends Model
      @var array
      */
     protected $casts = [
-    'id'                     => 'integer',
-    'uuid'                   => 'string',
-    'remindable_id'          => 'integer',
+    'id' => 'integer',
+    'remindable_id' => 'integer',
     'remindable_object_type' => 'string',
-    'remind_datetime'        => 'datetime',
-    'snooze_datetime'        => 'datetime',
-    'note'                   => 'string',
-    'created_at'             => 'datetime',
-    'updated_at'             => 'datetime',
-    'deleted_at'             => 'datetime',
+    'remind_datetime' => 'datetime',
+    'snooze_datetime' => 'datetime',
+    'note' => 'string',
+    'is_reminded' => 'boolean',
+    'is_acknowledged' => 'boolean',
+    'is_cancelled' => 'boolean',
+    'created_at' => 'datetime',
+    'updated_at' => 'datetime',
+    'deleted_at' => 'datetime',
     ];
 
     /**
@@ -125,6 +127,14 @@ class Remindables extends Model
     }
 
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
+
+
+
+
+
+
+
 
 
 

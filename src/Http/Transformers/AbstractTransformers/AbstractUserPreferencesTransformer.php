@@ -25,18 +25,26 @@ class AbstractUserPreferencesTransformer extends AbstractTransformer
         return $this->buildPayload(
             [
             'id'  =>  $model->uuid,
-            'is_system_email_optout'  =>  $model->is_system_email_optout == 1 ? true : false,
-            'is_phone_optout'  =>  $model->is_phone_optout == 1 ? true : false,
-            'is_marketing_email_optout'  =>  $model->is_marketing_email_optout == 1 ? true : false,
+            'is_system_email_optout'  =>  $model->is_system_email_optout,
+            'is_phone_optout'  =>  $model->is_phone_optout,
+            'is_marketing_email_optout'  =>  $model->is_marketing_email_optout,
             'iam_user_id'  =>  $iamUserId ? $iamUserId->uuid : null,
-            'created_at'  =>  $model->created_at ? $model->created_at->toIso8601String() : null,
-            'updated_at'  =>  $model->updated_at ? $model->updated_at->toIso8601String() : null,
-            'deleted_at'  =>  $model->deleted_at ? $model->deleted_at->toIso8601String() : null,
+            'created_at'  =>  $model->created_at,
+            'updated_at'  =>  $model->updated_at,
+            'deleted_at'  =>  $model->deleted_at,
             ]
         );
     }
 
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
+
+
+
+
+
+
+
 
 
 }

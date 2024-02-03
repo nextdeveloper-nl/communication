@@ -27,6 +27,21 @@ class RemindablesQueryFilter extends AbstractQueryFilter
         return $this->builder->where('note', 'like', '%' . $value . '%');
     }
 
+    public function isReminded()
+    {
+        return $this->builder->where('is_reminded', true);
+    }
+    
+    public function isAcknowledged()
+    {
+        return $this->builder->where('is_acknowledged', true);
+    }
+    
+    public function isCancelled()
+    {
+        return $this->builder->where('is_cancelled', true);
+    }
+    
     public function remindDatetimeStart($date) 
     {
         return $this->builder->where('remind_datetime', '>=', $date);

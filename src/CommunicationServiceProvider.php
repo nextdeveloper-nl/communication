@@ -3,8 +3,11 @@
 namespace NextDeveloper\Communication;
 
 use GuzzleHttp\Client as GuzzleClient;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Log;
 use NextDeveloper\Commons\AbstractServiceProvider;
+use NextDeveloper\Communication\Actions\Emails\Deliver;
+use NextDeveloper\Communication\Jobs\DeliverAllEmails;
 
 /**
  * Class CommunicationServiceProvider
@@ -157,5 +160,33 @@ class CommunicationServiceProvider extends AbstractServiceProvider
 
         return $isSuccessfull;
     }
+
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
+    private function bootSchedule()
+    {
+        $this->app->booted(function () {
+            $schedule = $this->app->make(Schedule::class);
+
+            $schedule->call(function () {})->monthly();
+
+            //	Daily jobs
+            $schedule->call(function () {})->daily();
+
+            //  Güne başlarken taskları
+            $schedule->call(function () {})->weekdays()->dailyAt('09:00');
+
+            $schedule->call(function () {})->weekdays()->dailyAt('12:00');
+
+            //	Hourly Jobs
+            $schedule->call(function () {})->hourly();
+
+            $schedule->call(function () {})->everyFifteenMinutes();
+
+            $schedule->call(function () {
+                logger()->info('[Communication] Every minute jobs start');
+                dispatch( new DeliverAllEmails() );
+            })->everyMinute();
+        });
+    }
 }

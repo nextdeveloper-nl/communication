@@ -52,14 +52,13 @@ class UserPreferences extends Model
      @var array
      */
     protected $casts = [
-    'id'                        => 'integer',
-    'uuid'                      => 'string',
-    'is_system_email_optout'    => 'boolean',
-    'is_phone_optout'           => 'boolean',
+    'id' => 'integer',
+    'is_system_email_optout' => 'boolean',
+    'is_phone_optout' => 'boolean',
     'is_marketing_email_optout' => 'boolean',
-    'created_at'                => 'datetime',
-    'updated_at'                => 'datetime',
-    'deleted_at'                => 'datetime',
+    'created_at' => 'datetime',
+    'updated_at' => 'datetime',
+    'deleted_at' => 'datetime',
     ];
 
     /**
@@ -120,12 +119,15 @@ class UserPreferences extends Model
         }
     }
 
-    public function users() : \Illuminate\Database\Eloquent\Relations\BelongsTo
-    {
-        return $this->belongsTo(\NextDeveloper\IAM\Database\Models\Users::class);
-    }
-    
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
+
+
+
+
+
+
+
 
 
 }
