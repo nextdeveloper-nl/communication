@@ -2,104 +2,57 @@
 
 namespace NextDeveloper\Communication\Database\Traits;
 
-use Illuminate\Mail\Mailable;
-use Illuminate\Support\Facades\Mail;
-use NextDeveloper\Communication\Actions\Emails\Deliver;
-use NextDeveloper\Communication\Database\Models\Emails;
+use NextDeveloper\Communication\Actions\SMS\Deliver;
+use NextDeveloper\Communication\Services\Delivery\Twillio;
+use Twilio\Exceptions\TwilioException;
 
 /**
- * This traits handles the email sending process for the customer
+ * Trait SendSMS
+ *
+ * This trait provides methods for sending SMS messages.
  */
 trait SendSMS
 {
     /**
-     * This function will take the envelope and then send the email.
+     * Send an SMS message and schedule it for delivery.
      *
-     * @param Mailable $mailable
-     * @return bool
+     * @param string $body The body of the SMS message.
+     * @param \DateTimeInterface|null $schedule The scheduled time for delivery.
      */
-    public function sendWithEnvelope(Mailable $mailable)
+    public function sendSMS(string $body, $schedule = null): true
     {
-        Mail::mailer('smtp')
-            ->to($this->email)
-            ->send($mailable);
+        // If no schedule is provided, default to current time.
+        if (!$schedule) {
+            $schedule = now();
+        }
 
+        // TODO: Create an SMS record in the database.
+        // Create an SMS record in the database.
+//        $sms = SMS::create([
+//            'body' => $body,
+//            'from' => config('sms.from'),
+//            'deliver_at' => $schedule,
+//            'to' => $this->phone_number,
+//        ]);
+
+        // Dispatch a job to send the SMS.
+//        Deliver::dispatch($sms);
+
+        // Return true to indicate that the SMS was scheduled for delivery.
         return true;
     }
 
     /**
+     * Send an SMS without recording it in the database.
      *
-     * This function will take the default view and the default content and then send the email.
-     *
-     * This function and the default template should only be limited with 1 content only. If you need to send multiple
-     * content, then you need to use the sendWithView function.
-     *
-     * @param $subject
-     * @param $body
-     * @param null $schedule
+     * @param string $body The body of the SMS message.
+     * @return bool True if the SMS was sent successfully, false otherwise.
+     * @throws TwilioException Thrown if there is an error while sending the SMS.
      */
-    public function sendEmail($subject, $body, $schedule = null)
+    public function sendSmsWithoutRecord(string $body): bool
     {
-        if(!$schedule) {
-            $schedule = now();
-        }
-
-        /**
-         * This function will take subject and body, then save it to database with a is_sent = 0 flag.
-         */
-        $email  = Emails::create([
-            'subject'               => $subject,
-            'body'                  => $body,
-            'from_email_address'    => config('mail.from.address'),
-            'deliver_at'            => $schedule,
-            'to'                    => $this->email,
-        ]);
-
-        /**
-         * This function will trigger the job to send the email.
-         */
-
-        $sendEmailJob = new Deliver($email);
-        dispatch($sendEmailJob);
-
-        return false;
-
-    }
-
-    public function sendWithView($subject, $view, $data, $schedule = null) {
-        if(!$schedule) {
-            $schedule = now();
-        }
-
-        /**
-         * This function will take subject, view and data, then build the html and then save it to the database.
-         */
-
-        //  Here we will be creating the html from the view and data.
-        $html = view($view, $data)->render();
-        return self::sendHtmlEmail($subject, $html, $schedule);
-    }
-
-    /**
-     * Receives the subject and the html and then saves it to the database. After that it triggers the job to
-     * start the transcation
-     *
-     * @param $subject
-     * @param $html
-     * @return void
-     */
-    public function sendHtmlEmail($subject, $html, $schedule = null)
-    {
-        if(!$schedule) {
-            $schedule = now();
-        }
-
-        Emails::create([
-            //  ...
-        ]);
-
-        /**
-         * This function will take subject and body, then save it to the database.
-         */
+        // Create a new Twilio instance and send the SMS directly.
+        $sms = (new Twillio())->sendDirect($this->phone_number, $body);
+        return $sms;
     }
 }
