@@ -14,17 +14,17 @@ class EmailsCreateRequest extends AbstractFormRequest
     {
         return [
             'from_email_address' => 'required|string',
+        'to' => 'required',
+        'cc' => 'nullable',
+        'bcc' => 'nullable',
         'subject' => 'required|string',
         'body' => 'required|string',
+        'attachments' => 'nullable',
+        'headers' => 'nullable',
         'delivery_results' => 'nullable',
         'is_marketing_email' => 'boolean',
         'deliver_at' => 'nullable|date',
         'delivered_at' => 'nullable|date',
-        'to' => 'nullable',
-        'cc' => 'nullable',
-        'bcc' => 'nullable',
-        'attachments' => 'nullable',
-        'headers' => 'nullable',
         ];
     }
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE

@@ -18,6 +18,7 @@ use NextDeveloper\Communication\Events\Remindables\RemindablesUpdatedEvent;
 use NextDeveloper\Communication\Events\Remindables\RemindablesUpdatingEvent;
 use NextDeveloper\Communication\Events\Remindables\RemindablesDeletedEvent;
 use NextDeveloper\Communication\Events\Remindables\RemindablesDeletingEvent;
+use NextDeveloper\Events\Services\Events;
 
 /**
  * This class is responsible from managing the data for Remindables
@@ -132,8 +133,6 @@ class AbstractRemindablesService
      */
     public static function create(array $data)
     {
-        event(new RemindablesCreatingEvent());
-
         if (array_key_exists('remindable_id', $data)) {
             $data['remindable_id'] = DatabaseHelper::uuidToId(
                 '\NextDeveloper\\Database\Models\Remindables',
@@ -147,22 +146,30 @@ class AbstractRemindablesService
             );
         }
     
+        if(!array_key_exists('iam_account_id', $data)) {
+            $data['iam_account_id'] = UserHelper::currentAccount()->id;
+        }
+
+        if(!array_key_exists('iam_user_id', $data)) {
+            $data['iam_user_id']    = UserHelper::me()->id;
+        }
+
         try {
             $model = Remindables::create($data);
         } catch(\Exception $e) {
             throw $e;
         }
 
-        event(new RemindablesCreatedEvent($model));
+        Events::fire('created:NextDeveloper\Communication\Remindables', $model);
 
         return $model->fresh();
     }
 
     /**
-     This function expects the ID inside the object.
-    
-     @param  array $data
-     @return Remindables
+     * This function expects the ID inside the object.
+     *
+     * @param  array $data
+     * @return Remindables
      */
     public static function updateRaw(array $data) : ?Remindables
     {
@@ -200,7 +207,7 @@ class AbstractRemindablesService
             );
         }
     
-        event(new RemindablesUpdatingEvent($model));
+        Events::fire('updating:NextDeveloper\Communication\Remindables', $model);
 
         try {
             $isUpdated = $model->update($data);
@@ -209,7 +216,7 @@ class AbstractRemindablesService
             throw $e;
         }
 
-        event(new RemindablesUpdatedEvent($model));
+        Events::fire('updated:NextDeveloper\Communication\Remindables', $model);
 
         return $model->fresh();
     }
@@ -228,7 +235,7 @@ class AbstractRemindablesService
     {
         $model = Remindables::where('uuid', $id)->first();
 
-        event(new RemindablesDeletingEvent());
+        Events::fire('deleted:NextDeveloper\Communication\Remindables', $model);
 
         try {
             $model = $model->delete();

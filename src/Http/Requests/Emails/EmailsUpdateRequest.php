@@ -14,17 +14,17 @@ class EmailsUpdateRequest extends AbstractFormRequest
     {
         return [
             'from_email_address' => 'nullable|string',
+        'to' => 'nullable',
+        'cc' => 'nullable',
+        'bcc' => 'nullable',
         'subject' => 'nullable|string',
         'body' => 'nullable|string',
+        'attachments' => 'nullable',
+        'headers' => 'nullable',
         'delivery_results' => 'nullable',
         'is_marketing_email' => 'boolean',
         'deliver_at' => 'nullable|date',
         'delivered_at' => 'nullable|date',
-        'to' => 'nullable',
-        'cc' => 'nullable',
-        'bcc' => 'nullable',
-        'attachments' => 'nullable',
-        'headers' => 'nullable',
         ];
     }
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE

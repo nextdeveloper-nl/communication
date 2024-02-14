@@ -54,8 +54,13 @@ class Emails extends Model
     protected $casts = [
     'id' => 'integer',
     'from_email_address' => 'string',
+    'to' => \NextDeveloper\Commons\Database\Casts\TextArray::class,
+    'cc' => \NextDeveloper\Commons\Database\Casts\TextArray::class,
+    'bcc' => \NextDeveloper\Commons\Database\Casts\TextArray::class,
     'subject' => 'string',
     'body' => 'string',
+    'attachments' => \NextDeveloper\Commons\Database\Casts\TextArray::class,
+    'headers' => \NextDeveloper\Commons\Database\Casts\TextArray::class,
     'delivery_results' => 'array',
     'is_marketing_email' => 'boolean',
     'deliver_at' => 'datetime',
@@ -63,11 +68,6 @@ class Emails extends Model
     'created_at' => 'datetime',
     'updated_at' => 'datetime',
     'deleted_at' => 'datetime',
-    'to' => \NextDeveloper\Commons\Database\Casts\TextArray::class,
-    'cc' => \NextDeveloper\Commons\Database\Casts\TextArray::class,
-    'bcc' => \NextDeveloper\Commons\Database\Casts\TextArray::class,
-    'attachments' => \NextDeveloper\Commons\Database\Casts\TextArray::class,
-    'headers' => \NextDeveloper\Commons\Database\Casts\TextArray::class,
     ];
 
     /**
@@ -131,6 +131,11 @@ class Emails extends Model
     }
 
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
+
+
+
+
 
 
 

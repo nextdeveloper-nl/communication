@@ -18,6 +18,7 @@ use NextDeveloper\Communication\Events\Emails\EmailsUpdatedEvent;
 use NextDeveloper\Communication\Events\Emails\EmailsUpdatingEvent;
 use NextDeveloper\Communication\Events\Emails\EmailsDeletedEvent;
 use NextDeveloper\Communication\Events\Emails\EmailsDeletingEvent;
+use NextDeveloper\Events\Services\Events;
 
 /**
  * This class is responsible from managing the data for Emails
@@ -132,8 +133,6 @@ class AbstractEmailsService
      */
     public static function create(array $data)
     {
-        event(new EmailsCreatingEvent());
-
         if (array_key_exists('iam_user_id', $data)) {
             $data['iam_user_id'] = DatabaseHelper::uuidToId(
                 '\NextDeveloper\IAM\Database\Models\Users',
@@ -147,22 +146,30 @@ class AbstractEmailsService
             );
         }
     
+        if(!array_key_exists('iam_account_id', $data)) {
+            $data['iam_account_id'] = UserHelper::currentAccount()->id;
+        }
+
+        if(!array_key_exists('iam_user_id', $data)) {
+            $data['iam_user_id']    = UserHelper::me()->id;
+        }
+
         try {
             $model = Emails::create($data);
         } catch(\Exception $e) {
             throw $e;
         }
 
-        event(new EmailsCreatedEvent($model));
+        Events::fire('created:NextDeveloper\Communication\Emails', $model);
 
         return $model->fresh();
     }
 
     /**
-     This function expects the ID inside the object.
-    
-     @param  array $data
-     @return Emails
+     * This function expects the ID inside the object.
+     *
+     * @param  array $data
+     * @return Emails
      */
     public static function updateRaw(array $data) : ?Emails
     {
@@ -200,7 +207,7 @@ class AbstractEmailsService
             );
         }
     
-        event(new EmailsUpdatingEvent($model));
+        Events::fire('updating:NextDeveloper\Communication\Emails', $model);
 
         try {
             $isUpdated = $model->update($data);
@@ -209,7 +216,7 @@ class AbstractEmailsService
             throw $e;
         }
 
-        event(new EmailsUpdatedEvent($model));
+        Events::fire('updated:NextDeveloper\Communication\Emails', $model);
 
         return $model->fresh();
     }
@@ -228,7 +235,7 @@ class AbstractEmailsService
     {
         $model = Emails::where('uuid', $id)->first();
 
-        event(new EmailsDeletingEvent());
+        Events::fire('deleted:NextDeveloper\Communication\Emails', $model);
 
         try {
             $model = $model->delete();
