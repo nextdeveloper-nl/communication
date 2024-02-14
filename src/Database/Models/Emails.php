@@ -12,9 +12,28 @@ use NextDeveloper\Commons\Common\Cache\Traits\CleanCache;
 use NextDeveloper\Commons\Database\Traits\Taggable;
 
 /**
- * Class Emails.
+ * Emails model.
  *
- * @package NextDeveloper\Communication\Database\Models
+ * @package  NextDeveloper\Communication\Database\Models
+ * @property integer $id
+ * @property string $uuid
+ * @property string $from_email_address
+ * @property array $to
+ * @property array $cc
+ * @property array $bcc
+ * @property string $subject
+ * @property string $body
+ * @property array $attachments
+ * @property array $headers
+ * @property $delivery_results
+ * @property integer $iam_user_id
+ * @property integer $iam_account_id
+ * @property boolean $is_marketing_email
+ * @property \Carbon\Carbon $deliver_at
+ * @property \Carbon\Carbon $delivered_at
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property \Carbon\Carbon $deleted_at
  */
 class Emails extends Model
 {
@@ -31,6 +50,23 @@ class Emails extends Model
      @var array
      */
     protected $guarded = [];
+
+    protected $fillable = [
+            'from_email_address',
+            'to',
+            'cc',
+            'bcc',
+            'subject',
+            'body',
+            'attachments',
+            'headers',
+            'delivery_results',
+            'iam_user_id',
+            'iam_account_id',
+            'is_marketing_email',
+            'deliver_at',
+            'delivered_at',
+    ];
 
     /**
       Here we have the fulltext fields. We can use these for fulltext search if enabled.
@@ -131,6 +167,7 @@ class Emails extends Model
     }
 
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
 
 
 

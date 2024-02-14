@@ -12,9 +12,23 @@ use NextDeveloper\Commons\Common\Cache\Traits\CleanCache;
 use NextDeveloper\Commons\Database\Traits\Taggable;
 
 /**
- * Class Remindables.
+ * Remindables model.
  *
- * @package NextDeveloper\Communication\Database\Models
+ * @package  NextDeveloper\Communication\Database\Models
+ * @property integer $id
+ * @property string $uuid
+ * @property integer $remindable_id
+ * @property string $remindable_object_type
+ * @property \Carbon\Carbon $remind_datetime
+ * @property \Carbon\Carbon $snooze_datetime
+ * @property integer $iam_user_id
+ * @property string $note
+ * @property boolean $is_reminded
+ * @property boolean $is_acknowledged
+ * @property boolean $is_cancelled
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property \Carbon\Carbon $deleted_at
  */
 class Remindables extends Model
 {
@@ -31,6 +45,18 @@ class Remindables extends Model
      @var array
      */
     protected $guarded = [];
+
+    protected $fillable = [
+            'remindable_id',
+            'remindable_object_type',
+            'remind_datetime',
+            'snooze_datetime',
+            'iam_user_id',
+            'note',
+            'is_reminded',
+            'is_acknowledged',
+            'is_cancelled',
+    ];
 
     /**
       Here we have the fulltext fields. We can use these for fulltext search if enabled.
@@ -127,6 +153,7 @@ class Remindables extends Model
     }
 
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
 
 
 

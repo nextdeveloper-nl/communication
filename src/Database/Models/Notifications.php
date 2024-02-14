@@ -12,9 +12,23 @@ use NextDeveloper\Commons\Common\Cache\Traits\CleanCache;
 use NextDeveloper\Commons\Database\Traits\Taggable;
 
 /**
- * Class Notifications.
+ * Notifications model.
  *
- * @package NextDeveloper\Communication\Database\Models
+ * @package  NextDeveloper\Communication\Database\Models
+ * @property integer $id
+ * @property string $uuid
+ * @property boolean $is_info
+ * @property boolean $is_warning
+ * @property boolean $is_error
+ * @property integer $notifiable_id
+ * @property string $notifiable_type
+ * @property string $data
+ * @property \Carbon\Carbon $read_at
+ * @property integer $iam_user_id
+ * @property integer $iam_account_id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property \Carbon\Carbon $deleted_at
  */
 class Notifications extends Model
 {
@@ -31,6 +45,18 @@ class Notifications extends Model
      @var array
      */
     protected $guarded = [];
+
+    protected $fillable = [
+            'is_info',
+            'is_warning',
+            'is_error',
+            'notifiable_id',
+            'notifiable_type',
+            'data',
+            'read_at',
+            'iam_user_id',
+            'iam_account_id',
+    ];
 
     /**
       Here we have the fulltext fields. We can use these for fulltext search if enabled.
@@ -125,6 +151,7 @@ class Notifications extends Model
     }
 
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
 
 
 
