@@ -18,6 +18,7 @@ use NextDeveloper\Communication\Events\Notifications\NotificationsUpdatedEvent;
 use NextDeveloper\Communication\Events\Notifications\NotificationsUpdatingEvent;
 use NextDeveloper\Communication\Events\Notifications\NotificationsDeletedEvent;
 use NextDeveloper\Communication\Events\Notifications\NotificationsDeletingEvent;
+use NextDeveloper\Events\Services\Events;
 
 /**
  * This class is responsible from managing the data for Notifications
@@ -132,8 +133,6 @@ class AbstractNotificationsService
      */
     public static function create(array $data)
     {
-        event(new NotificationsCreatingEvent());
-
         if (array_key_exists('notifiable_id', $data)) {
             $data['notifiable_id'] = DatabaseHelper::uuidToId(
                 '\NextDeveloper\\Database\Models\Notifiables',
@@ -153,22 +152,30 @@ class AbstractNotificationsService
             );
         }
     
+        if(!array_key_exists('iam_account_id', $data)) {
+            $data['iam_account_id'] = UserHelper::currentAccount()->id;
+        }
+
+        if(!array_key_exists('iam_user_id', $data)) {
+            $data['iam_user_id']    = UserHelper::me()->id;
+        }
+
         try {
             $model = Notifications::create($data);
         } catch(\Exception $e) {
             throw $e;
         }
 
-        event(new NotificationsCreatedEvent($model));
+        Events::fire('created:NextDeveloper\Communication\Notifications', $model);
 
         return $model->fresh();
     }
 
     /**
-     This function expects the ID inside the object.
-    
-     @param  array $data
-     @return Notifications
+     * This function expects the ID inside the object.
+     *
+     * @param  array $data
+     * @return Notifications
      */
     public static function updateRaw(array $data) : ?Notifications
     {
@@ -212,7 +219,7 @@ class AbstractNotificationsService
             );
         }
     
-        event(new NotificationsUpdatingEvent($model));
+        Events::fire('updating:NextDeveloper\Communication\Notifications', $model);
 
         try {
             $isUpdated = $model->update($data);
@@ -221,7 +228,7 @@ class AbstractNotificationsService
             throw $e;
         }
 
-        event(new NotificationsUpdatedEvent($model));
+        Events::fire('updated:NextDeveloper\Communication\Notifications', $model);
 
         return $model->fresh();
     }
@@ -240,7 +247,7 @@ class AbstractNotificationsService
     {
         $model = Notifications::where('uuid', $id)->first();
 
-        event(new NotificationsDeletingEvent());
+        Events::fire('deleted:NextDeveloper\Communication\Notifications', $model);
 
         try {
             $model = $model->delete();

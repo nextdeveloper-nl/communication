@@ -27,8 +27,13 @@ class AbstractEmailsTransformer extends AbstractTransformer
             [
             'id'  =>  $model->uuid,
             'from_email_address'  =>  $model->from_email_address,
+            'to'  =>  $model->to,
+            'cc'  =>  $model->cc,
+            'bcc'  =>  $model->bcc,
             'subject'  =>  $model->subject,
             'body'  =>  $model->body,
+            'attachments'  =>  $model->attachments,
+            'headers'  =>  $model->headers,
             'delivery_results'  =>  $model->delivery_results,
             'iam_user_id'  =>  $iamUserId ? $iamUserId->uuid : null,
             'iam_account_id'  =>  $iamAccountId ? $iamAccountId->uuid : null,
@@ -38,16 +43,17 @@ class AbstractEmailsTransformer extends AbstractTransformer
             'created_at'  =>  $model->created_at,
             'updated_at'  =>  $model->updated_at,
             'deleted_at'  =>  $model->deleted_at,
-            'to'  =>  $model->to,
-            'cc'  =>  $model->cc,
-            'bcc'  =>  $model->bcc,
-            'attachments'  =>  $model->attachments,
-            'headers'  =>  $model->headers,
             ]
         );
     }
 
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
+
+
+
+
+
 
 
 

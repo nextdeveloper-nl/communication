@@ -12,9 +12,18 @@ use NextDeveloper\Commons\Common\Cache\Traits\CleanCache;
 use NextDeveloper\Commons\Database\Traits\Taggable;
 
 /**
- * Class UserPreferences.
+ * UserPreferences model.
  *
- * @package NextDeveloper\Communication\Database\Models
+ * @package  NextDeveloper\Communication\Database\Models
+ * @property integer $id
+ * @property string $uuid
+ * @property boolean $is_system_email_optout
+ * @property boolean $is_phone_optout
+ * @property boolean $is_marketing_email_optout
+ * @property integer $iam_user_id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property \Carbon\Carbon $deleted_at
  */
 class UserPreferences extends Model
 {
@@ -31,6 +40,13 @@ class UserPreferences extends Model
      @var array
      */
     protected $guarded = [];
+
+    protected $fillable = [
+            'is_system_email_optout',
+            'is_phone_optout',
+            'is_marketing_email_optout',
+            'iam_user_id',
+    ];
 
     /**
       Here we have the fulltext fields. We can use these for fulltext search if enabled.
@@ -120,6 +136,12 @@ class UserPreferences extends Model
     }
 
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
+
+
+
+
+
 
 
 
