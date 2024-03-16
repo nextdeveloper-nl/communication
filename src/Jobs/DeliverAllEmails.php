@@ -22,6 +22,8 @@ class DeliverAllEmails extends AbstractAction
 
     private $email;
 
+    public $queue = 'communication';
+
     /**
      * This action takes an email and sends it to the user.
      *
@@ -57,7 +59,8 @@ class DeliverAllEmails extends AbstractAction
                 $this->setProgress(ceil($sentMail / $mailCount) * 100, 'Sending emails');
             }
         } else {
-            throw new \DeliveryMethodNotFoundException('Cannot find the delivery method you required.');
+            throw new \DeliveryMethodNotFoundException('Cannot find the delivery method you required.'
+                . ' Please check the configuration and the delivery method is in their place.');
         }
     }
 }
