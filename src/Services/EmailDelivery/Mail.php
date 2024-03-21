@@ -9,7 +9,6 @@ class Mail
 
     public function send(Emails $email): void
     {
-
        \Illuminate\Support\Facades\Mail::mailer('smtp')
         ->raw($email->body, function ($message) use ($email) {
             $message->from($email->from_email_address);
