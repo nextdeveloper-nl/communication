@@ -42,4 +42,10 @@ class Communicate
          * Here we will send the customer a notification by using customers prefered notification channels.
          */
     }
+
+    public function sendEnvelopeNow($envelope) {
+        Mail::driver('smtp')
+            ->to($this->user->email)
+            ->send($envelope);
+    }
 }
