@@ -15,7 +15,7 @@ class CommunicationSupportRole extends AbstractRole implements IAuthorizationRol
 {
     public const NAME = 'communication-admin';
 
-    public const LEVEL = 50;
+    public const LEVEL = 120;
 
     public const DESCRIPTION = 'Communication Admin';
 

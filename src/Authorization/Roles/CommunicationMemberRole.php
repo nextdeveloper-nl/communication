@@ -15,7 +15,7 @@ class CommunicationMemberRole extends AbstractRole implements IAuthorizationRole
 {
     public const NAME = 'communication-member';
 
-    public const LEVEL = 50;
+    public const LEVEL = 150;
 
     public const DESCRIPTION = 'This level of role lets user to see its own communication logs.';
 
