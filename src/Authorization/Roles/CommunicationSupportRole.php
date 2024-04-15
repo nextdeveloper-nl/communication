@@ -33,11 +33,9 @@ class CommunicationSupportRole extends AbstractRole implements IAuthorizationRol
         /**
          * Here user will be able to list all models, because by default, sales manager can see everybody.
          */
-        $ids = AccountManagers::withoutGlobalScopes()
-            ->where('iam_account_id', UserHelper::currentAccount()->id)
-            ->pluck('crm_account_id');
-
-        $builder->whereIn('iam_account_id', $ids);
+        $builder->where([
+            'iam_account_id'    =>  UserHelper::currentAccount()->id
+        ]);
     }
 
     public function checkPrivileges(Users $users = null)
