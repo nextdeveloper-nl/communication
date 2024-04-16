@@ -4,7 +4,7 @@ namespace NextDeveloper\Communication\Database\Filters;
 
 use Illuminate\Database\Eloquent\Builder;
 use NextDeveloper\Commons\Database\Filters\AbstractQueryFilter;
-            
+
 
 /**
  * This class automatically puts where clause on database so that use can filter
@@ -16,12 +16,12 @@ class NotificationsQueryFilter extends AbstractQueryFilter
      * @var Builder
      */
     protected $builder;
-    
+
     public function notifiableType($value)
     {
         return $this->builder->where('notifiable_type', 'like', '%' . $value . '%');
     }
-    
+
     public function data($value)
     {
         return $this->builder->where('data', 'like', '%' . $value . '%');
@@ -31,64 +31,60 @@ class NotificationsQueryFilter extends AbstractQueryFilter
     {
         return $this->builder->where('is_info', true);
     }
-    
+
     public function isWarning()
     {
         return $this->builder->where('is_warning', true);
     }
-    
+
     public function isError()
     {
         return $this->builder->where('is_error', true);
     }
-    
-    public function readAtStart($date) 
+
+    public function readAtStart($date)
     {
         return $this->builder->where('read_at', '>=', $date);
     }
 
-    public function readAtEnd($date) 
+    public function readAtEnd($date)
     {
         return $this->builder->where('read_at', '<=', $date);
     }
 
-    public function createdAtStart($date) 
+    public function createdAtStart($date)
     {
         return $this->builder->where('created_at', '>=', $date);
     }
 
-    public function createdAtEnd($date) 
+    public function createdAtEnd($date)
     {
         return $this->builder->where('created_at', '<=', $date);
     }
 
-    public function updatedAtStart($date) 
+    public function updatedAtStart($date)
     {
         return $this->builder->where('updated_at', '>=', $date);
     }
 
-    public function updatedAtEnd($date) 
+    public function updatedAtEnd($date)
     {
         return $this->builder->where('updated_at', '<=', $date);
     }
 
-    public function deletedAtStart($date) 
+    public function deletedAtStart($date)
     {
         return $this->builder->where('deleted_at', '>=', $date);
     }
 
-    public function deletedAtEnd($date) 
+    public function deletedAtEnd($date)
     {
         return $this->builder->where('deleted_at', '<=', $date);
     }
 
-    public function notifiableId($value)
+    public function objectId($value)
     {
-            $notifiable = \NextDeveloper\\Database\Models\Notifiables::where('uuid', $value)->first();
-
-        if($notifiable) {
-            return $this->builder->where('notifiable_id', '=', $notifiable->id);
-        }
+        return $this->builder->where('object_id', '=', $value);
     }
 
     public function iamUserId($value)
