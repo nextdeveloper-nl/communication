@@ -1,6 +1,8 @@
 <?php
 
-class DeliveryMethodNotFoundException extends Exception
+namespace NextDeveloper\Communication\Exceptions;
+
+class DeliveryMethodNotFoundException extends \Exception
 {
 
 }

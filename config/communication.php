@@ -1,6 +1,6 @@
 <?php
 
-use NextDeveloper\Communication\Services\Delivery\UzmanPosta;
+use NextDeveloper\Communication\Services\EmailDelivery\UzmanPosta;
 use NextDeveloper\Communication\Services\Delivery\Twillio;
 
 return [

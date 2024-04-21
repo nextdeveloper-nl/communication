@@ -1,11 +1,12 @@
 <?php
 
-namespace NextDeveloper\Communication\Services\Delivery;
+namespace NextDeveloper\Communication\Services\EmailDelivery;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Facades\Log;
 use NextDeveloper\Communication\Database\Models\Emails;
+use NextDeveloper\Communication\Exceptions\DeliveryMethodNotFoundException;
 
 /**
  * Class UzmanPosta
@@ -37,7 +38,7 @@ class UzmanPosta
 
         //  If the API token or URL is not set, then throw an exception.
         if (empty($apiToken) || empty($apiUrl)) {
-            throw new \DeliveryMethodNotFoundException('UzmanPosta api token or url is not set.');
+            throw new DeliveryMethodNotFoundException('UzmanPosta api token or url is not set.');
         }
 
         //  Set the headers for the API requests.
