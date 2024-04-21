@@ -22,8 +22,6 @@ class DeliverAllEmails extends AbstractAction
 
     private $email;
 
-    public $queue = 'communication';
-
     /**
      * This action takes an email and sends it to the user.
      *
