@@ -34,7 +34,7 @@ class Communicate
      */
     public function sendEnvelope($envelope)
     {
-        EmailsService::sendEnvelope($this->user, $envelope);
+        self::sendEnvelopeNow($envelope);
     }
 
     public function sendNotification($subject, $message) {
