@@ -7,7 +7,11 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use NextDeveloper\Commons\Actions\AbstractAction;
+use NextDeveloper\Communication\Database\Models\Emails;
 
+/**
+ * This action delivers all emails, if email is not specified, that are waiting in the queue.
+ */
 class Deliver extends AbstractAction
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
@@ -17,8 +21,9 @@ class Deliver extends AbstractAction
      *
      * @param $model
      */
-    public function __construct(public $model)
+    public function __construct(Emails $email = null)
     {
+        $this->model = $email;
         return parent::__construct();
     }
 
