@@ -16,8 +16,8 @@ class NotificationsUpdateRequest extends AbstractFormRequest
             'is_info' => 'boolean',
         'is_warning' => 'boolean',
         'is_error' => 'boolean',
-        'notifiable_id' => 'nullable|exists:notifiables,uuid|uuid',
-        'notifiable_type' => 'nullable|string',
+        'object_id' => 'nullable',
+        'object_type' => 'nullable|string',
         'data' => 'nullable|string',
         'read_at' => 'nullable|date',
         ];

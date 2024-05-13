@@ -17,8 +17,8 @@ use NextDeveloper\Commons\Database\Traits\Taggable;
  * @package  NextDeveloper\Communication\Database\Models
  * @property integer $id
  * @property string $uuid
- * @property integer $remindable_id
- * @property string $remindable_object_type
+ * @property integer $object_id
+ * @property string $object_type
  * @property \Carbon\Carbon $remind_datetime
  * @property \Carbon\Carbon $snooze_datetime
  * @property integer $iam_user_id
@@ -47,8 +47,8 @@ class Remindables extends Model
     protected $guarded = [];
 
     protected $fillable = [
-            'remindable_id',
-            'remindable_object_type',
+            'object_id',
+            'object_type',
             'remind_datetime',
             'snooze_datetime',
             'iam_user_id',
@@ -79,8 +79,8 @@ class Remindables extends Model
      */
     protected $casts = [
     'id' => 'integer',
-    'remindable_id' => 'integer',
-    'remindable_object_type' => 'string',
+    'object_id' => 'integer',
+    'object_type' => 'string',
     'remind_datetime' => 'datetime',
     'snooze_datetime' => 'datetime',
     'note' => 'string',
@@ -153,6 +153,7 @@ class Remindables extends Model
     }
 
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
 
 
 

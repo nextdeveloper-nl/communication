@@ -4,7 +4,7 @@ namespace NextDeveloper\Communication\Database\Filters;
 
 use Illuminate\Database\Eloquent\Builder;
 use NextDeveloper\Commons\Database\Filters\AbstractQueryFilter;
-
+        
 
 /**
  * This class automatically puts where clause on database so that use can filter
@@ -12,16 +12,17 @@ use NextDeveloper\Commons\Database\Filters\AbstractQueryFilter;
  */
 class NotificationsQueryFilter extends AbstractQueryFilter
 {
+
     /**
      * @var Builder
      */
     protected $builder;
-
-    public function notifiableType($value)
+    
+    public function objectType($value)
     {
-        return $this->builder->where('notifiable_type', 'like', '%' . $value . '%');
+        return $this->builder->where('object_type', 'like', '%' . $value . '%');
     }
-
+    
     public function data($value)
     {
         return $this->builder->where('data', 'like', '%' . $value . '%');
@@ -82,11 +83,6 @@ class NotificationsQueryFilter extends AbstractQueryFilter
         return $this->builder->where('deleted_at', '<=', $date);
     }
 
-    public function objectId($value)
-    {
-        return $this->builder->where('object_id', '=', $value);
-    }
-
     public function iamUserId($value)
     {
             $iamUser = \NextDeveloper\IAM\Database\Models\Users::where('uuid', $value)->first();
@@ -106,4 +102,5 @@ class NotificationsQueryFilter extends AbstractQueryFilter
     }
 
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
 }

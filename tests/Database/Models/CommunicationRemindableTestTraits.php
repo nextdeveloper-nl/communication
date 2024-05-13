@@ -58,7 +58,7 @@ trait CommunicationRemindableTestTraits
         $response = $this->http->request(
             'POST', '/communication/communicationremindable', [
             'form_params'   =>  [
-                'remindable_object_type'  =>  'a',
+                'object_type'  =>  'a',
                 'note'  =>  'a',
                     'remind_datetime'  =>  now(),
                     'snooze_datetime'  =>  now(),
@@ -344,12 +344,12 @@ trait CommunicationRemindableTestTraits
         $this->assertTrue(true);
     }
 
-    public function test_communicationremindable_event_remindable_object_type_filter()
+    public function test_communicationremindable_event_object_type_filter()
     {
         try {
             $request = new Request(
                 [
-                'remindable_object_type'  =>  'a'
+                'object_type'  =>  'a'
                 ]
             );
 

@@ -20,8 +20,8 @@ use NextDeveloper\Commons\Database\Traits\Taggable;
  * @property boolean $is_info
  * @property boolean $is_warning
  * @property boolean $is_error
- * @property integer $notifiable_id
- * @property string $notifiable_type
+ * @property integer $object_id
+ * @property string $object_type
  * @property string $data
  * @property \Carbon\Carbon $read_at
  * @property integer $iam_user_id
@@ -50,8 +50,8 @@ class Notifications extends Model
             'is_info',
             'is_warning',
             'is_error',
-            'notifiable_id',
-            'notifiable_type',
+            'object_id',
+            'object_type',
             'data',
             'read_at',
             'iam_user_id',
@@ -82,8 +82,8 @@ class Notifications extends Model
     'is_info' => 'boolean',
     'is_warning' => 'boolean',
     'is_error' => 'boolean',
-    'notifiable_id' => 'integer',
-    'notifiable_type' => 'string',
+    'object_id' => 'integer',
+    'object_type' => 'string',
     'data' => 'string',
     'read_at' => 'datetime',
     'created_at' => 'datetime',
@@ -151,6 +151,7 @@ class Notifications extends Model
     }
 
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
 
 
 
