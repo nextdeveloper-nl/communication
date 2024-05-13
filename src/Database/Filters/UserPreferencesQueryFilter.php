@@ -12,6 +12,7 @@ use NextDeveloper\Commons\Database\Filters\AbstractQueryFilter;
  */
 class UserPreferencesQueryFilter extends AbstractQueryFilter
 {
+
     /**
      * @var Builder
      */
@@ -21,43 +22,43 @@ class UserPreferencesQueryFilter extends AbstractQueryFilter
     {
         return $this->builder->where('is_system_email_optout', true);
     }
-    
+
     public function isPhoneOptout()
     {
         return $this->builder->where('is_phone_optout', true);
     }
-    
+
     public function isMarketingEmailOptout()
     {
         return $this->builder->where('is_marketing_email_optout', true);
     }
-    
-    public function createdAtStart($date) 
+
+    public function createdAtStart($date)
     {
         return $this->builder->where('created_at', '>=', $date);
     }
 
-    public function createdAtEnd($date) 
+    public function createdAtEnd($date)
     {
         return $this->builder->where('created_at', '<=', $date);
     }
 
-    public function updatedAtStart($date) 
+    public function updatedAtStart($date)
     {
         return $this->builder->where('updated_at', '>=', $date);
     }
 
-    public function updatedAtEnd($date) 
+    public function updatedAtEnd($date)
     {
         return $this->builder->where('updated_at', '<=', $date);
     }
 
-    public function deletedAtStart($date) 
+    public function deletedAtStart($date)
     {
         return $this->builder->where('deleted_at', '>=', $date);
     }
 
-    public function deletedAtEnd($date) 
+    public function deletedAtEnd($date)
     {
         return $this->builder->where('deleted_at', '<=', $date);
     }

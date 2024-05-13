@@ -16,8 +16,8 @@ class NotificationsCreateRequest extends AbstractFormRequest
             'is_info' => 'boolean',
         'is_warning' => 'boolean',
         'is_error' => 'boolean',
-        'notifiable_id' => 'required|exists:notifiables,uuid|uuid',
-        'notifiable_type' => 'required|string',
+        'object_id' => 'required',
+        'object_type' => 'required|string',
         'data' => 'required|string',
         'read_at' => 'nullable|date',
         ];

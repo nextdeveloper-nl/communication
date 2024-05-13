@@ -4,7 +4,7 @@ namespace NextDeveloper\Communication\Database\Filters;
 
 use Illuminate\Database\Eloquent\Builder;
 use NextDeveloper\Commons\Database\Filters\AbstractQueryFilter;
-
+    
 
 /**
  * This class automatically puts where clause on database so that use can filter
@@ -12,16 +12,17 @@ use NextDeveloper\Commons\Database\Filters\AbstractQueryFilter;
  */
 class RemindablesQueryFilter extends AbstractQueryFilter
 {
+
     /**
      * @var Builder
      */
     protected $builder;
-
-    public function remindableObjectType($value)
+    
+    public function objectType($value)
     {
-        return $this->builder->where('remindable_object_type', 'like', '%' . $value . '%');
+        return $this->builder->where('object_type', 'like', '%' . $value . '%');
     }
-
+    
     public function note($value)
     {
         return $this->builder->where('note', 'like', '%' . $value . '%');
@@ -102,4 +103,5 @@ class RemindablesQueryFilter extends AbstractQueryFilter
     }
 
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
 }

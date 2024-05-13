@@ -13,8 +13,8 @@ class RemindablesUpdateRequest extends AbstractFormRequest
     public function rules()
     {
         return [
-            'remindable_id' => 'nullable|exists:remindables,uuid|uuid',
-        'remindable_object_type' => 'nullable|string',
+            'object_id' => 'nullable',
+        'object_type' => 'nullable|string',
         'remind_datetime' => 'nullable|date',
         'snooze_datetime' => 'nullable|date',
         'note' => 'nullable|string',

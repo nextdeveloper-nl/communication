@@ -58,7 +58,7 @@ trait CommunicationNotificationTestTraits
         $response = $this->http->request(
             'POST', '/communication/communicationnotification', [
             'form_params'   =>  [
-                'notifiable_type'  =>  'a',
+                'object_type'  =>  'a',
                 'data'  =>  'a',
                     'read_at'  =>  now(),
                             ],
@@ -343,12 +343,12 @@ trait CommunicationNotificationTestTraits
         $this->assertTrue(true);
     }
 
-    public function test_communicationnotification_event_notifiable_type_filter()
+    public function test_communicationnotification_event_object_type_filter()
     {
         try {
             $request = new Request(
                 [
-                'notifiable_type'  =>  'a'
+                'object_type'  =>  'a'
                 ]
             );
 
