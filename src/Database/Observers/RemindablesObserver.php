@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use NextDeveloper\Commons\Exceptions\NotAllowedException;
 use NextDeveloper\IAM\Helpers\UserHelper;
+use NextDeveloper\Events\Services\Events;
 
 /**
  * Class RemindablesObserver
@@ -35,6 +36,8 @@ class RemindablesObserver
             !UserHelper::can('create', $model),
             new NotAllowedException('You are not allowed to create this record')
         );
+
+        Events::fire('creating:NextDeveloper\Communication\Remindables', $model);
     }
 
     /**
@@ -44,6 +47,7 @@ class RemindablesObserver
      */
     public function created(Model $model)
     {
+        Events::fire('created:NextDeveloper\Communication\Remindables', $model);
     }
 
     /**
@@ -54,9 +58,11 @@ class RemindablesObserver
     public function saving(Model $model)
     {
         throw_if(
-            !UserHelper::can('update', $model),
+            !UserHelper::can('save', $model),
             new NotAllowedException('You are not allowed to save this record')
         );
+
+        Events::fire('saving:NextDeveloper\Communication\Remindables', $model);
     }
 
     /**
@@ -66,6 +72,7 @@ class RemindablesObserver
      */
     public function saved(Model $model)
     {
+        Events::fire('saved:NextDeveloper\Communication\Remindables', $model);
     }
 
 
@@ -78,6 +85,8 @@ class RemindablesObserver
             !UserHelper::can('update', $model),
             new NotAllowedException('You are not allowed to update this record')
         );
+
+        Events::fire('updating:NextDeveloper\Communication\Remindables', $model);
     }
 
     /**
@@ -87,6 +96,7 @@ class RemindablesObserver
      */
     public function updated(Model $model)
     {
+        Events::fire('updated:NextDeveloper\Communication\Remindables', $model);
     }
 
 
@@ -99,6 +109,8 @@ class RemindablesObserver
             !UserHelper::can('delete', $model),
             new NotAllowedException('You are not allowed to delete this record')
         );
+
+        Events::fire('deleting:NextDeveloper\Communication\Remindables', $model);
     }
 
     /**
@@ -108,6 +120,7 @@ class RemindablesObserver
      */
     public function deleted(Model $model)
     {
+        Events::fire('deleted:NextDeveloper\Communication\Remindables', $model);
     }
 
     /**
@@ -121,6 +134,8 @@ class RemindablesObserver
             !UserHelper::can('restore', $model),
             new NotAllowedException('You are not allowed to restore this record')
         );
+
+        Events::fire('restoring:NextDeveloper\Communication\Remindables', $model);
     }
 
     /**
@@ -130,6 +145,7 @@ class RemindablesObserver
      */
     public function restored(Model $model)
     {
+        Events::fire('restored:NextDeveloper\Communication\Remindables', $model);
     }
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
 }
