@@ -9,16 +9,12 @@ use Illuminate\Support\Str;
 use NextDeveloper\IAM\Helpers\UserHelper;
 use NextDeveloper\Commons\Common\Cache\CacheHelper;
 use NextDeveloper\Commons\Helpers\DatabaseHelper;
+use NextDeveloper\Commons\Database\Models\AvailableActions;
 use NextDeveloper\Communication\Database\Models\Emails;
 use NextDeveloper\Communication\Database\Filters\EmailsQueryFilter;
 use NextDeveloper\Commons\Exceptions\ModelNotFoundException;
-use NextDeveloper\Communication\Events\Emails\EmailsCreatedEvent;
-use NextDeveloper\Communication\Events\Emails\EmailsCreatingEvent;
-use NextDeveloper\Communication\Events\Emails\EmailsUpdatedEvent;
-use NextDeveloper\Communication\Events\Emails\EmailsUpdatingEvent;
-use NextDeveloper\Communication\Events\Emails\EmailsDeletedEvent;
-use NextDeveloper\Communication\Events\Emails\EmailsDeletingEvent;
 use NextDeveloper\Events\Services\Events;
+use NextDeveloper\Commons\Exceptions\NotAllowedException;
 
 /**
  * This class is responsible from managing the data for Emails
@@ -33,6 +29,8 @@ class AbstractEmailsService
     {
         $enablePaginate = array_key_exists('paginate', $params);
 
+        $request = new Request();
+
         /**
         * Here we are adding null request since if filter is null, this means that this function is called from
         * non http application. This is actually not I think its a correct way to handle this problem but it's a workaround.
@@ -40,7 +38,7 @@ class AbstractEmailsService
         * Please let me know if you have any other idea about this; baris.bulut@nextdeveloper.com
         */
         if($filter == null) {
-            $filter = new EmailsQueryFilter(new Request());
+            $filter = new EmailsQueryFilter($request);
         }
 
         $perPage = config('commons.pagination.per_page');
@@ -63,11 +61,18 @@ class AbstractEmailsService
 
         $model = Emails::filter($filter);
 
-        if($model && $enablePaginate) {
-            return $model->paginate($perPage);
-        } else {
-            return $model->get();
+        if($enablePaginate) {
+            //  We are using this because we have been experiencing huge security problem when we use the paginate method.
+            //  The reason was, when the pagination method was using, somehow paginate was discarding all the filters.
+            return new \Illuminate\Pagination\LengthAwarePaginator(
+                $model->skip(($request->get('page', 1) - 1) * $perPage)->take($perPage)->get(),
+                $model->count(),
+                $perPage,
+                $request->get('page', 1)
+            );
         }
+
+        return $model->get();
     }
 
     public static function getAll()
@@ -84,6 +89,38 @@ class AbstractEmailsService
     public static function getByRef($ref) : ?Emails
     {
         return Emails::findByRef($ref);
+    }
+
+    public static function getActions()
+    {
+        $model = Emails::class;
+
+        $model = Str::remove('Database\\Models\\', $model);
+
+        $actions = AvailableActions::where('input', $model)
+            ->get();
+
+        return $actions;
+    }
+
+    /**
+     * This method initiates the related action with the given parameters.
+     */
+    public static function doAction($objectId, $action, ...$params)
+    {
+        $object = Emails::where('uuid', $objectId)->first();
+
+        $action = '\\NextDeveloper\\Communication\\Actions\\Emails\\' . Str::studly($action);
+
+        if(class_exists($action)) {
+            $action = new $action($object, $params);
+
+            dispatch($action);
+
+            return $action->getActionId();
+        }
+
+        return null;
     }
 
     /**
@@ -139,21 +176,21 @@ class AbstractEmailsService
                 $data['iam_user_id']
             );
         }
+                    
+        if(!array_key_exists('iam_user_id', $data)) {
+            $data['iam_user_id']    = UserHelper::me()->id;
+        }
         if (array_key_exists('iam_account_id', $data)) {
             $data['iam_account_id'] = DatabaseHelper::uuidToId(
                 '\NextDeveloper\IAM\Database\Models\Accounts',
                 $data['iam_account_id']
             );
         }
-    
+            
         if(!array_key_exists('iam_account_id', $data)) {
             $data['iam_account_id'] = UserHelper::currentAccount()->id;
         }
-
-        if(!array_key_exists('iam_user_id', $data)) {
-            $data['iam_user_id']    = UserHelper::me()->id;
-        }
-
+                        
         try {
             $model = Emails::create($data);
         } catch(\Exception $e) {
@@ -193,6 +230,13 @@ class AbstractEmailsService
     public static function update($id, array $data)
     {
         $model = Emails::where('uuid', $id)->first();
+
+        if(!$model) {
+            throw new NotAllowedException(
+                'We cannot find the related object to update. ' .
+                'Maybe you dont have the permission to update this object?'
+            );
+        }
 
         if (array_key_exists('iam_user_id', $data)) {
             $data['iam_user_id'] = DatabaseHelper::uuidToId(
@@ -234,6 +278,13 @@ class AbstractEmailsService
     public static function delete($id)
     {
         $model = Emails::where('uuid', $id)->first();
+
+        if(!$model) {
+            throw new NotAllowedException(
+                'We cannot find the related object to delete. ' .
+                'Maybe you dont have the permission to update this object?'
+            );
+        }
 
         Events::fire('deleted:NextDeveloper\Communication\Emails', $model);
 
