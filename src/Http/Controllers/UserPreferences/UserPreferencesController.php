@@ -35,6 +35,36 @@ class UserPreferencesController extends AbstractController
     }
 
     /**
+     * This function returns the list of actions that can be performed on this object.
+     *
+     * @return void
+     */
+    public function getActions()
+    {
+        $data = UserPreferencesService::getActions();
+
+        return ResponsableFactory::makeResponse($this, $data);
+    }
+
+    /**
+     * Makes the related action to the object
+     *
+     * @param  $objectId
+     * @param  $action
+     * @return array
+     */
+    public function doAction($objectId, $action)
+    {
+        $actionId = UserPreferencesService::doAction($objectId, $action, request()->all());
+
+        return $this->withArray(
+            [
+            'action_id' =>  $actionId
+            ]
+        );
+    }
+
+    /**
      * This method receives ID for the related model and returns the item to the client.
      *
      * @param  $userPreferencesId
@@ -76,6 +106,12 @@ class UserPreferencesController extends AbstractController
      */
     public function store(UserPreferencesCreateRequest $request)
     {
+        if($request->has('validateOnly') && $request->get('validateOnly') == true) {
+            return [
+                'validation'    =>  'success'
+            ];
+        }
+
         $model = UserPreferencesService::create($request->validated());
 
         return ResponsableFactory::makeResponse($this, $model);
@@ -85,12 +121,18 @@ class UserPreferencesController extends AbstractController
      * This method updates UserPreferences object on database.
      *
      * @param  $userPreferencesId
-     * @param  CountryCreateRequest $request
+     * @param  UserPreferencesUpdateRequest $request
      * @return mixed|null
      * @throws \NextDeveloper\Commons\Exceptions\CannotCreateModelException
      */
     public function update($userPreferencesId, UserPreferencesUpdateRequest $request)
     {
+        if($request->has('validateOnly') && $request->get('validateOnly') == true) {
+            return [
+                'validation'    =>  'success'
+            ];
+        }
+
         $model = UserPreferencesService::update($userPreferencesId, $request->validated());
 
         return ResponsableFactory::makeResponse($this, $model);
@@ -100,7 +142,6 @@ class UserPreferencesController extends AbstractController
      * This method updates UserPreferences object on database.
      *
      * @param  $userPreferencesId
-     * @param  CountryCreateRequest $request
      * @return mixed|null
      * @throws \NextDeveloper\Commons\Exceptions\CannotCreateModelException
      */
