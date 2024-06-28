@@ -194,6 +194,13 @@ Route::prefix('communication')->group(
         // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
 
 
+        Route::prefix('bots')->group(
+            function () {
+                Route::post('/code', 'Bots\BotsController@code');
+
+                Route::post('/telegram/{token}/webhook', 'Bots\BotsController@telegramWebhook');
+            }
+        );
 
 
 

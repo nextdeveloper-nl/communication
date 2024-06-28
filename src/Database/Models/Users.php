@@ -43,7 +43,7 @@ class Users extends Model
     protected $fillable = [
             'iam_user_id',
             'communication_bot_id',
-            'chat_id',
+            'telegram_id',
     ];
 
     /**

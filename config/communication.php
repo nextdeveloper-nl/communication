@@ -41,5 +41,9 @@ return [
             'token' =>  env('TWILIO_TOKEN'),
             'from'  =>  env('TWILIO_FROM'),
         ],
+        'ai'  =>  [
+            'api_url' =>  env('AI_API_URL'),
+            'token' =>  env('AI_API_TOKEN'),
+        ],
     ],
 ];

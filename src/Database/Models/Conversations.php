@@ -46,6 +46,7 @@ class Conversations extends Model
             'communication_bot_id',
             'message',
             'direction',
+        'update_id',
     ];
 
     /**

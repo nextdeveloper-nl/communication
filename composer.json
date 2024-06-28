@@ -25,7 +25,8 @@
     "league/fractal": "*",
     "monolog/monolog": "*",
     "mailgun/mailgun-php": "*",
-    "twilio/sdk": "*"
+    "twilio/sdk": "*",
+    "irazasyed/telegram-bot-sdk": "*"
   },
   "require-dev": {
     "illuminate/support": "5.5.*",

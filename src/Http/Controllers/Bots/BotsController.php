@@ -3,28 +3,32 @@
 namespace NextDeveloper\Communication\Http\Controllers\Bots;
 
 use Illuminate\Http\Request;
-use NextDeveloper\Communication\Http\Controllers\AbstractController;
 use NextDeveloper\Commons\Http\Response\ResponsableFactory;
-use NextDeveloper\Communication\Http\Requests\Bots\BotsUpdateRequest;
+use NextDeveloper\Commons\Http\Traits\Addresses;
+use NextDeveloper\Commons\Http\Traits\Tags;
 use NextDeveloper\Communication\Database\Filters\BotsQueryFilter;
 use NextDeveloper\Communication\Database\Models\Bots;
-use NextDeveloper\Communication\Services\BotsService;
+use NextDeveloper\Communication\Http\Controllers\AbstractController;
 use NextDeveloper\Communication\Http\Requests\Bots\BotsCreateRequest;
-use NextDeveloper\Commons\Http\Traits\Tags;use NextDeveloper\Commons\Http\Traits\Addresses;
+use NextDeveloper\Communication\Http\Requests\Bots\BotsUpdateRequest;
+use NextDeveloper\Communication\Services\BotsService;
+use NextDeveloper\IAM\Database\Scopes\AuthorizationScope;
+
 class BotsController extends AbstractController
 {
     private $model = Bots::class;
 
     use Tags;
     use Addresses;
+
     /**
      * This method returns the list of bots.
      *
      * optional http params:
      * - paginate: If you set paginate parameter, the result will be returned paginated.
      *
-     * @param  BotsQueryFilter $filter  An object that builds search query
-     * @param  Request         $request Laravel request object, this holds all data about request. Automatically populated.
+     * @param BotsQueryFilter $filter An object that builds search query
+     * @param Request $request Laravel request object, this holds all data about request. Automatically populated.
      * @return \Illuminate\Http\JsonResponse
      */
     public function index(BotsQueryFilter $filter, Request $request)
@@ -59,7 +63,7 @@ class BotsController extends AbstractController
 
         return $this->withArray(
             [
-            'action_id' =>  $actionId
+                'action_id' => $actionId
             ]
         );
     }
@@ -100,15 +104,15 @@ class BotsController extends AbstractController
     /**
      * This method created Bots object on database.
      *
-     * @param  BotsCreateRequest $request
+     * @param BotsCreateRequest $request
      * @return mixed|null
      * @throws \NextDeveloper\Commons\Exceptions\CannotCreateModelException
      */
     public function store(BotsCreateRequest $request)
     {
-        if($request->has('validateOnly') && $request->get('validateOnly') == true) {
+        if ($request->has('validateOnly') && $request->get('validateOnly') == true) {
             return [
-                'validation'    =>  'success'
+                'validation' => 'success'
             ];
         }
 
@@ -121,15 +125,15 @@ class BotsController extends AbstractController
      * This method updates Bots object on database.
      *
      * @param  $botsId
-     * @param  BotsUpdateRequest $request
+     * @param BotsUpdateRequest $request
      * @return mixed|null
      * @throws \NextDeveloper\Commons\Exceptions\CannotCreateModelException
      */
     public function update($botsId, BotsUpdateRequest $request)
     {
-        if($request->has('validateOnly') && $request->get('validateOnly') == true) {
+        if ($request->has('validateOnly') && $request->get('validateOnly') == true) {
             return [
-                'validation'    =>  'success'
+                'validation' => 'success'
             ];
         }
 
@@ -154,4 +158,21 @@ class BotsController extends AbstractController
 
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
 
+    public function code()
+    {
+        $model = BotsService::generateCode();
+
+        return ResponsableFactory::makeResponse($this, $model);
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function telegramWebhook($token)
+    {
+
+        BotsService::telegramWebhook($token);
+
+        return 'ok';
+    }
 }
