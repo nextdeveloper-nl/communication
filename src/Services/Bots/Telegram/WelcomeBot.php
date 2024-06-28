@@ -16,7 +16,6 @@ use Telegram\Bot\Exceptions\TelegramSDKException;
 
 class WelcomeBot
 {
-
     /**
      * Create a conversation and handle incoming updates from Telegram bot.
      *
@@ -262,17 +261,6 @@ class WelcomeBot
         self::saveMessage($message, $iamUserId, 0, $updateId);
     }
 
-    /**
-     * Check if the update ID already exists in the database.
-     *
-     * @param mixed $updateId
-     * @return Conversations|null
-     */
-    private static function checkUpdateId(mixed $updateId): ?Conversations
-    {
-        return Conversations::withoutGlobalScope(AuthorizationScope::class)
-            ->where('update_id', $updateId)
-            ->first();
-    }
+
 
 }

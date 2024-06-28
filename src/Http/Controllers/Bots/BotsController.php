@@ -170,7 +170,6 @@ class BotsController extends AbstractController
      */
     public function telegramWebhook($token)
     {
-
         BotsService::telegramWebhook($token);
 
         return 'ok';

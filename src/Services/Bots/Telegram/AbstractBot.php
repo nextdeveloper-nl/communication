@@ -2,17 +2,18 @@
 
 namespace NextDeveloper\Communication\Services\Bots\Telegram;
 
-use Telegram\Bot\Api;
-use Telegram\Bot\Exceptions\TelegramSDKException;
+use NextDeveloper\Communication\Database\Models\Conversations;
+use NextDeveloper\IAM\Database\Scopes\AuthorizationScope;
 
-class InitBot
+class AbstractBot
 {
+    protected $bot;
 
-    public function __construct(private Api $bot){}
+    public function setBot($bot)
+    {
+        $this->bot = $bot;
+    }
 
-    /**
-     * @throws TelegramSDKException
-     */
     public function sendMessage($chatId, $message): void
     {
         $this->bot->sendMessage([
@@ -21,9 +22,6 @@ class InitBot
         ]);
     }
 
-    /**
-     * @throws TelegramSDKException
-     */
     public function getUpdates(): array
     {
         $updates = $this->bot->getUpdates();
@@ -31,10 +29,8 @@ class InitBot
         return $updates;
     }
 
-
-    public function getChatId($update)
+    public static function getChatId($update)
     {
-
         if (!isset($update['message']['from']['id'])) {
             return null;
         }
@@ -42,18 +38,16 @@ class InitBot
         return $update['message']['from']['id'];
     }
 
-    public function getMessage($update)
+    public static function getMessage($update)
     {
-
         if (!isset($update['message']['text'])) {
             return null;
         }
         return $update['message']['text'];
     }
 
-    public function getChatIdAndMessage($update): array
+    public static function getChatIdAndMessage($update): array
     {
-
         if (!isset($update['message']['from']['id']) || !isset($update['message']['text'])) {
             return [];
         }
@@ -64,9 +58,8 @@ class InitBot
         ];
     }
 
-    public function getUserName($update)
+    public static function getUserName($update)
     {
-
         if (!isset($update['message']['from']['username'])) {
             return null;
         }
@@ -74,9 +67,8 @@ class InitBot
         return $update['message']['from']['username'];
     }
 
-    public function getFirstName($update)
+    public static function getFirstName($update)
     {
-
         if (!isset($update['message']['from']['first_name'])) {
             return null;
         }
@@ -84,10 +76,8 @@ class InitBot
         return $update['message']['from']['first_name'];
     }
 
-
-    public function getLanguage($update)
+    public static function getLanguage($update)
     {
-
         if (!isset($update['message']['from']['language_code'])) {
             return null;
         }
@@ -96,9 +86,8 @@ class InitBot
     }
 
 
-    public function getUpdateId($update)
+    public static function getUpdateId($update)
     {
-
         if (!isset($update['update_id'])) {
             return null;
         }
@@ -107,7 +96,7 @@ class InitBot
     }
 
 
-    public function getUpdateDate($update)
+    public static function getUpdateDate($update)
     {
         if (!isset($update['message']['date'])) {
             return null;
@@ -116,7 +105,7 @@ class InitBot
         return $update['message']['date'];
     }
 
-    public function getUpdateType($update)
+    public static function getUpdateType($update)
     {
         if (!isset($update['updateType'])) {
             return null;
@@ -125,5 +114,16 @@ class InitBot
         return $update['updateType'];
     }
 
+    /**
+     * Check if the update ID already exists in the database.
+     *
+     * @param mixed $updateId
+     * @return Conversations|null
+     */
+    private static function checkUpdateId(mixed $updateId): ?Conversations
+    {
+        return Conversations::withoutGlobalScope(AuthorizationScope::class)
+            ->where('update_id', $updateId)
+            ->first();
+    }
 }
-

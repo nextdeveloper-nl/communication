@@ -50,6 +50,6 @@ class BotsService extends AbstractBotsService
             abort_if(true, 404, 'Bot class not found');
         }
 
-        $botClass::getInstance($model->token);
+        dispatch(new $botClass($model->token));
     }
 }
