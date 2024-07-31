@@ -24,7 +24,7 @@ class Twillio
      *
      * Initializes the Twilio client using the provided Twilio Account SID and Auth Token.
      *
-     * @throws \DeliveryMethodNotFoundException Thrown when Twilio SID or token is not set.
+     * @throws \DeliveryConfigurationNotFoundException Thrown when Twilio SID or token is not set.
      * @throws ConfigurationException Thrown when there is a configuration error.
      */
     public function __construct()
@@ -34,7 +34,7 @@ class Twillio
 
         // Check if SID or token is empty.
         if (empty($sid) || empty($token)) {
-            throw new \DeliveryMethodNotFoundException('Twilio sid or token is not set.');
+            throw new \DeliveryConfigurationNotFoundException('Twilio sid or token is not set.');
         }
 
         // Initialize Twilio client with SID and token.
@@ -86,7 +86,7 @@ class Twillio
         );
 
         // Check if the message was successfully sent (HTTP status code 201).
-        if ($this->client->lastResponse->getStatusCode() == 201) {
+        if ($this->client->getHttpClient()->lastResponse->getStatusCode() === 201) {
             return true; // Return true if a message was successfully sent.
         }
 

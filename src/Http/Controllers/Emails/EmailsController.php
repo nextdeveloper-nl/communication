@@ -35,6 +35,36 @@ class EmailsController extends AbstractController
     }
 
     /**
+     * This function returns the list of actions that can be performed on this object.
+     *
+     * @return void
+     */
+    public function getActions()
+    {
+        $data = EmailsService::getActions();
+
+        return ResponsableFactory::makeResponse($this, $data);
+    }
+
+    /**
+     * Makes the related action to the object
+     *
+     * @param  $objectId
+     * @param  $action
+     * @return array
+     */
+    public function doAction($objectId, $action)
+    {
+        $actionId = EmailsService::doAction($objectId, $action, request()->all());
+
+        return $this->withArray(
+            [
+            'action_id' =>  $actionId
+            ]
+        );
+    }
+
+    /**
      * This method receives ID for the related model and returns the item to the client.
      *
      * @param  $emailsId
@@ -76,6 +106,12 @@ class EmailsController extends AbstractController
      */
     public function store(EmailsCreateRequest $request)
     {
+        if($request->has('validateOnly') && $request->get('validateOnly') == true) {
+            return [
+                'validation'    =>  'success'
+            ];
+        }
+
         $model = EmailsService::create($request->validated());
 
         return ResponsableFactory::makeResponse($this, $model);
@@ -85,12 +121,18 @@ class EmailsController extends AbstractController
      * This method updates Emails object on database.
      *
      * @param  $emailsId
-     * @param  CountryCreateRequest $request
+     * @param  EmailsUpdateRequest $request
      * @return mixed|null
      * @throws \NextDeveloper\Commons\Exceptions\CannotCreateModelException
      */
     public function update($emailsId, EmailsUpdateRequest $request)
     {
+        if($request->has('validateOnly') && $request->get('validateOnly') == true) {
+            return [
+                'validation'    =>  'success'
+            ];
+        }
+
         $model = EmailsService::update($emailsId, $request->validated());
 
         return ResponsableFactory::makeResponse($this, $model);
@@ -100,7 +142,6 @@ class EmailsController extends AbstractController
      * This method updates Emails object on database.
      *
      * @param  $emailsId
-     * @param  CountryCreateRequest $request
      * @return mixed|null
      * @throws \NextDeveloper\Commons\Exceptions\CannotCreateModelException
      */
