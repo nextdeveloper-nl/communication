@@ -2,6 +2,7 @@
 
 use NextDeveloper\Communication\Services\EmailDelivery\UzmanPosta;
 use NextDeveloper\Communication\Services\Delivery\Twillio;
+use NextDeveloper\Communication\Services\CrossPlatformNotification\Mattermost;
 
 return [
     'from'  =>  [
@@ -14,6 +15,9 @@ return [
         'mailer'    =>  env('COMMUNICATION_DEFAULT_MAILER', UzmanPosta::class),
         'view'      =>  env('COMMUNICATION_DEFAULT_VIEW', 'Communication::emails.generic'),
         'sms'       =>  env('COMMUNICATION_DEFAULT_SMS', Twillio::class),
+        'platforms' =>  [
+            Mattermost::class,
+        ]
     ],
     'labeling'  =>  [
         'logo'      =>  'https://plusclouds.com.tr/assets/frontend/images/logos/plusclouds-logo.png',
@@ -40,6 +44,9 @@ return [
             'sid'   =>  env('TWILIO_SID'),
             'token' =>  env('TWILIO_TOKEN'),
             'from'  =>  env('TWILIO_FROM'),
+        ],
+        'mattermost'    =>  [
+            'webhook_url'   =>  env('MATTERMOST_WEBHOOK_URL'),
         ],
     ],
 ];
