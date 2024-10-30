@@ -24,6 +24,8 @@ use NextDeveloper\Commons\Database\Traits\Taggable;
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  * @property \Carbon\Carbon $deleted_at
+ * @property integer $communicaton_session_id
+ * @property string $update_id
  */
 class Conversations extends Model
 {
@@ -46,6 +48,8 @@ class Conversations extends Model
             'communication_bot_id',
             'message',
             'direction',
+            'communicaton_session_id',
+            'update_id',
     ];
 
     /**
@@ -75,6 +79,8 @@ class Conversations extends Model
     'created_at' => 'datetime',
     'updated_at' => 'datetime',
     'deleted_at' => 'datetime',
+    'communicaton_session_id' => 'integer',
+    'update_id' => 'string',
     ];
 
     /**
@@ -136,4 +142,5 @@ class Conversations extends Model
     }
 
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
 }

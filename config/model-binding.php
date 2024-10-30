@@ -405,5 +405,13 @@ return [
         return NextDeveloper\Communication\Database\Models\CommunicationBot::findByRef($value);
 },
 
+'communicationavailablechannel' => function ($value) {
+        return NextDeveloper\Communication\Database\Models\CommunicationAvailableChannel::findByRef($value);
+},
+
+'communicationchannel' => function ($value) {
+        return NextDeveloper\Communication\Database\Models\CommunicationChannel::findByRef($value);
+},
+
 // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
 ];

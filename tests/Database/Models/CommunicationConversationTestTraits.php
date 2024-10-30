@@ -59,6 +59,7 @@ trait CommunicationConversationTestTraits
             'POST', '/communication/communicationconversation', [
             'form_params'   =>  [
                 'message'  =>  'a',
+                'update_id'  =>  'a',
                 'direction'  =>  '1',
                             ],
                 ['http_errors' => false]
@@ -348,6 +349,25 @@ trait CommunicationConversationTestTraits
             $request = new Request(
                 [
                 'message'  =>  'a'
+                ]
+            );
+
+            $filter = new CommunicationConversationQueryFilter($request);
+
+            $model = \NextDeveloper\Communication\Database\Models\CommunicationConversation::filter($filter)->first();
+        } catch (\Exception $e) {
+            $this->assertFalse(false, $e->getMessage());
+        }
+
+        $this->assertTrue(true);
+    }
+
+    public function test_communicationconversation_event_update_id_filter()
+    {
+        try {
+            $request = new Request(
+                [
+                'update_id'  =>  'a'
                 ]
             );
 

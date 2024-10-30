@@ -58,8 +58,8 @@ trait CommunicationUserTestTraits
         $response = $this->http->request(
             'POST', '/communication/communicationuser', [
             'form_params'   =>  [
-                'communication_bot_id'  =>  'a',
-                'chat_id'  =>  'a',
+                'telegram_id'  =>  'a',
+                'ai_session_id'  =>  'a',
                             ],
                 ['http_errors' => false]
             ]
@@ -342,12 +342,12 @@ trait CommunicationUserTestTraits
         $this->assertTrue(true);
     }
 
-    public function test_communicationuser_event_communication_bot_id_filter()
+    public function test_communicationuser_event_telegram_id_filter()
     {
         try {
             $request = new Request(
                 [
-                'communication_bot_id'  =>  'a'
+                'telegram_id'  =>  'a'
                 ]
             );
 
@@ -361,12 +361,12 @@ trait CommunicationUserTestTraits
         $this->assertTrue(true);
     }
 
-    public function test_communicationuser_event_chat_id_filter()
+    public function test_communicationuser_event_ai_session_id_filter()
     {
         try {
             $request = new Request(
                 [
-                'chat_id'  =>  'a'
+                'ai_session_id'  =>  'a'
                 ]
             );
 
