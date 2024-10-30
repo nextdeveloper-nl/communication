@@ -60,6 +60,8 @@ trait CommunicationBotTestTraits
             'form_params'   =>  [
                 'name'  =>  'a',
                 'description'  =>  'a',
+                'token'  =>  'a',
+                'class'  =>  'a',
                             ],
                 ['http_errors' => false]
             ]
@@ -367,6 +369,44 @@ trait CommunicationBotTestTraits
             $request = new Request(
                 [
                 'description'  =>  'a'
+                ]
+            );
+
+            $filter = new CommunicationBotQueryFilter($request);
+
+            $model = \NextDeveloper\Communication\Database\Models\CommunicationBot::filter($filter)->first();
+        } catch (\Exception $e) {
+            $this->assertFalse(false, $e->getMessage());
+        }
+
+        $this->assertTrue(true);
+    }
+
+    public function test_communicationbot_event_token_filter()
+    {
+        try {
+            $request = new Request(
+                [
+                'token'  =>  'a'
+                ]
+            );
+
+            $filter = new CommunicationBotQueryFilter($request);
+
+            $model = \NextDeveloper\Communication\Database\Models\CommunicationBot::filter($filter)->first();
+        } catch (\Exception $e) {
+            $this->assertFalse(false, $e->getMessage());
+        }
+
+        $this->assertTrue(true);
+    }
+
+    public function test_communicationbot_event_class_filter()
+    {
+        try {
+            $request = new Request(
+                [
+                'class'  =>  'a'
                 ]
             );
 

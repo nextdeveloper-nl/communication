@@ -18,14 +18,14 @@ class UsersQueryFilter extends AbstractQueryFilter
      */
     protected $builder;
     
-    public function communicationBotId($value)
+    public function telegramId($value)
     {
-        return $this->builder->where('communication_bot_id', 'like', '%' . $value . '%');
+        return $this->builder->where('telegram_id', 'like', '%' . $value . '%');
     }
     
-    public function chatId($value)
+    public function aiSessionId($value)
     {
-        return $this->builder->where('chat_id', 'like', '%' . $value . '%');
+        return $this->builder->where('ai_session_id', 'like', '%' . $value . '%');
     }
 
     public function createdAtStart($date)
@@ -67,23 +67,24 @@ class UsersQueryFilter extends AbstractQueryFilter
         }
     }
 
-    public function communicationBotId($value)
+    public function telegramId($value)
     {
-            $communicationBot = \NextDeveloper\Communication\Database\Models\Bots::where('uuid', $value)->first();
+            $telegram = \NextDeveloper\\Database\Models\Telegrams::where('uuid', $value)->first();
 
-        if($communicationBot) {
-            return $this->builder->where('communication_bot_id', '=', $communicationBot->id);
+        if($telegram) {
+            return $this->builder->where('telegram_id', '=', $telegram->id);
         }
     }
 
-    public function chatId($value)
+    public function aiSessionId($value)
     {
-            $chat = \NextDeveloper\\Database\Models\Chats::where('uuid', $value)->first();
+            $aiSession = \NextDeveloper\\Database\Models\AiSessions::where('uuid', $value)->first();
 
-        if($chat) {
-            return $this->builder->where('chat_id', '=', $chat->id);
+        if($aiSession) {
+            return $this->builder->where('ai_session_id', '=', $aiSession->id);
         }
     }
 
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
 }

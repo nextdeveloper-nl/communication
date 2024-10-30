@@ -7,34 +7,35 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Log;
+use NextDeveloper\Communication\Actions\Channels\Send;
+use NextDeveloper\Communication\Helpers\Communicate;
+use NextDeveloper\IAM\Database\Models\Users;
 
 class CrossPlatformNotificationJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    private Users $model;
     protected string $message;
-    protected array $platforms;
 
-    public function __construct(string $message, array $platforms = [])
+
+    public function __construct(Users $model, string $message)
     {
-        $this->message = $message;
-        $this->platforms = $platforms ?: config('communication.defaults.platforms');
+        $this->model        = $model;
+        $this->message      = $message;
     }
+
 
     /**
      * @throws \Exception
      */
     public function handle(): void
     {
-        foreach ($this->platforms as $platformClass) {
-            if (!class_exists($platformClass)) {
-                Log::error("Notification class $platformClass does not exist.");
-                continue;
-            }
+        $channels = (new Communicate($this->model))->getNotificationPlatforms();
 
-            $platform = new $platformClass($this->message);
-            $platform->send();
+        foreach ($channels as $channel) {
+            $send = new Send($channel, $this->message);
+            $send->handle();
         }
     }
 }

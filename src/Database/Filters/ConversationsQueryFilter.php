@@ -4,7 +4,7 @@ namespace NextDeveloper\Communication\Database\Filters;
 
 use Illuminate\Database\Eloquent\Builder;
 use NextDeveloper\Commons\Database\Filters\AbstractQueryFilter;
-        
+                
 
 /**
  * This class automatically puts where clause on database so that use can filter
@@ -21,6 +21,11 @@ class ConversationsQueryFilter extends AbstractQueryFilter
     public function message($value)
     {
         return $this->builder->where('message', 'like', '%' . $value . '%');
+    }
+    
+    public function updateId($value)
+    {
+        return $this->builder->where('update_id', 'like', '%' . $value . '%');
     }
 
     public function direction($value)
@@ -84,5 +89,24 @@ class ConversationsQueryFilter extends AbstractQueryFilter
         }
     }
 
+    public function communicatonSessionId($value)
+    {
+            $communicatonSession = \NextDeveloper\\Database\Models\CommunicatonSessions::where('uuid', $value)->first();
+
+        if($communicatonSession) {
+            return $this->builder->where('communicaton_session_id', '=', $communicatonSession->id);
+        }
+    }
+
+    public function updateId($value)
+    {
+            $update = \NextDeveloper\\Database\Models\Updates::where('uuid', $value)->first();
+
+        if($update) {
+            return $this->builder->where('update_id', '=', $update->id);
+        }
+    }
+
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
 }

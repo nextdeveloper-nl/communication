@@ -4,7 +4,7 @@ namespace NextDeveloper\Communication\Services\CrossPlatformNotification;
 
 use Illuminate\Support\Facades\Http;
 
-class Mattermost implements CrossPlatformNotificationInterface
+class Mattermost implements ChannelAbstract
 {
     protected string $webhookUrl;
     protected string $message;

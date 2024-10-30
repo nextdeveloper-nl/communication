@@ -56,6 +56,8 @@ class AbstractConversationsTransformer extends AbstractTransformer
     {
                                                 $iamUserId = \NextDeveloper\IAM\Database\Models\Users::where('id', $model->iam_user_id)->first();
                                                             $communicationBotId = \NextDeveloper\Communication\Database\Models\Bots::where('id', $model->communication_bot_id)->first();
+                                                            $communicatonSessionId = \NextDeveloper\\Database\Models\CommunicatonSessions::where('id', $model->communicaton_session_id)->first();
+                                                            $updateId = \NextDeveloper\\Database\Models\Updates::where('id', $model->update_id)->first();
                         
         return $this->buildPayload(
             [
@@ -67,6 +69,8 @@ class AbstractConversationsTransformer extends AbstractTransformer
             'created_at'  =>  $model->created_at,
             'updated_at'  =>  $model->updated_at,
             'deleted_at'  =>  $model->deleted_at,
+            'communicaton_session_id'  =>  $communicatonSessionId ? $communicatonSessionId->uuid : null,
+            'update_id'  =>  $updateId ? $updateId->uuid : null,
             ]
         );
     }
@@ -155,4 +159,5 @@ class AbstractConversationsTransformer extends AbstractTransformer
         return $this->collection($addresses, new AddressesTransformer());
     }
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
 }

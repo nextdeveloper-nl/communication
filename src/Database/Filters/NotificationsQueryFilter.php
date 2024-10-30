@@ -28,19 +28,31 @@ class NotificationsQueryFilter extends AbstractQueryFilter
         return $this->builder->where('data', 'like', '%' . $value . '%');
     }
 
-    public function isInfo()
+    public function isInfo($value)
     {
-        return $this->builder->where('is_info', true);
+        if(!is_bool($value)) {
+            $value = false;
+        }
+
+        return $this->builder->where('is_info', $value);
     }
 
-    public function isWarning()
+    public function isWarning($value)
     {
-        return $this->builder->where('is_warning', true);
+        if(!is_bool($value)) {
+            $value = false;
+        }
+
+        return $this->builder->where('is_warning', $value);
     }
 
-    public function isError()
+    public function isError($value)
     {
-        return $this->builder->where('is_error', true);
+        if(!is_bool($value)) {
+            $value = false;
+        }
+
+        return $this->builder->where('is_error', $value);
     }
 
     public function readAtStart($date)
@@ -102,6 +114,7 @@ class NotificationsQueryFilter extends AbstractQueryFilter
     }
 
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
 
 
 

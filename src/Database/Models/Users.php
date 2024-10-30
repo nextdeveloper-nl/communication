@@ -18,11 +18,11 @@ use NextDeveloper\Commons\Database\Traits\Taggable;
  * @property integer $id
  * @property string $uuid
  * @property integer $iam_user_id
- * @property string $communication_bot_id
- * @property string $chat_id
+ * @property string $telegram_id
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  * @property \Carbon\Carbon $deleted_at
+ * @property string $ai_session_id
  */
 class Users extends Model
 {
@@ -42,8 +42,8 @@ class Users extends Model
 
     protected $fillable = [
             'iam_user_id',
-            'communication_bot_id',
-            'chat_id',
+            'telegram_id',
+            'ai_session_id',
     ];
 
     /**
@@ -67,11 +67,11 @@ class Users extends Model
      */
     protected $casts = [
     'id' => 'integer',
-    'communication_bot_id' => 'string',
-    'chat_id' => 'string',
+    'telegram_id' => 'string',
     'created_at' => 'datetime',
     'updated_at' => 'datetime',
     'deleted_at' => 'datetime',
+    'ai_session_id' => 'string',
     ];
 
     /**
@@ -133,4 +133,5 @@ class Users extends Model
     }
 
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
 }

@@ -22,6 +22,8 @@ use NextDeveloper\Commons\Database\Traits\Taggable;
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  * @property \Carbon\Carbon $deleted_at
+ * @property string $token
+ * @property string $class
  */
 class Bots extends Model
 {
@@ -42,6 +44,8 @@ class Bots extends Model
     protected $fillable = [
             'name',
             'description',
+            'token',
+            'class',
     ];
 
     /**
@@ -70,6 +74,8 @@ class Bots extends Model
     'created_at' => 'datetime',
     'updated_at' => 'datetime',
     'deleted_at' => 'datetime',
+    'token' => 'string',
+    'class' => 'string',
     ];
 
     /**
@@ -131,4 +137,5 @@ class Bots extends Model
     }
 
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
 }

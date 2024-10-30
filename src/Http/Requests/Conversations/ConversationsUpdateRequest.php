@@ -16,6 +16,8 @@ class ConversationsUpdateRequest extends AbstractFormRequest
             'communication_bot_id' => 'nullable|exists:communication_bots,uuid|uuid',
         'message' => 'nullable|string',
         'direction' => 'integer',
+        'communicaton_session_id' => 'nullable|exists:communicaton_sessions,uuid|uuid',
+        'update_id' => 'nullable|string|exists:updates,uuid|uuid',
         ];
     }
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE

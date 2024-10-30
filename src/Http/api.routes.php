@@ -191,12 +191,67 @@ Route::prefix('communication')->group(
             }
         );
 
+        Route::prefix('available-channels')->group(
+            function () {
+                Route::get('/', 'AvailableChannels\AvailableChannelsController@index');
+                Route::get('/actions', 'AvailableChannels\AvailableChannelsController@getActions');
+
+                Route::get('{communication_available_channels}/tags ', 'AvailableChannels\AvailableChannelsController@tags');
+                Route::post('{communication_available_channels}/tags ', 'AvailableChannels\AvailableChannelsController@saveTags');
+                Route::get('{communication_available_channels}/addresses ', 'AvailableChannels\AvailableChannelsController@addresses');
+                Route::post('{communication_available_channels}/addresses ', 'AvailableChannels\AvailableChannelsController@saveAddresses');
+
+                Route::get('/{communication_available_channels}/{subObjects}', 'AvailableChannels\AvailableChannelsController@relatedObjects');
+                Route::get('/{communication_available_channels}', 'AvailableChannels\AvailableChannelsController@show');
+
+                Route::post('/', 'AvailableChannels\AvailableChannelsController@store');
+                Route::post('/{communication_available_channels}/do/{action}', 'AvailableChannels\AvailableChannelsController@doAction');
+
+                Route::patch('/{communication_available_channels}', 'AvailableChannels\AvailableChannelsController@update');
+                Route::delete('/{communication_available_channels}', 'AvailableChannels\AvailableChannelsController@destroy');
+            }
+        );
+
+        Route::prefix('channels')->group(
+            function () {
+                Route::get('/', 'Channels\ChannelsController@index');
+                Route::get('/actions', 'Channels\ChannelsController@getActions');
+
+                Route::get('{communication_channels}/tags ', 'Channels\ChannelsController@tags');
+                Route::post('{communication_channels}/tags ', 'Channels\ChannelsController@saveTags');
+                Route::get('{communication_channels}/addresses ', 'Channels\ChannelsController@addresses');
+                Route::post('{communication_channels}/addresses ', 'Channels\ChannelsController@saveAddresses');
+
+                Route::get('/{communication_channels}/{subObjects}', 'Channels\ChannelsController@relatedObjects');
+                Route::get('/{communication_channels}', 'Channels\ChannelsController@show');
+
+                Route::post('/', 'Channels\ChannelsController@store');
+                Route::post('/{communication_channels}/do/{action}', 'Channels\ChannelsController@doAction');
+
+                Route::patch('/{communication_channels}', 'Channels\ChannelsController@update');
+                Route::delete('/{communication_channels}', 'Channels\ChannelsController@destroy');
+            }
+        );
+
         // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
 
 
 
 
 
+
+
+
+
+
+
+
+        Route::prefix('channels')->group(
+            function () {
+                Route::post('/{communication_channels}/code/send', 'Channels\ChannelsController@sendCode');
+                Route::post('/{communication_channels}/code/verify', 'Channels\ChannelsController@verifyCode');
+            }
+        );
 
 
 

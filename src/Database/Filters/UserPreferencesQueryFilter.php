@@ -18,19 +18,31 @@ class UserPreferencesQueryFilter extends AbstractQueryFilter
      */
     protected $builder;
 
-    public function isSystemEmailOptout()
+    public function isSystemEmailOptout($value)
     {
-        return $this->builder->where('is_system_email_optout', true);
+        if(!is_bool($value)) {
+            $value = false;
+        }
+
+        return $this->builder->where('is_system_email_optout', $value);
     }
 
-    public function isPhoneOptout()
+    public function isPhoneOptout($value)
     {
-        return $this->builder->where('is_phone_optout', true);
+        if(!is_bool($value)) {
+            $value = false;
+        }
+
+        return $this->builder->where('is_phone_optout', $value);
     }
 
-    public function isMarketingEmailOptout()
+    public function isMarketingEmailOptout($value)
     {
-        return $this->builder->where('is_marketing_email_optout', true);
+        if(!is_bool($value)) {
+            $value = false;
+        }
+
+        return $this->builder->where('is_marketing_email_optout', $value);
     }
 
     public function createdAtStart($date)
@@ -73,6 +85,7 @@ class UserPreferencesQueryFilter extends AbstractQueryFilter
     }
 
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
 
 
 

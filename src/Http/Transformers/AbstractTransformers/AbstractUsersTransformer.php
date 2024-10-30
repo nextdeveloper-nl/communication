@@ -55,18 +55,18 @@ class AbstractUsersTransformer extends AbstractTransformer
     public function transform(Users $model)
     {
                                                 $iamUserId = \NextDeveloper\IAM\Database\Models\Users::where('id', $model->iam_user_id)->first();
-                                                            $communicationBotId = \NextDeveloper\Communication\Database\Models\Bots::where('id', $model->communication_bot_id)->first();
-                                                            $chatId = \NextDeveloper\\Database\Models\Chats::where('id', $model->chat_id)->first();
+                                                            $telegramId = \NextDeveloper\\Database\Models\Telegrams::where('id', $model->telegram_id)->first();
+                                                            $aiSessionId = \NextDeveloper\\Database\Models\AiSessions::where('id', $model->ai_session_id)->first();
                         
         return $this->buildPayload(
             [
             'id'  =>  $model->uuid,
             'iam_user_id'  =>  $iamUserId ? $iamUserId->uuid : null,
-            'communication_bot_id'  =>  $communicationBotId ? $communicationBotId->uuid : null,
-            'chat_id'  =>  $chatId ? $chatId->uuid : null,
+            'telegram_id'  =>  $telegramId ? $telegramId->uuid : null,
             'created_at'  =>  $model->created_at,
             'updated_at'  =>  $model->updated_at,
             'deleted_at'  =>  $model->deleted_at,
+            'ai_session_id'  =>  $aiSessionId ? $aiSessionId->uuid : null,
             ]
         );
     }
@@ -155,4 +155,5 @@ class AbstractUsersTransformer extends AbstractTransformer
         return $this->collection($addresses, new AddressesTransformer());
     }
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
 }

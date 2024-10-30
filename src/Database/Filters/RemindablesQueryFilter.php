@@ -28,19 +28,31 @@ class RemindablesQueryFilter extends AbstractQueryFilter
         return $this->builder->where('note', 'like', '%' . $value . '%');
     }
 
-    public function isReminded()
+    public function isReminded($value)
     {
-        return $this->builder->where('is_reminded', true);
+        if(!is_bool($value)) {
+            $value = false;
+        }
+
+        return $this->builder->where('is_reminded', $value);
     }
 
-    public function isAcknowledged()
+    public function isAcknowledged($value)
     {
-        return $this->builder->where('is_acknowledged', true);
+        if(!is_bool($value)) {
+            $value = false;
+        }
+
+        return $this->builder->where('is_acknowledged', $value);
     }
 
-    public function isCancelled()
+    public function isCancelled($value)
     {
-        return $this->builder->where('is_cancelled', true);
+        if(!is_bool($value)) {
+            $value = false;
+        }
+
+        return $this->builder->where('is_cancelled', $value);
     }
 
     public function remindDatetimeStart($date)
@@ -103,6 +115,7 @@ class RemindablesQueryFilter extends AbstractQueryFilter
     }
 
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
 
 
 

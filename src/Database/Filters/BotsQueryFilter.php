@@ -27,6 +27,16 @@ class BotsQueryFilter extends AbstractQueryFilter
     {
         return $this->builder->where('description', 'like', '%' . $value . '%');
     }
+    
+    public function token($value)
+    {
+        return $this->builder->where('token', 'like', '%' . $value . '%');
+    }
+    
+    public function class($value)
+    {
+        return $this->builder->where('class', 'like', '%' . $value . '%');
+    }
 
     public function createdAtStart($date)
     {
@@ -59,4 +69,5 @@ class BotsQueryFilter extends AbstractQueryFilter
     }
 
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
 }
