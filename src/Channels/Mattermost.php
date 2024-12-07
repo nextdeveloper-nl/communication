@@ -40,17 +40,15 @@ class Mattermost implements ChannelAbstract
      * Creates a new Mattermost channel instance
      *
      * @param array<string, mixed> $config Configuration array containing webhook_url
-     * @param string $message Message to be sent
      * @throws InvalidArgumentException If the configuration is invalid
      */
-    public function __construct(array $config, string $message)
+    public function __construct(array $config)
     {
         if (!$this->validateConfig($config)) {
             throw new InvalidArgumentException('Invalid configuration provided');
         }
 
         $this->webhookUrl = $config['webhook_url'];
-        $this->message = $message;
     }
 
     /**
@@ -78,13 +76,13 @@ class Mattermost implements ChannelAbstract
      *
      * @throws Exception If the message fails to send
      */
-    public function send(): void
+    public function send($message): void
     {
         try {
             $response = Http::timeout(30)
                 ->retry(3, 100)
                 ->post($this->webhookUrl, [
-                    'text' => $this->message,
+                    'text' => $message,
                 ]);
 
             $this->handleResponse($response);

@@ -2,11 +2,17 @@
 
 namespace NextDeveloper\Communication\Helpers;
 
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use InvalidArgumentException;
+use NextDeveloper\Commons\Exceptions\NotFoundException;
+use NextDeveloper\Communication\Database\Models\AvailableChannels;
 use NextDeveloper\Communication\Database\Models\Channels;
 use NextDeveloper\Communication\Services\EmailsService;
 use NextDeveloper\IAM\Database\Models\Users;
+use NextDeveloper\IAM\Database\Scopes\AuthorizationScope;
 use PharIo\Manifest\Email;
+use function PHPUnit\Framework\isInstanceOf;
 
 /**
  * This class is used to email the user by using the communications module.
@@ -56,9 +62,31 @@ class Communicate
     }
 
     public function sendNotification($subject, $message) {
-        /**
-         * Here we will send the customer a notification by using customers prefered notification channels.
-         */
+        $userNotificationChannels = Channels::withoutGlobalScope(AuthorizationScope::class)
+            ->where('iam_user_id', $this->user->id)
+            ->get();
+
+        foreach ($userNotificationChannels as $userChannel) {
+            $processor = AvailableChannels::withoutGlobalScope(AuthorizationScope::class)
+                ->where('id', $userChannel->communication_available_channel_id)
+                ->first();
+
+            try {
+                switch ($processor->name) {
+                    case 'Mattermost':
+                        $p = new \NextDeveloper\Communication\Channels\Mattermost(
+                            config: $userChannel->config
+                        );
+                        $p->send($message);
+                        break;
+                }
+            } catch (InvalidArgumentException $e) {
+                dd($e);
+            } catch (\Exception $e) {
+                Log::error(__METHOD__ . ' | The processor (' . $processor->name . ') is not found ' .
+                    'in the packages. Please fix this error. This is important!!!');
+            }
+        }
     }
 
     public function sendEnvelopeNow($envelope) {

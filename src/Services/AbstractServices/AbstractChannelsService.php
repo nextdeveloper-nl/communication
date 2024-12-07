@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Str;
+use NextDeveloper\IAM\Database\Scopes\AuthorizationScope;
 use NextDeveloper\IAM\Helpers\UserHelper;
 use NextDeveloper\Commons\Common\Cache\CacheHelper;
 use NextDeveloper\Commons\Helpers\DatabaseHelper;
@@ -88,7 +89,9 @@ class AbstractChannelsService
      */
     public static function getByRef($ref) : ?Channels
     {
-        return Channels::findByRef($ref);
+        return Channels::withoutGlobalScope(AuthorizationScope::class)
+            ->where('uuid', $ref)
+            ->first();
     }
 
     public static function getActions()
@@ -184,7 +187,7 @@ class AbstractChannelsService
                 $data['iam_user_id']
             );
         }
-                    
+
         if(!array_key_exists('iam_user_id', $data)) {
             $data['iam_user_id']    = UserHelper::me()->id;
         }
@@ -194,11 +197,11 @@ class AbstractChannelsService
                 $data['iam_account_id']
             );
         }
-            
+
         if(!array_key_exists('iam_account_id', $data)) {
             $data['iam_account_id'] = UserHelper::currentAccount()->id;
         }
-                        
+
         try {
             $model = Channels::create($data);
         } catch(\Exception $e) {
@@ -264,7 +267,7 @@ class AbstractChannelsService
                 $data['iam_account_id']
             );
         }
-    
+
         Events::fire('updating:NextDeveloper\Communication\Channels', $model);
 
         try {

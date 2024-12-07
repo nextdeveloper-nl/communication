@@ -22,11 +22,20 @@ use NextDeveloper\IAM\Database\Scopes\AuthorizationScope;
 class ChannelsService extends AbstractChannelsService
 {
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
-
-
     private const VERIFICATION_CODE_MIN = 100000;
     private const VERIFICATION_CODE_MAX = 999999;
     private const CHANNEL_MODEL_TYPE = 'NextDeveloper\Communication\Database\Models\Channels';
+
+    public static function create($data)
+    {
+        try {
+            $data['config'] = json_decode($data['config'], true);
+        } catch (Exception $e) {
+            throw new InvalidArgumentException('The config value should be json.');
+        }
+
+        return parent::create($data);
+    }
 
     /**
      * Validates that all required channel fields exist in the platform fields.
