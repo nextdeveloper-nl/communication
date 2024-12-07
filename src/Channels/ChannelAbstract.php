@@ -26,9 +26,10 @@ interface ChannelAbstract
     /**
      * Sends the message through the channel
      *
+     * @param $message
      * @throws \Exception If the message cannot be sent
      */
-    public function send(): void;
+    public function send($message): void;
 
     /**
      * Validates the configuration

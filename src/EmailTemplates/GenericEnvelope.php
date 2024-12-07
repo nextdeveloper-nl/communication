@@ -42,7 +42,8 @@ class GenericEnvelope extends Mailable
         return new Envelope(
             subject: i18n::t($this->subject, $this->language->code),
             from: new Address(
-                //  ...
+                address: config('leo.mail.from'),
+                name: config('leo.mail.from_name')
             ),
             to: [
                 new Address(

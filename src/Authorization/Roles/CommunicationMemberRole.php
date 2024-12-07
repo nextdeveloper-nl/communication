@@ -30,6 +30,10 @@ class CommunicationMemberRole extends AbstractRole implements IAuthorizationRole
      */
     public function apply(Builder $builder, Model $model)
     {
+        if($model->getTable() == 'communication_available_channels') {
+            return;
+        }
+
         /**
          * Here user will be able to list all models, because by default, sales manager can see everybody.
          */
