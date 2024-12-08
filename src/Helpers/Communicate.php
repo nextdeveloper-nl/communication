@@ -72,10 +72,12 @@ class Communicate
                 ->first();
 
             try {
+                $config = json_decode($userChannel->config, true);
+
                 switch ($processor->name) {
                     case 'Mattermost':
                         $p = new \NextDeveloper\Communication\Channels\Mattermost(
-                            config: $userChannel->config
+                            config: $config
                         );
                         $p->send($message);
                         break;
