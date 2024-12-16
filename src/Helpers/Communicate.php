@@ -62,7 +62,6 @@ class Communicate
     }
 
     public function sendNotification($subject, $message) {
-        dd($this->user);
         $userNotificationChannels = Channels::withoutGlobalScope(AuthorizationScope::class)
             ->where('iam_user_id', $this->user->id)
             ->get();
@@ -73,7 +72,7 @@ class Communicate
                 ->first();
 
             try {
-                $config = json_decode($userChannel->config, true);
+                $config = $userChannel->config;
 
                 switch ($processor->name) {
                     case 'Mattermost':
