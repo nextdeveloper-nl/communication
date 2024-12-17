@@ -61,7 +61,7 @@ class Communicate
         self::sendEnvelopeNow($envelope);
     }
 
-    public function sendNotification($subject, $message) {
+    public function sendNotification($subject, $message, $preferredChannel = null) {
         $userNotificationChannels = Channels::withoutGlobalScope(AuthorizationScope::class)
             ->where('iam_user_id', $this->user->id)
             ->get();
