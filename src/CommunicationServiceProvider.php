@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Log;
 use NextDeveloper\Commons\AbstractServiceProvider;
 use NextDeveloper\Communication\Actions\Emails\Deliver;
 use NextDeveloper\Communication\Jobs\DeliverAllEmails;
-
+use NextDeveloper\Communication\Console\Commands\EmailsDeliveryCommand;
 /**
  * Class CommunicationServiceProvider
  *
@@ -135,7 +135,7 @@ class CommunicationServiceProvider extends AbstractServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands(
                 [
-
+                    EmailsDeliveryCommand::class,
                 ]
             );
         }
@@ -184,9 +184,12 @@ class CommunicationServiceProvider extends AbstractServiceProvider
             $schedule->call(function () {})->everyFifteenMinutes();
 
             $schedule->call(function () {
-                logger()->info('[Communication] Every minute jobs start');
-                dispatch( new DeliverAllEmails() );
+
             })->everyMinute();
+
+            // Run the emails delivery command every hour
+            $schedule->command('communication:deliver-emails')
+                ->everyOddHour();
         });
     }
 }
