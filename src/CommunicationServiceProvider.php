@@ -9,6 +9,7 @@ use NextDeveloper\Commons\AbstractServiceProvider;
 use NextDeveloper\Communication\Actions\Emails\Deliver;
 use NextDeveloper\Communication\Jobs\DeliverAllEmails;
 use NextDeveloper\Communication\Console\Commands\EmailsDeliveryCommand;
+use NextDeveloper\Communication\Console\Commands\FetchMailgunEventCommand;
 /**
  * Class CommunicationServiceProvider
  *
@@ -41,6 +42,7 @@ class CommunicationServiceProvider extends AbstractServiceProvider
         $this->bootModelBindings();
         $this->bootEvents();
         $this->bootLogger();
+        $this->bootSchedule();
     }
 
     /**
@@ -136,6 +138,7 @@ class CommunicationServiceProvider extends AbstractServiceProvider
             $this->commands(
                 [
                     EmailsDeliveryCommand::class,
+                    FetchMailgunEventCommand::class,
                 ]
             );
         }
@@ -188,8 +191,11 @@ class CommunicationServiceProvider extends AbstractServiceProvider
             })->everyMinute();
 
             // Run the emails delivery command every hour
-            $schedule->command('communication:deliver-emails')
+            $schedule->command('nextdeveloper:deliver-emails')
                 ->everyOddHour();
+
+            $schedule->command('nextdeveloper:fetch-mailgun-events')
+                ->daily();
         });
     }
 }

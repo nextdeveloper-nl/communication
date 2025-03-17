@@ -73,11 +73,15 @@ class Mailgun
 
             // Prepare the email parameters
             $parameters = [
-                'from'     => $email->from_email_address,
-                'to'       => $to,
-                'subject'  => $email->subject,
-                'text'     => $email->body,
-                'html'     => $email->body,
+                'from'              => $email->from_email_address,
+                'to'                => $to,
+                'subject'           => $email->subject,
+                'text'              => $email->body,
+                'html'              => $email->body,
+                'o:tracking'        => true,
+                'o:tracking-clicks' => true,
+                'o:tracking-opens'  => true,
+                'v:origin'          => $email->uuid,
             ];
 
             // Add CC if it exists
@@ -115,24 +119,21 @@ class Mailgun
             $response = $this->client->messages()->send($this->domain, $parameters);
 
             // If the email is delivered, then save the delivery results and the delivered_at timestamp
-            $email->delivery_results = json_encode([
-                'status' => 'sent',
-                'message' => 'Email sent successfully via Mailgun',
-                'response' => $response
-            ]);
+            $email->delivery_results = [
+                'message'   => 'Email sent successfully via Mailgun',
+            ];
             $email->delivered_at = now();
-            $email->save();
+            $email->saveQuietly();
 
             Log::info('Email sent successfully via Mailgun', ['email_id' => $email->id]);
         } catch (\Exception $e) {
             Log::error('Failed to send email via Mailgun: ' . $e->getMessage(), ['email_id' => $email->id]);
 
             // Update the email record with the error
-            $email->delivery_results = json_encode([
-                'status' => 'error',
-                'message' => $e->getMessage()
-            ]);
-            $email->save();
+            $email->delivery_results = [
+                'message'   => $e->getMessage(),
+            ];
+            $email->saveQuietly();
         }
     }
 
@@ -149,5 +150,147 @@ class Mailgun
         }
 
         return (string) $recipients;
+    }
+
+    /**
+     * Process events from Mailgun and update email records
+     *
+     * This method retrieves events from Mailgun and updates the corresponding email records
+     * with the event data.
+     *
+     * @param array $options Optional parameters to customize the event processing
+     * @param callable|null $progressCallback Optional callback for progress reporting
+     * @return int Total number of events processed
+     */
+    public function processEvents(array $options = [], ?callable $progressCallback = null): int
+    {
+        $totalProcessed = 0;
+        $currentPage = 1;
+        $processAllPages = $options['process_all_pages'] ?? false;
+
+        try {
+            // Get events from Mailgun for the domain
+            $queryParams = [
+                'limit' => $options['limit'] ?? 300,
+                'event' => $options['event'] ?? 'delivered OR failed OR rejected OR opened OR clicked',
+            ];
+
+
+            // Process pages until no more events or limit reached
+            do {
+                // Get events from the Mailgun API
+                $result = $this->client->events()->get($this->domain, $queryParams);
+
+                // Check if we have items in the response
+                if (!$result || !method_exists($result, 'getItems')) {
+                    Log::warning('No events or invalid response from Mailgun');
+                    break;
+                }
+
+                $items = $result->getItems();
+                $currentPageCount = count($items);
+
+                if (empty($items)) {
+                    Log::info('No events found on page ' . $currentPage);
+                    break;
+                }
+
+                Log::info('Processing ' . $currentPageCount . ' events from page ' . $currentPage);
+
+                // Process each event
+                $processedInThisPage = 0;
+                foreach ($items as $item) {
+                    // Extract event data
+                    $userVariables = $item->getUserVariables();
+
+                    if (!isset($userVariables['origin']) || empty($userVariables['origin'])) {
+                        continue; // Skip if no origin/uuid to match with
+                    }
+
+                    // Find the corresponding email by UUID
+                    $email = Emails::withoutGlobalScopes()
+                                ->where('uuid', $userVariables['origin'])
+                                ->first();
+
+                    if ($email) {
+                        // Get existing delivery results or initialize empty array
+                        $oldDeliveryResults = $email->delivery_results ?? [];
+
+                        // If delivery_results is not an array, convert it to one
+                        if (!is_array($oldDeliveryResults)) {
+                            $oldDeliveryResults = [];
+                        }
+
+                        // Update the delivery results with the new event data
+                        $email->delivery_results = array_merge($oldDeliveryResults, [
+                            'status'                => $item->getEvent(),
+                            'timestamp'             => $item->getTimestamp(),
+                            'delivery_status'       => $item->getDeliveryStatus(),
+                            'geo'                   => $item->getGeolocation(),
+                            'message'               => $item->getMessage(),
+                            'recipient'             => $item->getRecipient(),
+                            'severity'              => $item->getSeverity(),
+                            'original'              => $item, // Include the original object
+                        ]);
+
+                        // Save the updated email record
+                        $email->saveQuietly();
+
+                        Log::info('Email event processed', [
+                            'email_id' => $email->id,
+                            'event' => $item->getEvent(),
+                        ]);
+
+                        $processedInThisPage++;
+                        $totalProcessed++;
+                    }
+                }
+
+                // Report progress if callback provided
+                if ($progressCallback && $processedInThisPage > 0) {
+                    call_user_func($progressCallback, $processedInThisPage);
+                }
+
+                // Check if there are more pages to process
+                $hasNextPage = false;
+                $nextPageUrl = null;
+
+                // For simplicity, we'll only use the getNextUrl method if available
+                // Otherwise, we'll assume there's no next page
+                try {
+                    if (method_exists($result, 'getNextUrl')) {
+                        $nextPageUrl = $result->getNextUrl();
+                        $hasNextPage = !empty($nextPageUrl);
+                    }
+
+                    if ($hasNextPage && $processAllPages) {
+                        // Extract page token for next request
+                        $parsedUrl = parse_url($nextPageUrl);
+                        if (isset($parsedUrl['query'])) {
+                            parse_str($parsedUrl['query'], $queryParams);
+                            $currentPage++;
+                        } else {
+                            $hasNextPage = false;
+                        }
+                    } else {
+                        // If not processing all pages, stop after the first page
+                        $hasNextPage = false;
+                    }
+                } catch (\Exception $e) {
+                    Log::warning('Error checking for more pages: ' . $e->getMessage());
+                    $hasNextPage = false;
+                }
+
+            } while ($hasNextPage);
+
+            Log::info('Completed processing Mailgun events. Total processed: ' . $totalProcessed);
+
+        } catch (\Exception $e) {
+            Log::error('Failed to process Mailgun events: ' . $e->getMessage(), [
+                'exception' => $e
+            ]);
+        }
+
+        return $totalProcessed;
     }
 }

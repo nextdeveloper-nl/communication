@@ -16,7 +16,7 @@ class EmailsDeliveryCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'communication:emails-deliver
+    protected $signature = 'nextdeveloper:emails-deliver
                             {--limit=50 : Maximum number of emails to process in a single run}
                             {--dry-run : Show what would be done without actually sending emails}';
 
