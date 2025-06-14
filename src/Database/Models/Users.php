@@ -26,11 +26,15 @@ use NextDeveloper\Commons\Database\Traits\Taggable;
  */
 class Users extends Model
 {
-    use Filterable, UuidId, CleanCache, Taggable;
+    use Filterable, CleanCache, Taggable;
+    use UuidId;
     use SoftDeletes;
 
 
     public $timestamps = true;
+
+
+
 
     protected $table = 'communication_users';
 
@@ -133,5 +137,6 @@ class Users extends Model
     }
 
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
 
 }

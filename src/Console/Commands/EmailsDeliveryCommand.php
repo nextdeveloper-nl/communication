@@ -6,8 +6,13 @@ use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\App;
 use NextDeveloper\Communication\Actions\Emails\Deliver;
+use NextDeveloper\Communication\Database\Models\AvailableChannels;
+use NextDeveloper\Communication\Database\Models\Channels;
 use NextDeveloper\Communication\Database\Models\Emails;
+use NextDeveloper\Communication\Helpers\ChannelHelper;
+use NextDeveloper\IAM\Helpers\UserHelper;
 
 class EmailsDeliveryCommand extends Command
 {
@@ -34,6 +39,9 @@ class EmailsDeliveryCommand extends Command
      */
     public function handle(): int
     {
+        UserHelper::setAdminAsCurrentUser();
+
+        // Log the start of the command
         $this->info('Starting email delivery process...');
 
         $limit = $this->option('limit');
@@ -45,7 +53,7 @@ class EmailsDeliveryCommand extends Command
 
         try {
             // Get pending emails that are due for delivery
-            $pendingEmails = $this->getPendingEmails($limit);
+            $pendingEmails = ChannelHelper::getPendingEmails($limit);
 
             $count = $pendingEmails->count();
             $this->info("Found {$count} emails to process");
@@ -55,60 +63,113 @@ class EmailsDeliveryCommand extends Command
                 return 0;
             }
 
-            $bar = $this->output->createProgressBar($count);
-            $bar->start();
-
-            $success = 0;
-            $failed = 0;
-
-            foreach ($pendingEmails as $email) {
-                try {
-                    if (!$dryRun) {
-                        (new Deliver($email))->handle();
-                    } else {
-                        $this->line("\nWould deliver email ID: {$email->id}, Subject: {$email->subject}, To: " . implode(', ', $email->to));
-                    }
-                    $success++;
-                } catch (\Exception $e) {
-                    $this->error("\nError processing email ID {$email->id}: " . $e->getMessage());
-                    Log::error("Error processing email ID {$email->id}: " . $e->getMessage());
-                    Log::error($e->getTraceAsString());
-                    $failed++;
-                }
-
-                $bar->advance();
-            }
-
-            $bar->finish();
+            $result = $this->processEmails($pendingEmails, $dryRun);
 
             $this->newLine();
-            $this->info("Email delivery completed: {$success} succeeded, {$failed} failed");
+            $this->info("Email delivery completed: {$result['success']} succeeded, {$result['failed']} failed");
 
             return 0;
         } catch (\Exception $e) {
-            $this->error('Email delivery process failed: ' . $e->getMessage());
-            Log::error('Email delivery process failed: ' . $e->getMessage());
-            Log::error($e->getTraceAsString());
+            $this->error("\nEmail delivery process failed: " . $e->getMessage());
+            ChannelHelper::logError('Email delivery process failed', $e);
             return 1;
         }
     }
 
     /**
-     * Get pending emails that are due for delivery.
+     * Process a collection of emails for delivery.
      *
-     * @param int $limit Maximum number of emails to retrieve
-     * @return Collection
+     * @param Collection $emails
+     * @param bool $dryRun
+     * @return array
      */
-    protected function getPendingEmails(int $limit): Collection
+    protected function processEmails(Collection $emails, bool $dryRun): array
     {
-        return Emails::whereNull('delivered_at')
-            ->where(function ($query) {
-                $query->whereNull('deliver_at')
-                    ->orWhere('deliver_at', '<=', Carbon::now());
-            })
-            ->orderBy('created_at')
-            ->limit($limit)
-            ->get();
+        $bar = $this->output->createProgressBar($emails->count());
+        $bar->start();
+
+        $success = 0;
+        $failed = 0;
+
+        foreach ($emails as $email) {
+            try {
+                if (!$dryRun) {
+                    $this->deliverEmail($email);
+                } else {
+                    $this->line("\nWould deliver email ID: {$email->id}, Subject: {$email->subject}, To: " . implode(', ', $email->to));
+                }
+                $success++;
+            } catch (\Exception $e) {
+                $this->error("\nError processing email ID {$email->id}: " . $e->getMessage());
+                ChannelHelper::logError("Error processing email ID {$email->id}", $e);
+                $failed++;
+            }
+
+            $bar->advance();
+        }
+
+        $bar->finish();
+
+        return [
+            'success' => $success,
+            'failed' => $failed
+        ];
     }
 
+    /**
+     * Deliver a single email using the appropriate channel.
+     *
+     * @param Emails $email
+     * @throws \Exception
+     */
+    protected function deliverEmail(Emails $email): void
+    {
+        if ($email->communication_channel_id) {
+            $this->deliverViaSpecificChannel($email);
+        } else {
+            ChannelHelper::deliverViaDefaultChannel($email);
+        }
+
+        // Mark the email as delivered
+        ChannelHelper::markEmailAsDelivered($email);
+    }
+
+
+    /**
+     * Deliver an email via a specific channel.
+     *
+     * @param Emails $email
+     * @throws \Exception
+     */
+    protected function deliverViaSpecificChannel(Emails $email): void
+    {
+        $channel = ChannelHelper::getChannel($email);
+        if (!$channel) {
+            throw new \Exception(__METHOD__ . ": Channel with ID {$email->communication_channel_id} not found");
+        }
+
+        if (!$channel->is_active)
+        {
+            throw new \Exception(__METHOD__ . ": Channel with ID {$email->communication_channel_id} is not active");
+        }
+
+        $availableChannel = ChannelHelper::getAvailableChannel($channel, $email);
+        if (!$availableChannel) {
+            throw new \Exception(__METHOD__ . ": Available channel with ID {$channel->communication_available_channel_id} not found");
+        }
+
+        $channelClass = ChannelHelper::getChannelClass($availableChannel, $email);
+        if (!$channelClass) {
+            throw new \Exception(__METHOD__ . ": Class {$availableChannel->class} not found");
+        }
+
+        // Use Laravel's service container to resolve the channel class
+        $channelInstance = App::makeWith($channelClass, ['config' => $channel->config]);
+
+        if (!method_exists($channelInstance, 'send')) {
+            throw new \Exception(__METHOD__ . ": Method send not found in class {$channelClass}");
+        }
+
+        $channelInstance->send($email);
+    }
 }
