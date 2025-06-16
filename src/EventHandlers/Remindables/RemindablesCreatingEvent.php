@@ -2,8 +2,8 @@
 
 namespace NextDeveloper\Communication\EventHandlers\RemindablesCreatingEvent;
 
-use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\InteractsWithQueue;
 
 /**
  * Class RemindablesCreatingEvent

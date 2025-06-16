@@ -3,14 +3,16 @@
 namespace NextDeveloper\Communication\Http\Controllers\Notifications;
 
 use Illuminate\Http\Request;
-use NextDeveloper\Communication\Http\Controllers\AbstractController;
 use NextDeveloper\Commons\Http\Response\ResponsableFactory;
-use NextDeveloper\Communication\Http\Requests\Notifications\NotificationsUpdateRequest;
+use NextDeveloper\Commons\Http\Traits\Addresses;
+use NextDeveloper\Commons\Http\Traits\Tags;
 use NextDeveloper\Communication\Database\Filters\NotificationsQueryFilter;
 use NextDeveloper\Communication\Database\Models\Notifications;
-use NextDeveloper\Communication\Services\NotificationsService;
+use NextDeveloper\Communication\Http\Controllers\AbstractController;
 use NextDeveloper\Communication\Http\Requests\Notifications\NotificationsCreateRequest;
-use NextDeveloper\Commons\Http\Traits\Tags;use NextDeveloper\Commons\Http\Traits\Addresses;
+use NextDeveloper\Communication\Http\Requests\Notifications\NotificationsUpdateRequest;
+use NextDeveloper\Communication\Services\NotificationsService;
+
 class NotificationsController extends AbstractController
 {
     private $model = Notifications::class;

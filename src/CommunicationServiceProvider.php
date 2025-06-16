@@ -2,13 +2,11 @@
 
 namespace NextDeveloper\Communication;
 
-use GuzzleHttp\Client as GuzzleClient;
 use Illuminate\Console\Scheduling\Schedule;
-use Illuminate\Support\Facades\Log;
 use NextDeveloper\Commons\AbstractServiceProvider;
-use NextDeveloper\Communication\Actions\Emails\Deliver;
 use NextDeveloper\Communication\Jobs\DeliverAllEmails;
-
+use NextDeveloper\Communication\Console\Commands\EmailsDeliveryCommand;
+use NextDeveloper\Communication\Console\Commands\FetchMailgunEventCommand;
 /**
  * Class CommunicationServiceProvider
  *
@@ -39,8 +37,8 @@ class CommunicationServiceProvider extends AbstractServiceProvider
         //        $this->bootErrorHandler();
         $this->bootChannelRoutes();
         $this->bootModelBindings();
-        $this->bootEvents();
         $this->bootLogger();
+        $this->bootSchedule();
     }
 
     /**
@@ -94,24 +92,6 @@ class CommunicationServiceProvider extends AbstractServiceProvider
     }
 
     /**
-     * @return void
-     */
-    protected function bootEvents()
-    {
-        $configs = config()->all();
-
-        foreach ($configs as $key => $value) {
-            if (config()->has($key.'.events')) {
-                foreach (config($key.'.events') as $event => $handlers) {
-                    foreach ($handlers as $handler) {
-                        $this->app['events']->listen($event, $handler);
-                    }
-                }
-            }
-        }
-    }
-
-    /**
      * Register module routes
      *
      * @return void
@@ -135,7 +115,8 @@ class CommunicationServiceProvider extends AbstractServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands(
                 [
-
+                    EmailsDeliveryCommand::class,
+                    FetchMailgunEventCommand::class,
                 ]
             );
         }
@@ -184,9 +165,15 @@ class CommunicationServiceProvider extends AbstractServiceProvider
             $schedule->call(function () {})->everyFifteenMinutes();
 
             $schedule->call(function () {
-                logger()->info('[Communication] Every minute jobs start');
-                dispatch( new DeliverAllEmails() );
+
             })->everyMinute();
+
+            // Run the emails delivery command every hour
+            $schedule->command('nextdeveloper:deliver-emails')
+                ->everyOddHour();
+
+            $schedule->command('nextdeveloper:fetch-mailgun-events')
+                ->daily();
         });
     }
 }

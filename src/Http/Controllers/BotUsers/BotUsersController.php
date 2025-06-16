@@ -3,14 +3,16 @@
 namespace NextDeveloper\Communication\Http\Controllers\BotUsers;
 
 use Illuminate\Http\Request;
-use NextDeveloper\Communication\Http\Controllers\AbstractController;
 use NextDeveloper\Commons\Http\Response\ResponsableFactory;
-use NextDeveloper\Communication\Http\Requests\BotUsers\BotUsersUpdateRequest;
+use NextDeveloper\Commons\Http\Traits\Addresses;
+use NextDeveloper\Commons\Http\Traits\Tags;
 use NextDeveloper\Communication\Database\Filters\BotUsersQueryFilter;
 use NextDeveloper\Communication\Database\Models\BotUsers;
-use NextDeveloper\Communication\Services\BotUsersService;
+use NextDeveloper\Communication\Http\Controllers\AbstractController;
 use NextDeveloper\Communication\Http\Requests\BotUsers\BotUsersCreateRequest;
-use NextDeveloper\Commons\Http\Traits\Tags;use NextDeveloper\Commons\Http\Traits\Addresses;
+use NextDeveloper\Communication\Http\Requests\BotUsers\BotUsersUpdateRequest;
+use NextDeveloper\Communication\Services\BotUsersService;
+
 class BotUsersController extends AbstractController
 {
     private $model = BotUsers::class;

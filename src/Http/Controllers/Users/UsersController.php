@@ -3,14 +3,16 @@
 namespace NextDeveloper\Communication\Http\Controllers\Users;
 
 use Illuminate\Http\Request;
-use NextDeveloper\Communication\Http\Controllers\AbstractController;
 use NextDeveloper\Commons\Http\Response\ResponsableFactory;
-use NextDeveloper\Communication\Http\Requests\Users\UsersUpdateRequest;
+use NextDeveloper\Commons\Http\Traits\Addresses;
+use NextDeveloper\Commons\Http\Traits\Tags;
 use NextDeveloper\Communication\Database\Filters\UsersQueryFilter;
 use NextDeveloper\Communication\Database\Models\Users;
-use NextDeveloper\Communication\Services\UsersService;
+use NextDeveloper\Communication\Http\Controllers\AbstractController;
 use NextDeveloper\Communication\Http\Requests\Users\UsersCreateRequest;
-use NextDeveloper\Commons\Http\Traits\Tags;use NextDeveloper\Commons\Http\Traits\Addresses;
+use NextDeveloper\Communication\Http\Requests\Users\UsersUpdateRequest;
+use NextDeveloper\Communication\Services\UsersService;
+
 class UsersController extends AbstractController
 {
     private $model = Users::class;

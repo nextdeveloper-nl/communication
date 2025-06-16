@@ -7,6 +7,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use NextDeveloper\Commons\Actions\AbstractAction;
+use NextDeveloper\Commons\Exceptions\NotAllowedException;
 use NextDeveloper\Communication\Database\Models\Emails;
 
 /**
@@ -19,7 +20,8 @@ class Deliver extends AbstractAction
     /**
      * This action takes an email and sends it to the user.
      *
-     * @param $model
+     * @param Emails|null $email
+     * @throws NotAllowedException
      */
     public function __construct(Emails $email = null)
     {
@@ -27,9 +29,11 @@ class Deliver extends AbstractAction
         return parent::__construct();
     }
 
-    public function handle()
+    public function handle(): void
     {
-        $mailer = config('communication.defaults.mailer');
+        $defaultMailer = config('communication.defaults.mailer');
+        $mailer = config('communication.services.' . $defaultMailer . '.class');
+
 
         if(class_exists($mailer)) {
             /**
@@ -39,7 +43,7 @@ class Deliver extends AbstractAction
             $mailer = new $mailer();
             $mailer->send($this->model);
         } else {
-            throw new \DeliveryMethodNotFoundException('Cannot find the delivery method you required.');
+            throw new \BadMethodCallException('Cannot find the delivery method you required.');
         }
     }
 }

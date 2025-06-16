@@ -2,19 +2,18 @@
 
 namespace NextDeveloper\Communication\Services\AbstractServices;
 
-use Illuminate\Http\Request;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use NextDeveloper\IAM\Helpers\UserHelper;
-use NextDeveloper\Commons\Common\Cache\CacheHelper;
-use NextDeveloper\Commons\Helpers\DatabaseHelper;
 use NextDeveloper\Commons\Database\Models\AvailableActions;
-use NextDeveloper\Communication\Database\Models\Users;
-use NextDeveloper\Communication\Database\Filters\UsersQueryFilter;
 use NextDeveloper\Commons\Exceptions\ModelNotFoundException;
-use NextDeveloper\Events\Services\Events;
 use NextDeveloper\Commons\Exceptions\NotAllowedException;
+use NextDeveloper\Commons\Helpers\DatabaseHelper;
+use NextDeveloper\Communication\Database\Filters\UsersQueryFilter;
+use NextDeveloper\Communication\Database\Models\Users;
+use NextDeveloper\Events\Services\Events;
+use NextDeveloper\IAM\Helpers\UserHelper;
 
 /**
  * This class is responsible from managing the data for Users
@@ -64,11 +63,15 @@ class AbstractUsersService
         if($enablePaginate) {
             //  We are using this because we have been experiencing huge security problem when we use the paginate method.
             //  The reason was, when the pagination method was using, somehow paginate was discarding all the filters.
+            $modelCount = $model->count();
+            $page = array_key_exists('page', $params) ? $params['page'] : 1;
+            $items = $model->skip(($page - 1) * $perPage)->take($perPage)->get();
+
             return new \Illuminate\Pagination\LengthAwarePaginator(
-                $model->skip(($request->get('page', 1) - 1) * $perPage)->take($perPage)->get(),
-                $model->count(),
+                $items,
+                $modelCount,
                 $perPage,
-                $request->get('page', 1)
+                $page
             );
         }
 
@@ -176,7 +179,7 @@ class AbstractUsersService
                 $data['iam_user_id']
             );
         }
-                    
+
         if(!array_key_exists('iam_user_id', $data)) {
             $data['iam_user_id']    = UserHelper::me()->id;
         }
@@ -192,7 +195,7 @@ class AbstractUsersService
                 $data['chat_id']
             );
         }
-                        
+
         try {
             $model = Users::create($data);
         } catch(\Exception $e) {
@@ -258,7 +261,7 @@ class AbstractUsersService
                 $data['chat_id']
             );
         }
-    
+
         Events::fire('updating:NextDeveloper\Communication\Users', $model);
 
         try {

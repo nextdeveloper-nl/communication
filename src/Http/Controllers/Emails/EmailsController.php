@@ -3,14 +3,16 @@
 namespace NextDeveloper\Communication\Http\Controllers\Emails;
 
 use Illuminate\Http\Request;
-use NextDeveloper\Communication\Http\Controllers\AbstractController;
 use NextDeveloper\Commons\Http\Response\ResponsableFactory;
-use NextDeveloper\Communication\Http\Requests\Emails\EmailsUpdateRequest;
+use NextDeveloper\Commons\Http\Traits\Addresses;
+use NextDeveloper\Commons\Http\Traits\Tags;
 use NextDeveloper\Communication\Database\Filters\EmailsQueryFilter;
 use NextDeveloper\Communication\Database\Models\Emails;
-use NextDeveloper\Communication\Services\EmailsService;
+use NextDeveloper\Communication\Http\Controllers\AbstractController;
 use NextDeveloper\Communication\Http\Requests\Emails\EmailsCreateRequest;
-use NextDeveloper\Commons\Http\Traits\Tags;use NextDeveloper\Commons\Http\Traits\Addresses;
+use NextDeveloper\Communication\Http\Requests\Emails\EmailsUpdateRequest;
+use NextDeveloper\Communication\Services\EmailsService;
+
 class EmailsController extends AbstractController
 {
     private $model = Emails::class;

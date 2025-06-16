@@ -2,12 +2,11 @@
 
 namespace NextDeveloper\Communication\Jobs;
 
-use Illuminate\Support\Facades\Log;
-use NextDeveloper\Communication\Exceptions\DeliveryMethodNotFoundException;
 use Illuminate\Bus\Queueable;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 use NextDeveloper\Commons\Actions\AbstractAction;
 use NextDeveloper\Communication\Actions\Emails\Deliver;
 use NextDeveloper\Communication\Database\Models\Emails;

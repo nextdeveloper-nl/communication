@@ -2,14 +2,13 @@
 
 namespace NextDeveloper\Communication\Tests\Database\Models;
 
-use Tests\TestCase;
 use GuzzleHttp\Client;
-use Illuminate\Http\Response;
 use Illuminate\Http\Request;
-use NextDeveloper\Communication\Database\Filters\CommunicationBotCodeQueryFilter;
-use NextDeveloper\Communication\Services\AbstractServices\AbstractCommunicationBotCodeService;
+use Illuminate\Http\Response;
 use Illuminate\Pagination\LengthAwarePaginator;
 use League\Fractal\Resource\Collection;
+use NextDeveloper\Communication\Database\Filters\CommunicationBotCodeQueryFilter;
+use NextDeveloper\Communication\Services\AbstractServices\AbstractCommunicationBotCodeService;
 
 trait CommunicationBotCodeTestTraits
 {
