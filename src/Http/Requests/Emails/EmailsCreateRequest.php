@@ -25,6 +25,7 @@ class EmailsCreateRequest extends AbstractFormRequest
         'is_marketing_email' => 'boolean',
         'deliver_at' => 'nullable|date',
         'delivered_at' => 'nullable|date',
+        'communication_channel_id' => 'nullable|exists:communication_channels,uuid|uuid',
         ];
     }
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE

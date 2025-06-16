@@ -5,7 +5,8 @@ namespace NextDeveloper\Communication;
 use Illuminate\Console\Scheduling\Schedule;
 use NextDeveloper\Commons\AbstractServiceProvider;
 use NextDeveloper\Communication\Jobs\DeliverAllEmails;
-
+use NextDeveloper\Communication\Console\Commands\EmailsDeliveryCommand;
+use NextDeveloper\Communication\Console\Commands\FetchMailgunEventCommand;
 /**
  * Class CommunicationServiceProvider
  *
@@ -37,6 +38,7 @@ class CommunicationServiceProvider extends AbstractServiceProvider
         $this->bootChannelRoutes();
         $this->bootModelBindings();
         $this->bootLogger();
+        $this->bootSchedule();
     }
 
     /**
@@ -113,7 +115,8 @@ class CommunicationServiceProvider extends AbstractServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands(
                 [
-
+                    EmailsDeliveryCommand::class,
+                    FetchMailgunEventCommand::class,
                 ]
             );
         }
@@ -162,9 +165,15 @@ class CommunicationServiceProvider extends AbstractServiceProvider
             $schedule->call(function () {})->everyFifteenMinutes();
 
             $schedule->call(function () {
-                logger()->info('[Communication] Every minute jobs start');
-                dispatch( new DeliverAllEmails() );
+
             })->everyMinute();
+
+            // Run the emails delivery command every hour
+            $schedule->command('nextdeveloper:deliver-emails')
+                ->everyOddHour();
+
+            $schedule->command('nextdeveloper:fetch-mailgun-events')
+                ->daily();
         });
     }
 }
