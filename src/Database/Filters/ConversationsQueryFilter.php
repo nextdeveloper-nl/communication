@@ -4,7 +4,7 @@ namespace NextDeveloper\Communication\Database\Filters;
 
 use Illuminate\Database\Eloquent\Builder;
 use NextDeveloper\Commons\Database\Filters\AbstractQueryFilter;
-                
+
 
 /**
  * This class automatically puts where clause on database so that use can filter
@@ -17,15 +17,15 @@ class ConversationsQueryFilter extends AbstractQueryFilter
      * @var Builder
      */
     protected $builder;
-    
+
     public function message($value)
     {
-        return $this->builder->where('message', 'like', '%' . $value . '%');
+        return $this->builder->where('message', 'ilike', '%' . $value . '%');
     }
-    
+
     public function updateId($value)
     {
-        return $this->builder->where('update_id', 'like', '%' . $value . '%');
+        return $this->builder->where('update_id', 'ilike', '%' . $value . '%');
     }
 
     public function direction($value)

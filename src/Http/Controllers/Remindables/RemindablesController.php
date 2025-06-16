@@ -3,14 +3,16 @@
 namespace NextDeveloper\Communication\Http\Controllers\Remindables;
 
 use Illuminate\Http\Request;
-use NextDeveloper\Communication\Http\Controllers\AbstractController;
 use NextDeveloper\Commons\Http\Response\ResponsableFactory;
-use NextDeveloper\Communication\Http\Requests\Remindables\RemindablesUpdateRequest;
+use NextDeveloper\Commons\Http\Traits\Addresses;
+use NextDeveloper\Commons\Http\Traits\Tags;
 use NextDeveloper\Communication\Database\Filters\RemindablesQueryFilter;
 use NextDeveloper\Communication\Database\Models\Remindables;
-use NextDeveloper\Communication\Services\RemindablesService;
+use NextDeveloper\Communication\Http\Controllers\AbstractController;
 use NextDeveloper\Communication\Http\Requests\Remindables\RemindablesCreateRequest;
-use NextDeveloper\Commons\Http\Traits\Tags;use NextDeveloper\Commons\Http\Traits\Addresses;
+use NextDeveloper\Communication\Http\Requests\Remindables\RemindablesUpdateRequest;
+use NextDeveloper\Communication\Services\RemindablesService;
+
 class RemindablesController extends AbstractController
 {
     private $model = Remindables::class;

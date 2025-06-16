@@ -2,11 +2,8 @@
 
 namespace NextDeveloper\Communication;
 
-use GuzzleHttp\Client as GuzzleClient;
 use Illuminate\Console\Scheduling\Schedule;
-use Illuminate\Support\Facades\Log;
 use NextDeveloper\Commons\AbstractServiceProvider;
-use NextDeveloper\Communication\Actions\Emails\Deliver;
 use NextDeveloper\Communication\Jobs\DeliverAllEmails;
 
 /**
@@ -39,7 +36,6 @@ class CommunicationServiceProvider extends AbstractServiceProvider
         //        $this->bootErrorHandler();
         $this->bootChannelRoutes();
         $this->bootModelBindings();
-        $this->bootEvents();
         $this->bootLogger();
     }
 
@@ -90,24 +86,6 @@ class CommunicationServiceProvider extends AbstractServiceProvider
     {
         if (file_exists(($file = $this->dir.'/../config/channel.routes.php'))) {
             include_once $file;
-        }
-    }
-
-    /**
-     * @return void
-     */
-    protected function bootEvents()
-    {
-        $configs = config()->all();
-
-        foreach ($configs as $key => $value) {
-            if (config()->has($key.'.events')) {
-                foreach (config($key.'.events') as $event => $handlers) {
-                    foreach ($handlers as $handler) {
-                        $this->app['events']->listen($event, $handler);
-                    }
-                }
-            }
         }
     }
 

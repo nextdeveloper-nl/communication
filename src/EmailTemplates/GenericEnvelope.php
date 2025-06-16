@@ -8,10 +8,8 @@ use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use NextDeveloper\Commons\Database\Models\Languages;
 use NextDeveloper\Communication\Database\Models\Emails;
 use NextDeveloper\I18n\Helpers\i18n;
-use NextDeveloper\IAM\Database\Models\Users;
 
 class GenericEnvelope extends Mailable
 {

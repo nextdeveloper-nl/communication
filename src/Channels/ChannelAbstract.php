@@ -2,8 +2,6 @@
 
 namespace NextDeveloper\Communication\Channels;
 
-use InvalidArgumentException;
-
 /**
  * Interface for communication channels
  *

@@ -1,8 +1,8 @@
 <?php
 
-use NextDeveloper\IAM\Envelopes\AccountCreatedEnvelope;
 use Illuminate\Foundation\Testing\TestCase;
 use NextDeveloper\IAM\Database\Models\Users;
+use NextDeveloper\IAM\Envelopes\AccountCreatedEnvelope;
 use Tests\CreatesApplication;
 
 class SendEmailTest extends TestCase

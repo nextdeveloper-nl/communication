@@ -2,14 +2,13 @@
 
 namespace NextDeveloper\Communication\Tests\Database\Models;
 
-use Tests\TestCase;
 use GuzzleHttp\Client;
-use Illuminate\Http\Response;
 use Illuminate\Http\Request;
-use NextDeveloper\Communication\Database\Filters\CommunicationUserPreferenceQueryFilter;
-use NextDeveloper\Communication\Services\AbstractServices\AbstractCommunicationUserPreferenceService;
+use Illuminate\Http\Response;
 use Illuminate\Pagination\LengthAwarePaginator;
 use League\Fractal\Resource\Collection;
+use NextDeveloper\Communication\Database\Filters\CommunicationUserPreferenceQueryFilter;
+use NextDeveloper\Communication\Services\AbstractServices\AbstractCommunicationUserPreferenceService;
 
 trait CommunicationUserPreferenceTestTraits
 {

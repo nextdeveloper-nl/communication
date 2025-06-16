@@ -3,14 +3,16 @@
 namespace NextDeveloper\Communication\Http\Controllers\AvailableChannels;
 
 use Illuminate\Http\Request;
-use NextDeveloper\Communication\Http\Controllers\AbstractController;
 use NextDeveloper\Commons\Http\Response\ResponsableFactory;
-use NextDeveloper\Communication\Http\Requests\AvailableChannels\AvailableChannelsUpdateRequest;
+use NextDeveloper\Commons\Http\Traits\Addresses;
+use NextDeveloper\Commons\Http\Traits\Tags;
 use NextDeveloper\Communication\Database\Filters\AvailableChannelsQueryFilter;
 use NextDeveloper\Communication\Database\Models\AvailableChannels;
-use NextDeveloper\Communication\Services\AvailableChannelsService;
+use NextDeveloper\Communication\Http\Controllers\AbstractController;
 use NextDeveloper\Communication\Http\Requests\AvailableChannels\AvailableChannelsCreateRequest;
-use NextDeveloper\Commons\Http\Traits\Tags;use NextDeveloper\Commons\Http\Traits\Addresses;
+use NextDeveloper\Communication\Http\Requests\AvailableChannels\AvailableChannelsUpdateRequest;
+use NextDeveloper\Communication\Services\AvailableChannelsService;
+
 class AvailableChannelsController extends AbstractController
 {
     private $model = AvailableChannels::class;

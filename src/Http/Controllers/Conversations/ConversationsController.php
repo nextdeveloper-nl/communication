@@ -3,14 +3,16 @@
 namespace NextDeveloper\Communication\Http\Controllers\Conversations;
 
 use Illuminate\Http\Request;
-use NextDeveloper\Communication\Http\Controllers\AbstractController;
 use NextDeveloper\Commons\Http\Response\ResponsableFactory;
-use NextDeveloper\Communication\Http\Requests\Conversations\ConversationsUpdateRequest;
+use NextDeveloper\Commons\Http\Traits\Addresses;
+use NextDeveloper\Commons\Http\Traits\Tags;
 use NextDeveloper\Communication\Database\Filters\ConversationsQueryFilter;
 use NextDeveloper\Communication\Database\Models\Conversations;
-use NextDeveloper\Communication\Services\ConversationsService;
+use NextDeveloper\Communication\Http\Controllers\AbstractController;
 use NextDeveloper\Communication\Http\Requests\Conversations\ConversationsCreateRequest;
-use NextDeveloper\Commons\Http\Traits\Tags;use NextDeveloper\Commons\Http\Traits\Addresses;
+use NextDeveloper\Communication\Http\Requests\Conversations\ConversationsUpdateRequest;
+use NextDeveloper\Communication\Services\ConversationsService;
+
 class ConversationsController extends AbstractController
 {
     private $model = Conversations::class;

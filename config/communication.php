@@ -1,8 +1,8 @@
 <?php
 
-use NextDeveloper\Communication\Services\EmailDelivery\UzmanPosta;
-use NextDeveloper\Communication\Services\Delivery\Twillio;
 use NextDeveloper\Communication\Services\CrossPlatformNotification\Mattermost;
+use NextDeveloper\Communication\Services\Delivery\Twillio;
+use NextDeveloper\Communication\Services\EmailDelivery\UzmanPosta;
 
 return [
     'from'  =>  [
@@ -20,8 +20,8 @@ return [
         ]
     ],
     'labeling'  =>  [
-        'logo'      =>  'https://plusclouds.com.tr/assets/frontend/images/logos/plusclouds-logo.png',
-        'unsubscribe'    =>  'You dont want to get these emails ? <a href="https://plusclouds.com.tr/unsubscribe">Unsubscribe</a>'
+        'logo'      =>  'https://plusclouds.com/assets/frontend/images/logos/plusclouds-logo.png',
+        'unsubscribe'    =>  'You dont want to get these emails ? <a href="https://plusclouds.com/unsubscribe">Unsubscribe</a>'
     ],
     'scopes'    =>  [
         'global' => [

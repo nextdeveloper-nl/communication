@@ -3,14 +3,16 @@
 namespace NextDeveloper\Communication\Http\Controllers\BotCodes;
 
 use Illuminate\Http\Request;
-use NextDeveloper\Communication\Http\Controllers\AbstractController;
 use NextDeveloper\Commons\Http\Response\ResponsableFactory;
-use NextDeveloper\Communication\Http\Requests\BotCodes\BotCodesUpdateRequest;
+use NextDeveloper\Commons\Http\Traits\Addresses;
+use NextDeveloper\Commons\Http\Traits\Tags;
 use NextDeveloper\Communication\Database\Filters\BotCodesQueryFilter;
 use NextDeveloper\Communication\Database\Models\BotCodes;
-use NextDeveloper\Communication\Services\BotCodesService;
+use NextDeveloper\Communication\Http\Controllers\AbstractController;
 use NextDeveloper\Communication\Http\Requests\BotCodes\BotCodesCreateRequest;
-use NextDeveloper\Commons\Http\Traits\Tags;use NextDeveloper\Commons\Http\Traits\Addresses;
+use NextDeveloper\Communication\Http\Requests\BotCodes\BotCodesUpdateRequest;
+use NextDeveloper\Communication\Services\BotCodesService;
+
 class BotCodesController extends AbstractController
 {
     private $model = BotCodes::class;

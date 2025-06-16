@@ -2,7 +2,6 @@
 
 use Illuminate\Foundation\Testing\TestCase;
 use NextDeveloper\IAM\Database\Models\Users;
-use Tests\CreatesApplication;
 use Twilio\Exceptions\TwilioException;
 
 class SendSmsTest extends TestCase

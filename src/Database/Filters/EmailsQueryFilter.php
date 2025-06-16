@@ -4,7 +4,7 @@ namespace NextDeveloper\Communication\Database\Filters;
 
 use Illuminate\Database\Eloquent\Builder;
 use NextDeveloper\Commons\Database\Filters\AbstractQueryFilter;
-        
+
 
 /**
  * This class automatically puts where clause on database so that use can filter
@@ -17,20 +17,20 @@ class EmailsQueryFilter extends AbstractQueryFilter
      * @var Builder
      */
     protected $builder;
-    
+
     public function fromEmailAddress($value)
     {
-        return $this->builder->where('from_email_address', 'like', '%' . $value . '%');
+        return $this->builder->where('from_email_address', 'ilike', '%' . $value . '%');
     }
-    
+
     public function subject($value)
     {
-        return $this->builder->where('subject', 'like', '%' . $value . '%');
+        return $this->builder->where('subject', 'ilike', '%' . $value . '%');
     }
-    
+
     public function body($value)
     {
-        return $this->builder->where('body', 'like', '%' . $value . '%');
+        return $this->builder->where('body', 'ilike', '%' . $value . '%');
     }
 
     public function isMarketingEmail($value)

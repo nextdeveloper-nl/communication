@@ -5,14 +5,10 @@ namespace NextDeveloper\Communication\Helpers;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use InvalidArgumentException;
-use NextDeveloper\Commons\Exceptions\NotFoundException;
 use NextDeveloper\Communication\Database\Models\AvailableChannels;
 use NextDeveloper\Communication\Database\Models\Channels;
-use NextDeveloper\Communication\Services\EmailsService;
 use NextDeveloper\IAM\Database\Models\Users;
 use NextDeveloper\IAM\Database\Scopes\AuthorizationScope;
-use PharIo\Manifest\Email;
-use function PHPUnit\Framework\isInstanceOf;
 
 /**
  * This class is used to email the user by using the communications module.
