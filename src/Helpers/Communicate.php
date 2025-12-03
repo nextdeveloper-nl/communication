@@ -7,8 +7,10 @@ use Illuminate\Support\Facades\Mail;
 use InvalidArgumentException;
 use NextDeveloper\Communication\Database\Models\AvailableChannels;
 use NextDeveloper\Communication\Database\Models\Channels;
+use NextDeveloper\Communication\Services\ChannelsService;
 use NextDeveloper\IAM\Database\Models\Users;
 use NextDeveloper\IAM\Database\Scopes\AuthorizationScope;
+use NextDeveloper\IAM\Helpers\UserHelper;
 
 /**
  * This class is used to email the user by using the communications module.
@@ -62,6 +64,19 @@ class Communicate
             ->where('iam_user_id', $this->user->id)
             ->get();
 
+        //  We should create an email message channel here if the user has not set any channel.
+        if($userNotificationChannels->count() == 0) {
+            $user = $this->user;
+
+            UserHelper::runAsAdmin(function() use ($user) {
+                ChannelsService::createMailChannelForUser($user);
+            });
+
+            $userNotificationChannels = Channels::withoutGlobalScope(AuthorizationScope::class)
+                ->where('iam_user_id', $this->user->id)
+                ->get();
+        }
+
         foreach ($userNotificationChannels as $userChannel) {
             $processor = AvailableChannels::withoutGlobalScope(AuthorizationScope::class)
                 ->where('id', $userChannel->communication_available_channel_id)
@@ -75,7 +90,19 @@ class Communicate
                         $p = new \NextDeveloper\Communication\Channels\Mattermost(
                             config: $config
                         );
-                        $p->send($message);
+                        $p->send([
+                            'subject' => $subject,
+                            'message' => $message
+                        ]);
+                        break;
+                    case 'Email':
+                        $p = new \NextDeveloper\Communication\Channels\Email(
+                            user: $this->user,
+                        );
+                        $p->send([
+                            'subject' => $subject,
+                            'message' => $message
+                        ]);
                         break;
                 }
             } catch (InvalidArgumentException $e) {

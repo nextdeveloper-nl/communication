@@ -149,25 +149,6 @@ class CommunicationServiceProvider extends AbstractServiceProvider
         $this->app->booted(function () {
             $schedule = $this->app->make(Schedule::class);
 
-            $schedule->call(function () {})->monthly();
-
-            //	Daily jobs
-            $schedule->call(function () {})->daily();
-
-            //  Güne başlarken taskları
-            $schedule->call(function () {})->weekdays()->dailyAt('09:00');
-
-            $schedule->call(function () {})->weekdays()->dailyAt('12:00');
-
-            //	Hourly Jobs
-            $schedule->call(function () {})->hourly();
-
-            $schedule->call(function () {})->everyFifteenMinutes();
-
-            $schedule->call(function () {
-
-            })->everyMinute();
-
             // Run the emails delivery command every hour
             $schedule->command('nextdeveloper:deliver-emails')
                 ->everyOddHour();

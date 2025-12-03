@@ -89,9 +89,4 @@ class CommunicationSupportRole extends AbstractRole implements IAuthorizationRol
     {
         return self::DB_PREFIX;
     }
-
-    public function checkRules(Users $users): bool
-    {
-        // TODO: Implement checkRules() method.
-    }
 }
