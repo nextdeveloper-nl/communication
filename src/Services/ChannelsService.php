@@ -12,7 +12,9 @@ use NextDeveloper\Communication\Actions\Channels\Send;
 use NextDeveloper\Communication\Database\Models\AvailableChannels;
 use NextDeveloper\Communication\Database\Models\Channels;
 use NextDeveloper\Communication\Services\AbstractServices\AbstractChannelsService;
+use NextDeveloper\IAM\Database\Models\Users;
 use NextDeveloper\IAM\Database\Scopes\AuthorizationScope;
+use NextDeveloper\IAM\Helpers\UserHelper;
 
 /**
  * This class is responsible for managing communication channels and their verification.
@@ -270,5 +272,28 @@ class ChannelsService extends AbstractChannelsService
         ]);
 
         return true;
+    }
+
+    public static function createMailChannelForUser(Users $user): Channels
+    {
+        $communicationAvailableChannel = AvailableChannels::withoutGlobalScope(AuthorizationScope::class)
+            ->where('name', 'Email')
+            ->first();
+
+        $userChannels = Channels::withoutGlobalScope(AuthorizationScope::class)
+            ->where('iam_user_id', $user->id)
+            ->where('communication_available_channel_id', $communicationAvailableChannel->id)
+            ->first();
+
+        if(!$userChannels) {
+            $userChannels = Channels::create([
+                'communication_available_channel_id' => $communicationAvailableChannel->id,
+                'iam_user_id' =>  $user->id,
+                'iam_account_id' => UserHelper::currentAccount($user)->id,
+                'config' => []
+            ]);
+        }
+
+        return $userChannels;
     }
 }

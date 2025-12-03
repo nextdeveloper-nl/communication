@@ -78,7 +78,18 @@ class Mattermost implements ChannelAbstract
      */
     public function send($message): void
     {
+        $subject = '';
+
         try {
+            if(is_array($message)) {
+                $subject = $message['subject'] ?? '';
+                $message = $message['message'] ?? '';
+            }
+
+            if($subject != '') {
+                $message = "**{$subject}**\n\n{$message}";
+            }
+
             $response = Http::timeout(30)
                 ->retry(3, 100)
                 ->post($this->webhookUrl, [
