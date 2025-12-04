@@ -60,6 +60,8 @@ class Send extends AbstractAction
         }
 
         // Send the notification
-        (new $class($this->model->config, $this->message))->send();
+        //  (new $class($this->model->config, $this->message))->send();
+
+        //  Notification is not being sent here. This needs to be fixed. Maybe we should handle the whole package here?
     }
 }
