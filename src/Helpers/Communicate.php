@@ -54,22 +54,84 @@ class Communicate
      * @param $envelope
      * @return void
      */
-    public function sendEnvelope($envelope)
+    public function sendEnvelope($envelope): void
     {
-        self::sendEnvelopeNow($envelope);
+        $this->sendEnvelopeNow($envelope);
     }
 
-    public function sendNotification($subject, $message, $preferredChannel = null) {
+    public function sendEnvelopeNow($envelope): void
+    {
+        Mail::driver('smtp')
+            ->to($this->user->email)
+            ->send($envelope);
+    }
+
+    public function sendNotification($subject, $message, $preferredChannel = null): void
+    {
+
+
+        if ($preferredChannel) {
+            // get channel by name
+            $userPreferredChannel = $this->preferredChannel($preferredChannel);
+
+            if (!$userPreferredChannel) {
+
+                UserHelper::runAsAdmin(function () use ($preferredChannel) {
+                    ChannelsService::createChannelForUser($this->user, $preferredChannel);
+                });
+
+                $userPreferredChannel = $this->preferredChannel($preferredChannel);
+            }
+
+
+            // if still not found, fallback to all channels
+            if ($userPreferredChannel) {
+                // send it only to a preferred channel
+                switch ($preferredChannel) {
+                    case 'Email':
+                        $p = new \NextDeveloper\Communication\Channels\Email(
+                            user: $this->user,
+                        );
+                        $p->send([
+                            'subject' => $subject,
+                            'message' => $message
+                        ]);
+                        return;
+                    case 'Mattermost':
+                        $p = new \NextDeveloper\Communication\Channels\Mattermost(
+                            config: $userPreferredChannel->config
+                        );
+                        $p->send([
+                            'subject' => $subject,
+                            'message' => $message
+                        ]);
+                        return;
+                    case 'Sms':
+                        $p = new \NextDeveloper\Communication\Channels\Sms(
+                            config: $userPreferredChannel->config,
+                            user: $this->user,
+                        );
+                        $p->send([
+                            'message' => $message
+                        ]);
+                        return;
+                    default:
+                        break;
+                }
+            }
+        }
+
+
         $userNotificationChannels = Channels::withoutGlobalScope(AuthorizationScope::class)
             ->where('iam_user_id', $this->user->id)
             ->get();
 
         //  We should create an email message channel here if the user has not set any channel.
-        if($userNotificationChannels->count() == 0) {
+        if ($userNotificationChannels->count() == 0) {
             $user = $this->user;
 
-            UserHelper::runAsAdmin(function() use ($user) {
-                ChannelsService::createMailChannelForUser($user);
+            UserHelper::runAsAdmin(function () use ($user) {
+                ChannelsService::createChannelForUser($user);
             });
 
             $userNotificationChannels = Channels::withoutGlobalScope(AuthorizationScope::class)
@@ -104,6 +166,15 @@ class Communicate
                             'message' => $message
                         ]);
                         break;
+                    case 'Sms':
+                        $p = new \NextDeveloper\Communication\Channels\Sms(
+                            config: $config,
+                            user: $this->user,
+                        );
+                        $p->send([
+                            'message' => $message
+                        ]);
+                        break;
                 }
             } catch (InvalidArgumentException $e) {
                 dd($e);
@@ -114,9 +185,14 @@ class Communicate
         }
     }
 
-    public function sendEnvelopeNow($envelope) {
-        Mail::driver('smtp')
-            ->to($this->user->email)
-            ->send($envelope);
+
+    protected function preferredChannel($preferredChannel): ?Channels
+    {
+        return Channels::withoutGlobalScope(AuthorizationScope::class)
+            ->join('communication_available_channels', 'communication_channels.communication_available_channel_id', '=', 'communication_available_channels.id')
+            ->where('communication_channels.iam_user_id', $this->user->id)
+            ->where('communication_available_channels.name', $preferredChannel)
+            ->first();
     }
+
 }
