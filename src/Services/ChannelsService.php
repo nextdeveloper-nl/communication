@@ -274,19 +274,19 @@ class ChannelsService extends AbstractChannelsService
         return true;
     }
 
-    public static function createMailChannelForUser(Users $user): Channels
+    public static function createChannelForUser(Users $user, string $channelName = 'Email'): Channels
     {
         $communicationAvailableChannel = AvailableChannels::withoutGlobalScope(AuthorizationScope::class)
-            ->where('name', 'Email')
+            ->where('name', $channelName)
             ->first();
 
         $userChannels = Channels::withoutGlobalScope(AuthorizationScope::class)
             ->where('iam_user_id', $user->id)
-            ->where('communication_available_channel_id', $communicationAvailableChannel->id)
+            ->where('communication_available_channel_id', $communicationAvailableChannel?->id)
             ->first();
 
         if(!$userChannels) {
-            $userChannels = Channels::create([
+            $userChannels = Channels::forceCreateQuietly([
                 'communication_available_channel_id' => $communicationAvailableChannel->id,
                 'iam_user_id' =>  $user->id,
                 'iam_account_id' => UserHelper::currentAccount($user)->id,
@@ -296,4 +296,6 @@ class ChannelsService extends AbstractChannelsService
 
         return $userChannels;
     }
+
+
 }
