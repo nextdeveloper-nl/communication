@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 use JsonException;
 use NextDeveloper\Commons\Database\Models\Validatables;
+use NextDeveloper\Commons\Exceptions\CannotCreateModelException;
 use NextDeveloper\Commons\Services\ValidatablesService;
 use NextDeveloper\Communication\Actions\Channels\Send;
 use NextDeveloper\Communication\Database\Models\AvailableChannels;
@@ -276,14 +277,18 @@ class ChannelsService extends AbstractChannelsService
 
     public static function createChannelForUser(Users $user, string $channelName = 'Email'): Channels
     {
+        $userChannels = null;
+
         $communicationAvailableChannel = AvailableChannels::withoutGlobalScope(AuthorizationScope::class)
             ->where('name', $channelName)
             ->first();
 
-        $userChannels = Channels::withoutGlobalScope(AuthorizationScope::class)
-            ->where('iam_user_id', $user->id)
-            ->where('communication_available_channel_id', $communicationAvailableChannel?->id)
-            ->first();
+        if($communicationAvailableChannel){
+            $userChannels = Channels::withoutGlobalScope(AuthorizationScope::class)
+                ->where('iam_user_id', $user->id)
+                ->where('communication_available_channel_id', $communicationAvailableChannel->id)
+                ->first();
+        }
 
         if(!$userChannels) {
             $userChannels = Channels::forceCreateQuietly([
@@ -292,6 +297,8 @@ class ChannelsService extends AbstractChannelsService
                 'iam_account_id' => UserHelper::currentAccount($user)->id,
                 'config' => []
             ]);
+
+            Log::info('[ChannelsService::createChannelForUser] Created channel for the user; ' . $user->id);
         }
 
         return $userChannels;
