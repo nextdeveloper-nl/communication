@@ -65,7 +65,7 @@ class Email implements ChannelAbstract
             (new Communicate($this->user))->sendEnvelopeNow($envelope);
         } catch (Exception $e) {
             Log::error(__METHOD__ . ': Error sending email', [
-                'error' => $e->getMessage(),
+                'error' => $e->getTrace(),
                 'message' => $message
             ]);
             throw  new Exception(__METHOD__ . ': Failed to send message: ' . $e->getMessage());

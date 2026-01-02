@@ -68,14 +68,11 @@ class Communicate
 
     public function sendNotification($subject, $message, $preferredChannel = null): void
     {
-
-
         if ($preferredChannel) {
             // get channel by name
             $userPreferredChannel = $this->preferredChannel($preferredChannel);
 
             if (!$userPreferredChannel) {
-
                 UserHelper::runAsAdmin(function () use ($preferredChannel) {
                     ChannelsService::createChannelForUser($this->user, $preferredChannel);
                 });
@@ -83,12 +80,11 @@ class Communicate
                 $userPreferredChannel = $this->preferredChannel($preferredChannel);
             }
 
-
             // if still not found, fallback to all channels
             if ($userPreferredChannel) {
                 // send it only to a preferred channel
-                switch ($preferredChannel) {
-                    case 'Email':
+                switch (strtolower($preferredChannel)) {
+                    case 'email':
                         $p = new \NextDeveloper\Communication\Channels\Email(
                             user: $this->user,
                         );
@@ -97,7 +93,7 @@ class Communicate
                             'message' => $message
                         ]);
                         return;
-                    case 'Mattermost':
+                    case 'mattermost':
                         $p = new \NextDeveloper\Communication\Channels\Mattermost(
                             config: $userPreferredChannel->config
                         );
@@ -106,7 +102,7 @@ class Communicate
                             'message' => $message
                         ]);
                         return;
-                    case 'Sms':
+                    case 'sms':
                         $p = new \NextDeveloper\Communication\Channels\Sms(
                             config: $userPreferredChannel->config,
                             user: $this->user,
