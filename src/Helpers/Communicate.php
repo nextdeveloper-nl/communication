@@ -17,18 +17,23 @@ use NextDeveloper\IAM\Helpers\UserHelper;
  */
 class Communicate
 {
-    private Users $user;
+    private ?Users $user = null;
+    private ?string $email = null;
 
     /**
      *
      *
-     * @param Users $receiver
+     * @param Users|string $receiver
      */
-    public function __construct(Users $receiver)
+    public function __construct(Users|string $receiver = null)
     {
-        $this->user = $receiver;
+        if ($receiver instanceof Users) {
+            $this->user = $receiver;
+        }
 
-        return $this;
+        if (is_string($receiver)) {
+            $this->email = $receiver;
+        }
     }
 
     /**
@@ -38,6 +43,10 @@ class Communicate
      */
     public function getNotificationPlatforms(): mixed
     {
+        if (!$this->user) {
+            return collect();
+        }
+
         /**
          * Here we will get the notification platforms that the user has set.
          */
@@ -61,18 +70,36 @@ class Communicate
 
     public function sendEnvelopeNow($envelope): void
     {
+        $to = $this->email;
+
+        if ($this->user) {
+            $to = $this->user->email;
+        }
+
         Mail::driver('smtp')
-            ->to($this->user->email)
+            ->to($to)
             ->send($envelope);
     }
 
     public function sendNotification($subject, $message, $preferredChannel = null): void
     {
+        if ($this->email && !$this->user) {
+            $p = new \NextDeveloper\Communication\Channels\Email(
+                user: $this->email,
+            );
+            $p->send([
+                'subject' => $subject,
+                'message' => $message
+            ]);
+            return;
+        }
+
         if ($preferredChannel) {
             // get channel by name
             $userPreferredChannel = $this->preferredChannel($preferredChannel);
 
             if (!$userPreferredChannel) {
+
                 UserHelper::runAsAdmin(function () use ($preferredChannel) {
                     ChannelsService::createChannelForUser($this->user, $preferredChannel);
                 });
@@ -80,11 +107,12 @@ class Communicate
                 $userPreferredChannel = $this->preferredChannel($preferredChannel);
             }
 
+
             // if still not found, fallback to all channels
             if ($userPreferredChannel) {
                 // send it only to a preferred channel
-                switch (strtolower($preferredChannel)) {
-                    case 'email':
+                switch ($preferredChannel) {
+                    case 'Email':
                         $p = new \NextDeveloper\Communication\Channels\Email(
                             user: $this->user,
                         );
@@ -93,7 +121,7 @@ class Communicate
                             'message' => $message
                         ]);
                         return;
-                    case 'mattermost':
+                    case 'Mattermost':
                         $p = new \NextDeveloper\Communication\Channels\Mattermost(
                             config: $userPreferredChannel->config
                         );
@@ -102,7 +130,7 @@ class Communicate
                             'message' => $message
                         ]);
                         return;
-                    case 'sms':
+                    case 'Sms':
                         $p = new \NextDeveloper\Communication\Channels\Sms(
                             config: $userPreferredChannel->config,
                             user: $this->user,
@@ -185,6 +213,7 @@ class Communicate
     protected function preferredChannel($preferredChannel): ?Channels
     {
         return Channels::withoutGlobalScope(AuthorizationScope::class)
+            ->select('communication_channels.*')
             ->join('communication_available_channels', 'communication_channels.communication_available_channel_id', '=', 'communication_available_channels.id')
             ->where('communication_channels.iam_user_id', $this->user->id)
             ->where('communication_available_channels.name', $preferredChannel)

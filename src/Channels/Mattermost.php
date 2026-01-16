@@ -44,6 +44,7 @@ class Mattermost implements ChannelAbstract
      */
     public function __construct(array $config)
     {
+
         if (!$this->validateConfig($config)) {
             throw new InvalidArgumentException('Invalid configuration provided');
         }
