@@ -10,16 +10,22 @@ use NextDeveloper\IAM\Database\Models\Users;
 class NotificationEnvelope extends Mailable
 {
     public $user;
+    public string $email;
 
     /**
      * Create a new message instance.
      *
-     * @param Users $user The user to send the email to
+     * @param Users|string $user The user to send the email to
      * @param array $params Contract parameters
      */
-    public function __construct(Users $user, public $subject, public $body)
+    public function __construct(Users|string $user, public $subject, public $body)
     {
-        $this->user = $user;
+        if ($user instanceof Users) {
+            $this->user = $user;
+            $this->email = $user->email;
+        } else {
+            $this->email = $user;
+        }
     }
 
     /**
@@ -50,7 +56,7 @@ class NotificationEnvelope extends Mailable
             ),
             to: [
                 new Address(
-                    $this->user->email
+                    $this->email
                 )
             ],
             replyTo: [

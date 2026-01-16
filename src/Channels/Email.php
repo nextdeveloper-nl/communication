@@ -30,10 +30,10 @@ class Email implements ChannelAbstract
     /**
      * Creates a new Email channel instance
      *
-     * @param array<string, mixed> $config Configuration array containing access_token, refresh_token, max_emails_per_hour
+     * @param Users|string $user Configuration array containing access_token, refresh_token, max_emails_per_hour
      * @throws Exception
      */
-    public function __construct(public Users $user)
+    public function __construct(public Users|string $user)
     {
 
     }
