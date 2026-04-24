@@ -55,8 +55,8 @@ class AbstractThreadAssignmentsTransformer extends AbstractTransformer
     public function transform(ThreadAssignments $model)
     {
                                                 $communicationThreadId = \NextDeveloper\Communication\Database\Models\Threads::where('id', $model->communication_thread_id)->first();
-                                                            $assignedToUserId = \NextDeveloper\\Database\Models\AssignedToUsers::where('id', $model->assigned_to_user_id)->first();
-                                                            $assignedByUserId = \NextDeveloper\\Database\Models\AssignedByUsers::where('id', $model->assigned_by_user_id)->first();
+                                                            $assignedToUserId = \NextDeveloper\IAM\Database\Models\Users::where('id', $model->assigned_to_user_id)->first();
+                                                            $assignedByUserId = \NextDeveloper\IAM\Database\Models\Users::where('id', $model->assigned_by_user_id)->first();
                         
         return $this->buildPayload(
             [
@@ -153,4 +153,6 @@ class AbstractThreadAssignmentsTransformer extends AbstractTransformer
         return $this->collection($addresses, new AddressesTransformer());
     }
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
+
 }

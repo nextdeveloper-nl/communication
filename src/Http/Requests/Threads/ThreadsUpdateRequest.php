@@ -18,7 +18,7 @@ class ThreadsUpdateRequest extends AbstractFormRequest
         'communication_channel_id' => 'nullable|exists:communication_channels,uuid|uuid',
         'communication_contact_id' => 'nullable|exists:communication_contacts,uuid|uuid',
         'communication_bot_id' => 'nullable|exists:communication_bots,uuid|uuid',
-        'assigned_to_user_id' => 'nullable|exists:assigned_to_users,uuid|uuid',
+        'assigned_to_user_id' => 'nullable|exists:iam_users,uuid|uuid',
         'assigned_at' => 'nullable|date',
         'resolved_at' => 'nullable|date',
         'last_message_at' => 'nullable|date',

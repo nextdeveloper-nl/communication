@@ -274,7 +274,7 @@ class MessagesQueryFilter extends AbstractQueryFilter
     
     public function sentByUserId($value)
     {
-            $sentByUser = \NextDeveloper\\Database\Models\SentByUsers::where('uuid', $value)->first();
+            $sentByUser = \NextDeveloper\IAM\Database\Models\Users::where('uuid', $value)->first();
 
         if($sentByUser) {
             return $this->builder->where('sent_by_user_id', '=', $sentByUser->id);
@@ -289,7 +289,7 @@ class MessagesQueryFilter extends AbstractQueryFilter
     
     public function sentByBotId($value)
     {
-            $sentByBot = \NextDeveloper\\Database\Models\SentByBots::where('uuid', $value)->first();
+            $sentByBot = \NextDeveloper\Communication\Database\Models\Bots::where('uuid', $value)->first();
 
         if($sentByBot) {
             return $this->builder->where('sent_by_bot_id', '=', $sentByBot->id);
@@ -304,11 +304,7 @@ class MessagesQueryFilter extends AbstractQueryFilter
     
     public function replyToId($value)
     {
-            $replyTo = \NextDeveloper\\Database\Models\ReplyTos::where('uuid', $value)->first();
-
-        if($replyTo) {
-            return $this->builder->where('reply_to_id', '=', $replyTo->id);
-        }
+            return $this->builder->where('reply_to_id', '=', $value);
     }
 
         //  This is an alias function of replyTo
@@ -319,11 +315,7 @@ class MessagesQueryFilter extends AbstractQueryFilter
     
     public function externalMessageId($value)
     {
-            $externalMessage = \NextDeveloper\\Database\Models\ExternalMessages::where('uuid', $value)->first();
-
-        if($externalMessage) {
-            return $this->builder->where('external_message_id', '=', $externalMessage->id);
-        }
+            return $this->builder->where('external_message_id', '=', $value);
     }
 
         //  This is an alias function of externalMessage
@@ -343,4 +335,6 @@ class MessagesQueryFilter extends AbstractQueryFilter
 
     
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
+
 }

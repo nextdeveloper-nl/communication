@@ -334,6 +334,36 @@ Route::prefix('communication')->group(
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         Route::prefix('channels')->group(
             function () {
                 Route::post('/{communication_channels}/code/send', 'Channels\ChannelsController@sendCode');
@@ -343,4 +373,6 @@ Route::prefix('communication')->group(
 
     }
 );
+
+
 

@@ -57,7 +57,7 @@ class AbstractThreadsTransformer extends AbstractTransformer
                                                 $communicationChannelId = \NextDeveloper\Communication\Database\Models\Channels::where('id', $model->communication_channel_id)->first();
                                                             $communicationContactId = \NextDeveloper\Communication\Database\Models\Contacts::where('id', $model->communication_contact_id)->first();
                                                             $communicationBotId = \NextDeveloper\Communication\Database\Models\Bots::where('id', $model->communication_bot_id)->first();
-                                                            $assignedToUserId = \NextDeveloper\\Database\Models\AssignedToUsers::where('id', $model->assigned_to_user_id)->first();
+                                                            $assignedToUserId = \NextDeveloper\IAM\Database\Models\Users::where('id', $model->assigned_to_user_id)->first();
                                                             $iamAccountId = \NextDeveloper\IAM\Database\Models\Accounts::where('id', $model->iam_account_id)->first();
                         
         return $this->buildPayload(
@@ -164,4 +164,6 @@ class AbstractThreadsTransformer extends AbstractTransformer
         return $this->collection($addresses, new AddressesTransformer());
     }
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
+
 }

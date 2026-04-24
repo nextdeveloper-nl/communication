@@ -56,8 +56,8 @@ class AbstractMessagesTransformer extends AbstractTransformer
     {
                                                 $communicationThreadId = \NextDeveloper\Communication\Database\Models\Threads::where('id', $model->communication_thread_id)->first();
                                                             $crmCampaignId = \NextDeveloper\CRM\Database\Models\Campaigns::where('id', $model->crm_campaign_id)->first();
-                                                            $sentByUserId = \NextDeveloper\\Database\Models\SentByUsers::where('id', $model->sent_by_user_id)->first();
-                                                            $sentByBotId = \NextDeveloper\\Database\Models\SentByBots::where('id', $model->sent_by_bot_id)->first();
+                                                            $sentByUserId = \NextDeveloper\IAM\Database\Models\Users::where('id', $model->sent_by_user_id)->first();
+                                                            $sentByBotId = \NextDeveloper\Communication\Database\Models\Bots::where('id', $model->sent_by_bot_id)->first();
                                                             $replyToId = \NextDeveloper\\Database\Models\ReplyTos::where('id', $model->reply_to_id)->first();
                                                             $externalMessageId = \NextDeveloper\\Database\Models\ExternalMessages::where('id', $model->external_message_id)->first();
                                                             $iamAccountId = \NextDeveloper\IAM\Database\Models\Accounts::where('id', $model->iam_account_id)->first();
@@ -175,4 +175,6 @@ class AbstractMessagesTransformer extends AbstractTransformer
         return $this->collection($addresses, new AddressesTransformer());
     }
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
+
 }
