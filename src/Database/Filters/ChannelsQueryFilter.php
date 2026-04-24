@@ -4,7 +4,7 @@ namespace NextDeveloper\Communication\Database\Filters;
 
 use Illuminate\Database\Eloquent\Builder;
 use NextDeveloper\Commons\Database\Filters\AbstractQueryFilter;
-
+    
 
 /**
  * This class automatically puts where clause on database so that use can filter
@@ -17,25 +17,44 @@ class ChannelsQueryFilter extends AbstractQueryFilter
      * @var Builder
      */
     protected $builder;
-
-    public function isActive($value)
+    
+    public function name($value)
     {
-        if(!is_bool($value)) {
-            $value = false;
+        return $this->builder->where('name', 'ilike', '%' . $value . '%');
+    }
+
+        
+    public function type($value)
+    {
+        return $this->builder->where('type', 'ilike', '%' . $value . '%');
+    }
+
+    
+    public function priority($value)
+    {
+        $operator = substr($value, 0, 1);
+
+        if ($operator != '<' || $operator != '>') {
+            $operator = '=';
+        } else {
+            $value = substr($value, 1);
         }
 
+        return $this->builder->where('priority', $operator, $value);
+    }
+
+    
+    public function isActive($value)
+    {
         return $this->builder->where('is_active', $value);
     }
 
-    public function isVerified($value)
+        //  This is an alias function of isActive
+    public function is_active($value)
     {
-        if(!is_bool($value)) {
-            $value = false;
-        }
-
-        return $this->builder->where('is_verified', $value);
+        return $this->isActive($value);
     }
-
+     
     public function createdAtStart($date)
     {
         return $this->builder->where('created_at', '>=', $date);
@@ -44,6 +63,18 @@ class ChannelsQueryFilter extends AbstractQueryFilter
     public function createdAtEnd($date)
     {
         return $this->builder->where('created_at', '<=', $date);
+    }
+
+    //  This is an alias function of createdAt
+    public function created_at_start($value)
+    {
+        return $this->createdAtStart($value);
+    }
+
+    //  This is an alias function of createdAt
+    public function created_at_end($value)
+    {
+        return $this->createdAtEnd($value);
     }
 
     public function updatedAtStart($date)
@@ -56,6 +87,18 @@ class ChannelsQueryFilter extends AbstractQueryFilter
         return $this->builder->where('updated_at', '<=', $date);
     }
 
+    //  This is an alias function of updatedAt
+    public function updated_at_start($value)
+    {
+        return $this->updatedAtStart($value);
+    }
+
+    //  This is an alias function of updatedAt
+    public function updated_at_end($value)
+    {
+        return $this->updatedAtEnd($value);
+    }
+
     public function deletedAtStart($date)
     {
         return $this->builder->where('deleted_at', '>=', $date);
@@ -66,22 +109,16 @@ class ChannelsQueryFilter extends AbstractQueryFilter
         return $this->builder->where('deleted_at', '<=', $date);
     }
 
-    public function communicationAvailableChannelId($value)
+    //  This is an alias function of deletedAt
+    public function deleted_at_start($value)
     {
-            $communicationAvailableChannel = \NextDeveloper\Communication\Database\Models\AvailableChannels::where('uuid', $value)->first();
-
-        if($communicationAvailableChannel) {
-            return $this->builder->where('communication_available_channel_id', '=', $communicationAvailableChannel->id);
-        }
+        return $this->deletedAtStart($value);
     }
 
-    public function iamUserId($value)
+    //  This is an alias function of deletedAt
+    public function deleted_at_end($value)
     {
-            $iamUser = \NextDeveloper\IAM\Database\Models\Users::where('uuid', $value)->first();
-
-        if($iamUser) {
-            return $this->builder->where('iam_user_id', '=', $iamUser->id);
-        }
+        return $this->deletedAtEnd($value);
     }
 
     public function iamAccountId($value)
@@ -93,7 +130,6 @@ class ChannelsQueryFilter extends AbstractQueryFilter
         }
     }
 
+    
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
-
-
 }

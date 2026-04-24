@@ -8,7 +8,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use NextDeveloper\Communication\Database\Models\Channels;
-use NextDeveloper\Communication\Services\ChannelsService;
+use NextDeveloper\Communication\Services\BackupChannelsService;
 
 class NewChannelsCreated implements ShouldQueue
 {
@@ -35,7 +35,7 @@ class NewChannelsCreated implements ShouldQueue
     public function handle(): void
     {
         // Send verification code to the user
-        ChannelsService::sendCode($this->_model->uuid);
+        BackupChannelsService::sendCode($this->_model->uuid);
     }
-    
+
 }

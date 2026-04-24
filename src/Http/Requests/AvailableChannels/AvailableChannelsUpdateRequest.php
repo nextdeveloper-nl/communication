@@ -15,8 +15,8 @@ class AvailableChannelsUpdateRequest extends AbstractFormRequest
         return [
             'name' => 'nullable|string',
         'class' => 'nullable|string',
-        'config' => 'nullable',
         'parameters' => 'nullable',
+        'config' => 'nullable',
         ];
     }
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE

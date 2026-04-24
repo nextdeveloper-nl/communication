@@ -3,22 +3,20 @@
 namespace NextDeveloper\Communication\Http\Controllers\Bots;
 
 use Illuminate\Http\Request;
+use NextDeveloper\Communication\Http\Controllers\AbstractController;
 use NextDeveloper\Commons\Http\Response\ResponsableFactory;
-use NextDeveloper\Commons\Http\Traits\Addresses;
-use NextDeveloper\Commons\Http\Traits\Tags;
+use NextDeveloper\Communication\Http\Requests\Bots\BotsUpdateRequest;
 use NextDeveloper\Communication\Database\Filters\BotsQueryFilter;
 use NextDeveloper\Communication\Database\Models\Bots;
-use NextDeveloper\Communication\Http\Controllers\AbstractController;
-use NextDeveloper\Communication\Http\Requests\Bots\BotsCreateRequest;
-use NextDeveloper\Communication\Http\Requests\Bots\BotsUpdateRequest;
 use NextDeveloper\Communication\Services\BotsService;
-
+use NextDeveloper\Communication\Http\Requests\Bots\BotsCreateRequest;
+use NextDeveloper\Commons\Http\Traits\Tags as TagsTrait;use NextDeveloper\Commons\Http\Traits\Addresses as AddressesTrait;
 class BotsController extends AbstractController
 {
     private $model = Bots::class;
 
-    use Tags;
-    use Addresses;
+    use TagsTrait;
+    use AddressesTrait;
     /**
      * This method returns the list of bots.
      *

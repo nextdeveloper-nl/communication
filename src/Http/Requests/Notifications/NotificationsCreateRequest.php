@@ -13,9 +13,7 @@ class NotificationsCreateRequest extends AbstractFormRequest
     public function rules()
     {
         return [
-            'is_info' => 'boolean',
-        'is_warning' => 'boolean',
-        'is_error' => 'boolean',
+            'severity' => 'string',
         'object_id' => 'required',
         'object_type' => 'required|string',
         'data' => 'required|string',

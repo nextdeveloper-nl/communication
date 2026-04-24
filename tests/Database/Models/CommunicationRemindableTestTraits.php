@@ -9,6 +9,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use League\Fractal\Resource\Collection;
 use NextDeveloper\Communication\Database\Filters\CommunicationRemindableQueryFilter;
 use NextDeveloper\Communication\Services\AbstractServices\AbstractCommunicationRemindableService;
+use Tests\TestCase;
 
 trait CommunicationRemindableTestTraits
 {
@@ -671,4 +672,5 @@ trait CommunicationRemindableTestTraits
         $this->assertTrue(true);
     }
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
 }

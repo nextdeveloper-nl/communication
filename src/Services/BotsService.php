@@ -2,6 +2,7 @@
 
 namespace NextDeveloper\Communication\Services;
 
+use NextDeveloper\Communication\Database\Models\Bots;
 use NextDeveloper\Communication\Services\AbstractServices\AbstractBotsService;
 
 /**
@@ -15,4 +16,14 @@ class BotsService extends AbstractBotsService
 {
 
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
+    public static function activate(string $ref): Bots
+    {
+        return self::update($ref, ['is_active' => true]);
+    }
+
+    public static function deactivate(string $ref): Bots
+    {
+        return self::update($ref, ['is_active' => false]);
+    }
 }

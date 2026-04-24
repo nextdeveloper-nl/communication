@@ -9,6 +9,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use League\Fractal\Resource\Collection;
 use NextDeveloper\Communication\Database\Filters\CommunicationChannelQueryFilter;
 use NextDeveloper\Communication\Services\AbstractServices\AbstractCommunicationChannelService;
+use Tests\TestCase;
 
 trait CommunicationChannelTestTraits
 {
@@ -57,6 +58,9 @@ trait CommunicationChannelTestTraits
         $response = $this->http->request(
             'POST', '/communication/communicationchannel', [
             'form_params'   =>  [
+                'name'  =>  'a',
+                'type'  =>  'a',
+                'priority'  =>  '1',
                             ],
                 ['http_errors' => false]
             ]
@@ -339,6 +343,63 @@ trait CommunicationChannelTestTraits
         $this->assertTrue(true);
     }
 
+    public function test_communicationchannel_event_name_filter()
+    {
+        try {
+            $request = new Request(
+                [
+                'name'  =>  'a'
+                ]
+            );
+
+            $filter = new CommunicationChannelQueryFilter($request);
+
+            $model = \NextDeveloper\Communication\Database\Models\CommunicationChannel::filter($filter)->first();
+        } catch (\Exception $e) {
+            $this->assertFalse(false, $e->getMessage());
+        }
+
+        $this->assertTrue(true);
+    }
+
+    public function test_communicationchannel_event_type_filter()
+    {
+        try {
+            $request = new Request(
+                [
+                'type'  =>  'a'
+                ]
+            );
+
+            $filter = new CommunicationChannelQueryFilter($request);
+
+            $model = \NextDeveloper\Communication\Database\Models\CommunicationChannel::filter($filter)->first();
+        } catch (\Exception $e) {
+            $this->assertFalse(false, $e->getMessage());
+        }
+
+        $this->assertTrue(true);
+    }
+
+    public function test_communicationchannel_event_priority_filter()
+    {
+        try {
+            $request = new Request(
+                [
+                'priority'  =>  '1'
+                ]
+            );
+
+            $filter = new CommunicationChannelQueryFilter($request);
+
+            $model = \NextDeveloper\Communication\Database\Models\CommunicationChannel::filter($filter)->first();
+        } catch (\Exception $e) {
+            $this->assertFalse(false, $e->getMessage());
+        }
+
+        $this->assertTrue(true);
+    }
+
     public function test_communicationchannel_event_created_at_filter_start()
     {
         try {
@@ -513,4 +574,5 @@ trait CommunicationChannelTestTraits
         $this->assertTrue(true);
     }
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
 }

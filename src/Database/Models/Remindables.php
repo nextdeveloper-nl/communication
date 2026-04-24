@@ -2,13 +2,17 @@
 
 namespace NextDeveloper\Communication\Database\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use NextDeveloper\Commons\Common\Cache\Traits\CleanCache;
+use NextDeveloper\Commons\Database\Traits\HasStates;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Model;
 use NextDeveloper\Commons\Database\Traits\Filterable;
-use NextDeveloper\Commons\Database\Traits\Taggable;
-use NextDeveloper\Commons\Database\Traits\UuidId;
 use NextDeveloper\Communication\Database\Observers\RemindablesObserver;
+use NextDeveloper\Commons\Database\Traits\UuidId;
+use NextDeveloper\Commons\Database\Traits\HasObject;
+use NextDeveloper\Commons\Common\Cache\Traits\CleanCache;
+use NextDeveloper\Commons\Database\Traits\Taggable;
+use NextDeveloper\Commons\Database\Traits\RunAsAdministrator;
 
 /**
  * Remindables model.
@@ -20,26 +24,22 @@ use NextDeveloper\Communication\Database\Observers\RemindablesObserver;
  * @property string $object_type
  * @property \Carbon\Carbon $remind_datetime
  * @property \Carbon\Carbon $snooze_datetime
- * @property integer $iam_user_id
  * @property string $note
  * @property boolean $is_reminded
  * @property boolean $is_acknowledged
  * @property boolean $is_cancelled
+ * @property integer $iam_user_id
+ * @property integer $iam_account_id
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  * @property \Carbon\Carbon $deleted_at
  */
 class Remindables extends Model
 {
-    use Filterable, CleanCache, Taggable;
-    use UuidId;
+    use Filterable, UuidId, CleanCache, Taggable, HasStates, RunAsAdministrator, HasObject;
     use SoftDeletes;
 
-
     public $timestamps = true;
-
-
-
 
     protected $table = 'communication_remindables';
 
@@ -54,11 +54,12 @@ class Remindables extends Model
             'object_type',
             'remind_datetime',
             'snooze_datetime',
-            'iam_user_id',
             'note',
             'is_reminded',
             'is_acknowledged',
             'is_cancelled',
+            'iam_user_id',
+            'iam_account_id',
     ];
 
     /**
@@ -155,7 +156,15 @@ class Remindables extends Model
         }
     }
 
+    public function users() : \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(\NextDeveloper\IAM\Database\Models\Users::class);
+    }
+    
+    public function accounts() : \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(\NextDeveloper\IAM\Database\Models\Accounts::class);
+    }
+    
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
-
-
 }

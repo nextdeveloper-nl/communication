@@ -9,6 +9,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use League\Fractal\Resource\Collection;
 use NextDeveloper\Communication\Database\Filters\CommunicationUserPreferenceQueryFilter;
 use NextDeveloper\Communication\Services\AbstractServices\AbstractCommunicationUserPreferenceService;
+use Tests\TestCase;
 
 trait CommunicationUserPreferenceTestTraits
 {
@@ -513,4 +514,5 @@ trait CommunicationUserPreferenceTestTraits
         $this->assertTrue(true);
     }
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
 }

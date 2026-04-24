@@ -2,193 +2,127 @@
 
 namespace NextDeveloper\Communication\Helpers;
 
+use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-use InvalidArgumentException;
-use NextDeveloper\Communication\Database\Models\AvailableChannels;
 use NextDeveloper\Communication\Database\Models\Channels;
-use NextDeveloper\Communication\Services\ChannelsService;
+use NextDeveloper\Communication\Services\MessagesService;
+use NextDeveloper\Communication\Services\NotificationsService;
+use NextDeveloper\Communication\Services\UserPreferencesService;
 use NextDeveloper\IAM\Database\Models\Users;
-use NextDeveloper\IAM\Database\Scopes\AuthorizationScope;
-use NextDeveloper\IAM\Helpers\UserHelper;
 
 /**
- * This class is used to email the user by using the communications module.
+ * Convenience wrapper for communicating with an IAM user via the V2 communication module.
+ *
+ * In V2, channels are account-level transports — not user-specific.
+ * In-app notifications go to communication_notifications.
+ * Email delivery routes through the account's highest-priority active email channel.
  */
 class Communicate
 {
     private Users $user;
 
-    /**
-     *
-     *
-     * @param Users $receiver
-     */
     public function __construct(Users $receiver)
     {
         $this->user = $receiver;
-
-        return $this;
     }
 
     /**
-     * This function is used to get the notification platforms that the user has set.
-     *
-     * @return mixed
-     */
-    public function getNotificationPlatforms(): mixed
-    {
-        /**
-         * Here we will get the notification platforms that the user has set.
-         */
-        return Channels::withoutGlobalScopes()
-            ->where('iam_user_id', $this->user->id)
-            ->whereIsActive(true)
-            ->whereIsVerified(true)
-            ->get();
-    }
-
-    /**
-     * This function is an alias of Emails service to make it easy to use, since we cannot use traits.
-     *
-     * @param $envelope
-     * @return void
+     * Sends a Laravel mailable directly to the user's email address.
      */
     public function sendEnvelope($envelope): void
     {
-        $this->sendEnvelopeNow($envelope);
+        Mail::to($this->user->email)->send($envelope);
     }
 
-    public function sendEnvelopeNow($envelope): void
+    /**
+     * Creates an in-app notification for the user, respecting their opt-out preferences.
+     * Use severity: 'info' | 'warning' | 'error'
+     */
+    public function sendNotification(string $severity, string $message, mixed $object = null): void
     {
-        Mail::driver('smtp')
-            ->to($this->user->email)
-            ->send($envelope);
-    }
+        $preferences = UserPreferencesService::getForUser($this->user->id);
 
-    public function sendNotification($subject, $message, $preferredChannel = null): void
-    {
-        if ($preferredChannel) {
-            // get channel by name
-            $userPreferredChannel = $this->preferredChannel($preferredChannel);
-
-            if (!$userPreferredChannel) {
-                UserHelper::runAsAdmin(function () use ($preferredChannel) {
-                    ChannelsService::createChannelForUser($this->user, $preferredChannel);
-                });
-
-                $userPreferredChannel = $this->preferredChannel($preferredChannel);
-            }
-
-            // if still not found, fallback to all channels
-            if ($userPreferredChannel) {
-                // send it only to a preferred channel
-                switch (strtolower($preferredChannel)) {
-                    case 'email':
-                        $p = new \NextDeveloper\Communication\Channels\Email(
-                            user: $this->user,
-                        );
-                        $p->send([
-                            'subject' => $subject,
-                            'message' => $message
-                        ]);
-                        return;
-                    case 'mattermost':
-                        $p = new \NextDeveloper\Communication\Channels\Mattermost(
-                            config: $userPreferredChannel->config
-                        );
-                        $p->send([
-                            'subject' => $subject,
-                            'message' => $message
-                        ]);
-                        return;
-                    case 'sms':
-                        $p = new \NextDeveloper\Communication\Channels\Sms(
-                            config: $userPreferredChannel->config,
-                            user: $this->user,
-                        );
-                        $p->send([
-                            'message' => $message
-                        ]);
-                        return;
-                    default:
-                        break;
-                }
-            }
+        if ($preferences->is_system_email_optout && $severity === 'info') {
+            return;
         }
 
+        $data = ['message' => $message];
 
-        $userNotificationChannels = Channels::withoutGlobalScope(AuthorizationScope::class)
-            ->where('iam_user_id', $this->user->id)
+        NotificationsService::create([
+            'severity'       => $severity,
+            'data'           => json_encode($data),
+            'object_id'      => $object?->id,
+            'object_type'    => $object ? get_class($object) : null,
+            'iam_user_id'    => $this->user->id,
+            'iam_account_id' => $this->user->iam_account_id,
+        ]);
+    }
+
+    /**
+     * Sends an email via the account's highest-priority active email channel.
+     * Falls back to direct SMTP if no channel is configured.
+     */
+    public function sendEmail(string $subject, string $body): void
+    {
+        $channel = ChannelHelper::getPrimaryForAccount($this->user->iam_account_id, 'email');
+
+        if (!$channel) {
+            Log::warning('[Communicate::sendEmail] No active email channel found for account, falling back to direct SMTP', [
+                'user_id'    => $this->user->id,
+                'account_id' => $this->user->iam_account_id,
+            ]);
+
+            $this->sendDirectEmail($subject, $body);
+            return;
+        }
+
+        $this->dispatchViaChannel($channel, $subject, $body);
+    }
+
+    /**
+     * Returns all active email channels for the user's account, ordered by priority.
+     */
+    public function getActiveChannels(string $type = 'email'): \Illuminate\Database\Eloquent\Collection
+    {
+        return Channels::where('iam_account_id', $this->user->iam_account_id)
+            ->where('type', $type)
+            ->where('is_active', true)
+            ->orderBy('priority')
             ->get();
-
-        //  We should create an email message channel here if the user has not set any channel.
-        if ($userNotificationChannels->count() == 0) {
-            $user = $this->user;
-
-            UserHelper::runAsAdmin(function () use ($user) {
-                ChannelsService::createChannelForUser($user);
-            });
-
-            $userNotificationChannels = Channels::withoutGlobalScope(AuthorizationScope::class)
-                ->where('iam_user_id', $this->user->id)
-                ->get();
-        }
-
-        foreach ($userNotificationChannels as $userChannel) {
-            $processor = AvailableChannels::withoutGlobalScope(AuthorizationScope::class)
-                ->where('id', $userChannel->communication_available_channel_id)
-                ->first();
-
-            try {
-                $config = $userChannel->config;
-
-                switch ($processor->name) {
-                    case 'Mattermost':
-                        $p = new \NextDeveloper\Communication\Channels\Mattermost(
-                            config: $config
-                        );
-                        $p->send([
-                            'subject' => $subject,
-                            'message' => $message
-                        ]);
-                        break;
-                    case 'Email':
-                        $p = new \NextDeveloper\Communication\Channels\Email(
-                            user: $this->user,
-                        );
-                        $p->send([
-                            'subject' => $subject,
-                            'message' => $message
-                        ]);
-                        break;
-                    case 'Sms':
-                        $p = new \NextDeveloper\Communication\Channels\Sms(
-                            config: $config,
-                            user: $this->user,
-                        );
-                        $p->send([
-                            'message' => $message
-                        ]);
-                        break;
-                }
-            } catch (InvalidArgumentException $e) {
-                dd($e);
-            } catch (\Exception $e) {
-                Log::error(__METHOD__ . ' | The processor (' . $processor->name . ') is not found ' .
-                    'in the packages. Please fix this error. This is important!!!');
-            }
-        }
     }
 
-
-    protected function preferredChannel($preferredChannel): ?Channels
+    private function sendDirectEmail(string $subject, string $body): void
     {
-        return Channels::withoutGlobalScope(AuthorizationScope::class)
-            ->join('communication_available_channels', 'communication_channels.communication_available_channel_id', '=', 'communication_available_channels.id')
-            ->where('communication_channels.iam_user_id', $this->user->id)
-            ->where('communication_available_channels.name', $preferredChannel)
-            ->first();
+        Mail::to($this->user->email)->send(
+            new \Illuminate\Mail\GenericMailable($subject, $body)
+        );
     }
 
+    private function dispatchViaChannel(Channels $channel, string $subject, string $body): void
+    {
+        $available = ChannelHelper::getAvailableChannelByType($channel->type);
+
+        if (!$available) {
+            Log::error('[Communicate::dispatchViaChannel] No AvailableChannels entry for type: ' . $channel->type);
+            return;
+        }
+
+        $class = ChannelHelper::getChannelClass($available);
+
+        if (!$class) {
+            return;
+        }
+
+        try {
+            $processor = new $class(channel: $channel);
+            $processor->send(['subject' => $subject, 'message' => $body, 'to' => $this->user->email]);
+        } catch (Exception $e) {
+            Log::error('[Communicate::dispatchViaChannel] Delivery failed via ' . $class, [
+                'error'      => $e->getMessage(),
+                'channel_id' => $channel->id,
+                'user_id'    => $this->user->id,
+            ]);
+        }
+    }
 }

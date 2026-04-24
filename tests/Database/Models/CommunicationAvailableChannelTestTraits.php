@@ -9,6 +9,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use League\Fractal\Resource\Collection;
 use NextDeveloper\Communication\Database\Filters\CommunicationAvailableChannelQueryFilter;
 use NextDeveloper\Communication\Services\AbstractServices\AbstractCommunicationAvailableChannelService;
+use Tests\TestCase;
 
 trait CommunicationAvailableChannelTestTraits
 {
@@ -553,4 +554,5 @@ trait CommunicationAvailableChannelTestTraits
         $this->assertTrue(true);
     }
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
 }

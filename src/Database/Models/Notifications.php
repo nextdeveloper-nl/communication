@@ -2,13 +2,17 @@
 
 namespace NextDeveloper\Communication\Database\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use NextDeveloper\Commons\Common\Cache\Traits\CleanCache;
+use NextDeveloper\Commons\Database\Traits\HasStates;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Model;
 use NextDeveloper\Commons\Database\Traits\Filterable;
-use NextDeveloper\Commons\Database\Traits\Taggable;
-use NextDeveloper\Commons\Database\Traits\UuidId;
 use NextDeveloper\Communication\Database\Observers\NotificationsObserver;
+use NextDeveloper\Commons\Database\Traits\UuidId;
+use NextDeveloper\Commons\Database\Traits\HasObject;
+use NextDeveloper\Commons\Common\Cache\Traits\CleanCache;
+use NextDeveloper\Commons\Database\Traits\Taggable;
+use NextDeveloper\Commons\Database\Traits\RunAsAdministrator;
 
 /**
  * Notifications model.
@@ -16,9 +20,7 @@ use NextDeveloper\Communication\Database\Observers\NotificationsObserver;
  * @package  NextDeveloper\Communication\Database\Models
  * @property integer $id
  * @property string $uuid
- * @property boolean $is_info
- * @property boolean $is_warning
- * @property boolean $is_error
+ * @property string $severity
  * @property integer $object_id
  * @property string $object_type
  * @property string $data
@@ -31,15 +33,10 @@ use NextDeveloper\Communication\Database\Observers\NotificationsObserver;
  */
 class Notifications extends Model
 {
-    use Filterable, CleanCache, Taggable;
-    use UuidId;
+    use Filterable, UuidId, CleanCache, Taggable, HasStates, RunAsAdministrator, HasObject;
     use SoftDeletes;
 
-
     public $timestamps = true;
-
-
-
 
     protected $table = 'communication_notifications';
 
@@ -50,9 +47,7 @@ class Notifications extends Model
     protected $guarded = [];
 
     protected $fillable = [
-            'is_info',
-            'is_warning',
-            'is_error',
+            'severity',
             'object_id',
             'object_type',
             'data',
@@ -82,9 +77,7 @@ class Notifications extends Model
      */
     protected $casts = [
     'id' => 'integer',
-    'is_info' => 'boolean',
-    'is_warning' => 'boolean',
-    'is_error' => 'boolean',
+    'severity' => 'string',
     'object_id' => 'integer',
     'object_type' => 'string',
     'data' => 'string',
@@ -153,7 +146,15 @@ class Notifications extends Model
         }
     }
 
+    public function users() : \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(\NextDeveloper\IAM\Database\Models\Users::class);
+    }
+    
+    public function accounts() : \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(\NextDeveloper\IAM\Database\Models\Accounts::class);
+    }
+    
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
-
-
 }

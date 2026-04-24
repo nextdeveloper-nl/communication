@@ -15,8 +15,8 @@ class AvailableChannelsCreateRequest extends AbstractFormRequest
         return [
             'name' => 'required|string',
         'class' => 'required|string',
-        'config' => 'required',
         'parameters' => 'nullable',
+        'config' => 'required',
         ];
     }
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
