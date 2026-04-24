@@ -94,9 +94,9 @@ class Communicate
 
     private function sendDirectEmail(string $subject, string $body): void
     {
-        Mail::to($this->user->email)->send(
-            new \Illuminate\Mail\GenericMailable($subject, $body)
-        );
+        Mail::html($body, function ($message) use ($subject) {
+            $message->to($this->user->email)->subject($subject);
+        });
     }
 
     private function dispatchViaChannel(Channels $channel, string $subject, string $body): void
