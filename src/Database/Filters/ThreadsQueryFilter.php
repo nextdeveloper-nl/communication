@@ -209,7 +209,7 @@ class ThreadsQueryFilter extends AbstractQueryFilter
     
     public function assignedToUserId($value)
     {
-            $assignedToUser = \NextDeveloper\\Database\Models\AssignedToUsers::where('uuid', $value)->first();
+            $assignedToUser = \NextDeveloper\IAM\Database\Models\Users::where('uuid', $value)->first();
 
         if($assignedToUser) {
             return $this->builder->where('assigned_to_user_id', '=', $assignedToUser->id);
@@ -233,4 +233,6 @@ class ThreadsQueryFilter extends AbstractQueryFilter
 
     
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
+
 }

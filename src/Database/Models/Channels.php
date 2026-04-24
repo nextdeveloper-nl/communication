@@ -80,7 +80,7 @@ class Channels extends Model
     'name' => 'string',
     'type' => 'string',
     'configuration' => 'array',
-    'credentials' => 'encrypted',
+    'credentials' => 'array',
     'is_active' => 'boolean',
     'priority' => 'integer',
     'created_at' => 'datetime',
@@ -162,4 +162,6 @@ class Channels extends Model
     }
 
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
+
 }

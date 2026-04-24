@@ -101,7 +101,7 @@ class SmtpServers extends Model
     'port' => 'integer',
     'encryption' => 'string',
     'username' => 'string',
-    'password' => 'encrypted',
+    'password' => 'string',
     'from_email' => 'string',
     'from_name' => 'string',
     'reply_to' => 'string',
@@ -186,4 +186,6 @@ class SmtpServers extends Model
     }
     
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
+
 }
