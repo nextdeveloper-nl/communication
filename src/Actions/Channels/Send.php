@@ -7,7 +7,7 @@ use NextDeveloper\Commons\Actions\AbstractAction;
 use NextDeveloper\Commons\Exceptions\NotAllowedException;
 use NextDeveloper\Communication\Database\Models\AvailableChannels;
 use NextDeveloper\Communication\Database\Models\Channels;
-use NextDeveloper\Communication\Services\ChannelsService;
+use NextDeveloper\Communication\Services\BackupChannelsService;
 
 class Send extends AbstractAction
 {
@@ -52,7 +52,7 @@ class Send extends AbstractAction
         }
 
         // validate channel fields and platform fields
-        if (!ChannelsService::validateChannelFields($this->model, $availableChannel)) {
+        if (!BackupChannelsService::validateChannelFields($this->model, $availableChannel)) {
             Log::error(
                 '[\NextDeveloper\Communication\Actions\Channels\Send::handle] Channel fields do not match platform fields: '
             );

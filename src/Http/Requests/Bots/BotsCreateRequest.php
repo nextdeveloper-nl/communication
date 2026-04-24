@@ -13,10 +13,9 @@ class BotsCreateRequest extends AbstractFormRequest
     public function rules()
     {
         return [
-            'name' => 'nullable|string',
+            'name' => 'required|string',
         'description' => 'nullable|string',
-        'token' => 'nullable|string',
-        'class' => 'nullable|string',
+        'is_active' => 'boolean',
         ];
     }
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE

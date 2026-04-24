@@ -2,18 +2,19 @@
 
 namespace NextDeveloper\Communication\Services\AbstractServices;
 
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Str;
-use NextDeveloper\Commons\Database\Models\AvailableActions;
-use NextDeveloper\Commons\Exceptions\ModelNotFoundException;
-use NextDeveloper\Commons\Exceptions\NotAllowedException;
-use NextDeveloper\Commons\Helpers\DatabaseHelper;
-use NextDeveloper\Communication\Database\Filters\AvailableChannelsQueryFilter;
-use NextDeveloper\Communication\Database\Models\AvailableChannels;
-use NextDeveloper\Events\Services\Events;
 use NextDeveloper\IAM\Helpers\UserHelper;
+use NextDeveloper\Commons\Common\Cache\CacheHelper;
+use NextDeveloper\Commons\Helpers\DatabaseHelper;
+use NextDeveloper\Commons\Database\Models\AvailableActions;
+use NextDeveloper\Communication\Database\Models\AvailableChannels;
+use NextDeveloper\Communication\Database\Filters\AvailableChannelsQueryFilter;
+use NextDeveloper\Commons\Exceptions\ModelNotFoundException;
+use NextDeveloper\Events\Services\Events;
+use NextDeveloper\Commons\Exceptions\NotAllowedException;
 
 /**
  * This class is responsible from managing the data for AvailableChannels
@@ -113,14 +114,24 @@ class AbstractAvailableChannelsService
     {
         $object = AvailableChannels::where('uuid', $objectId)->first();
 
-        $action = AvailableActions::where('name', $action)->first();
+        $action = AvailableActions::where('name', $action)
+            ->where('input', 'NextDeveloper\Communication\AvailableChannels')
+            ->first();
+
         $class = $action->class;
 
         if(class_exists($class)) {
             $action = new $class($object, $params);
+            $actionId = $action->getActionId();
+
+            if(request()->get('fg') == 'true') {
+                $action->handle();
+                return $actionId;
+            }
+
             dispatch($action);
 
-            return $action->getActionId();
+            return $actionId;
         }
 
         return null;
@@ -179,7 +190,7 @@ class AbstractAvailableChannelsService
                 $data['iam_user_id']
             );
         }
-
+                    
         if(!array_key_exists('iam_user_id', $data)) {
             $data['iam_user_id']    = UserHelper::me()->id;
         }
@@ -189,18 +200,16 @@ class AbstractAvailableChannelsService
                 $data['iam_account_id']
             );
         }
-
+            
         if(!array_key_exists('iam_account_id', $data)) {
             $data['iam_account_id'] = UserHelper::currentAccount()->id;
         }
-
+                        
         try {
             $model = AvailableChannels::create($data);
         } catch(\Exception $e) {
             throw $e;
         }
-
-        Events::fire('created:NextDeveloper\Communication\AvailableChannels', $model);
 
         return $model->fresh();
     }
@@ -253,17 +262,13 @@ class AbstractAvailableChannelsService
                 $data['iam_account_id']
             );
         }
-
-        Events::fire('updating:NextDeveloper\Communication\AvailableChannels', $model);
-
+    
         try {
             $isUpdated = $model->update($data);
             $model = $model->fresh();
         } catch(\Exception $e) {
             throw $e;
         }
-
-        Events::fire('updated:NextDeveloper\Communication\AvailableChannels', $model);
 
         return $model->fresh();
     }
@@ -288,8 +293,6 @@ class AbstractAvailableChannelsService
                 'Maybe you dont have the permission to update this object?'
             );
         }
-
-        Events::fire('deleted:NextDeveloper\Communication\AvailableChannels', $model);
 
         try {
             $model = $model->delete();

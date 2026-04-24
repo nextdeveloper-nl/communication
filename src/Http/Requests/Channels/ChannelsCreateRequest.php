@@ -13,12 +13,13 @@ class ChannelsCreateRequest extends AbstractFormRequest
     public function rules()
     {
         return [
-            'config' => 'required',
+            'name' => 'required|string',
+        'type' => 'required|string',
+        'configuration' => 'required',
+        'credentials' => 'nullable',
         'is_active' => 'boolean',
-        'is_verified' => 'boolean',
-        'communication_available_channel_id' => 'required|exists:communication_available_channels,uuid|uuid',
+        'priority' => 'integer',
         ];
     }
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
-
 }

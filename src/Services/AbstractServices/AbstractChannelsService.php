@@ -2,19 +2,19 @@
 
 namespace NextDeveloper\Communication\Services\AbstractServices;
 
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Str;
-use NextDeveloper\Commons\Database\Models\AvailableActions;
-use NextDeveloper\Commons\Exceptions\ModelNotFoundException;
-use NextDeveloper\Commons\Exceptions\NotAllowedException;
-use NextDeveloper\Commons\Helpers\DatabaseHelper;
-use NextDeveloper\Communication\Database\Filters\ChannelsQueryFilter;
-use NextDeveloper\Communication\Database\Models\Channels;
-use NextDeveloper\Events\Services\Events;
-use NextDeveloper\IAM\Database\Scopes\AuthorizationScope;
 use NextDeveloper\IAM\Helpers\UserHelper;
+use NextDeveloper\Commons\Common\Cache\CacheHelper;
+use NextDeveloper\Commons\Helpers\DatabaseHelper;
+use NextDeveloper\Commons\Database\Models\AvailableActions;
+use NextDeveloper\Communication\Database\Models\Channels;
+use NextDeveloper\Communication\Database\Filters\ChannelsQueryFilter;
+use NextDeveloper\Commons\Exceptions\ModelNotFoundException;
+use NextDeveloper\Events\Services\Events;
+use NextDeveloper\Commons\Exceptions\NotAllowedException;
 
 /**
  * This class is responsible from managing the data for Channels
@@ -92,9 +92,7 @@ class AbstractChannelsService
      */
     public static function getByRef($ref) : ?Channels
     {
-        return Channels::withoutGlobalScope(AuthorizationScope::class)
-            ->where('uuid', $ref)
-            ->first();
+        return Channels::findByRef($ref);
     }
 
     public static function getActions()
@@ -116,14 +114,24 @@ class AbstractChannelsService
     {
         $object = Channels::where('uuid', $objectId)->first();
 
-        $action = AvailableActions::where('name', $action)->first();
+        $action = AvailableActions::where('name', $action)
+            ->where('input', 'NextDeveloper\Communication\Channels')
+            ->first();
+
         $class = $action->class;
 
         if(class_exists($class)) {
             $action = new $class($object, $params);
+            $actionId = $action->getActionId();
+
+            if(request()->get('fg') == 'true') {
+                $action->handle();
+                return $actionId;
+            }
+
             dispatch($action);
 
-            return $action->getActionId();
+            return $actionId;
         }
 
         return null;
@@ -176,42 +184,22 @@ class AbstractChannelsService
      */
     public static function create(array $data)
     {
-        if (array_key_exists('communication_available_channel_id', $data)) {
-            $data['communication_available_channel_id'] = DatabaseHelper::uuidToId(
-                '\NextDeveloper\Communication\Database\Models\AvailableChannels',
-                $data['communication_available_channel_id']
-            );
-        }
-
-        if (array_key_exists('iam_user_id', $data)) {
-
-            $data['iam_user_id'] = DatabaseHelper::uuidToId(
-                '\NextDeveloper\IAM\Database\Models\Users',
-                $data['iam_user_id']
-            );
-        }
-
-        if(!array_key_exists('iam_user_id', $data)) {
-            $data['iam_user_id']    = UserHelper::me()->id;
-        }
         if (array_key_exists('iam_account_id', $data)) {
             $data['iam_account_id'] = DatabaseHelper::uuidToId(
                 '\NextDeveloper\IAM\Database\Models\Accounts',
                 $data['iam_account_id']
             );
         }
-
+            
         if(!array_key_exists('iam_account_id', $data)) {
             $data['iam_account_id'] = UserHelper::currentAccount()->id;
         }
-
+                        
         try {
             $model = Channels::create($data);
         } catch(\Exception $e) {
             throw $e;
         }
-
-        Events::fire('created:NextDeveloper\Communication\Channels', $model);
 
         return $model->fresh();
     }
@@ -252,35 +240,19 @@ class AbstractChannelsService
             );
         }
 
-        if (array_key_exists('communication_available_channel_id', $data)) {
-            $data['communication_available_channel_id'] = DatabaseHelper::uuidToId(
-                '\NextDeveloper\Communication\Database\Models\AvailableChannels',
-                $data['communication_available_channel_id']
-            );
-        }
-        if (array_key_exists('iam_user_id', $data)) {
-            $data['iam_user_id'] = DatabaseHelper::uuidToId(
-                '\NextDeveloper\IAM\Database\Models\Users',
-                $data['iam_user_id']
-            );
-        }
         if (array_key_exists('iam_account_id', $data)) {
             $data['iam_account_id'] = DatabaseHelper::uuidToId(
                 '\NextDeveloper\IAM\Database\Models\Accounts',
                 $data['iam_account_id']
             );
         }
-
-        Events::fire('updating:NextDeveloper\Communication\Channels', $model);
-
+    
         try {
             $isUpdated = $model->update($data);
             $model = $model->fresh();
         } catch(\Exception $e) {
             throw $e;
         }
-
-        Events::fire('updated:NextDeveloper\Communication\Channels', $model);
 
         return $model->fresh();
     }
@@ -305,8 +277,6 @@ class AbstractChannelsService
                 'Maybe you dont have the permission to update this object?'
             );
         }
-
-        Events::fire('deleted:NextDeveloper\Communication\Channels', $model);
 
         try {
             $model = $model->delete();
