@@ -2,13 +2,17 @@
 
 namespace NextDeveloper\Communication\Database\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use NextDeveloper\Commons\Common\Cache\Traits\CleanCache;
+use NextDeveloper\Commons\Database\Traits\HasStates;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Model;
 use NextDeveloper\Commons\Database\Traits\Filterable;
-use NextDeveloper\Commons\Database\Traits\Taggable;
-use NextDeveloper\Commons\Database\Traits\UuidId;
 use NextDeveloper\Communication\Database\Observers\BotsObserver;
+use NextDeveloper\Commons\Database\Traits\UuidId;
+use NextDeveloper\Commons\Database\Traits\HasObject;
+use NextDeveloper\Commons\Common\Cache\Traits\CleanCache;
+use NextDeveloper\Commons\Database\Traits\Taggable;
+use NextDeveloper\Commons\Database\Traits\RunAsAdministrator;
 
 /**
  * Bots model.
@@ -18,23 +22,18 @@ use NextDeveloper\Communication\Database\Observers\BotsObserver;
  * @property string $uuid
  * @property string $name
  * @property string $description
+ * @property boolean $is_active
+ * @property integer $iam_account_id
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  * @property \Carbon\Carbon $deleted_at
- * @property string $token
- * @property string $class
  */
 class Bots extends Model
 {
-    use Filterable, CleanCache, Taggable;
-    use UuidId;
+    use Filterable, UuidId, CleanCache, Taggable, HasStates, RunAsAdministrator, HasObject;
     use SoftDeletes;
 
-
     public $timestamps = true;
-
-
-
 
     protected $table = 'communication_bots';
 
@@ -47,8 +46,8 @@ class Bots extends Model
     protected $fillable = [
             'name',
             'description',
-            'token',
-            'class',
+            'is_active',
+            'iam_account_id',
     ];
 
     /**
@@ -74,11 +73,10 @@ class Bots extends Model
     'id' => 'integer',
     'name' => 'string',
     'description' => 'string',
+    'is_active' => 'boolean',
     'created_at' => 'datetime',
     'updated_at' => 'datetime',
     'deleted_at' => 'datetime',
-    'token' => 'string',
-    'class' => 'string',
     ];
 
     /**
@@ -139,7 +137,15 @@ class Bots extends Model
         }
     }
 
+    public function accounts() : \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(\NextDeveloper\IAM\Database\Models\Accounts::class);
+    }
+    
+    public function threads() : \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(\NextDeveloper\Communication\Database\Models\Threads::class);
+    }
+
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
-
-
 }

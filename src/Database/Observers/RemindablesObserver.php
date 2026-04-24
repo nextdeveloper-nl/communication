@@ -3,9 +3,10 @@
 namespace NextDeveloper\Communication\Database\Observers;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 use NextDeveloper\Commons\Exceptions\NotAllowedException;
-use NextDeveloper\Events\Services\Events;
 use NextDeveloper\IAM\Helpers\UserHelper;
+use NextDeveloper\Events\Services\Events;
 
 /**
  * Class RemindablesObserver

@@ -2,68 +2,53 @@
 
 namespace NextDeveloper\Communication\Helpers;
 
-use Carbon\Carbon;
-use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\App;
-use NextDeveloper\Communication\Actions\Emails\Deliver;
 use NextDeveloper\Communication\Database\Models\AvailableChannels;
 use NextDeveloper\Communication\Database\Models\Channels;
-use NextDeveloper\Communication\Database\Models\Emails;
+use NextDeveloper\Communication\Database\Models\Threads;
+use NextDeveloper\Communication\Services\MessagesService;
 
 class ChannelHelper
 {
     /**
-     * Get the channel for an email.
-     *
-     * @param Emails $email
-     * @return Channels|null
+     * Returns the channel attached to a thread.
      */
-    public static function getChannel(Emails $email): ?Channels
+    public static function getForThread(Threads $thread): ?Channels
     {
-        $channel = Channels::where('id', $email->communication_channel_id)->first();
+        $channel = Channels::find($thread->communication_channel_id);
 
         if (!$channel) {
-            Log::error(__METHOD__ . ": Channel with ID {$email->communication_channel_id} not found");
-            return null;
+            Log::error(__METHOD__ . ": Channel {$thread->communication_channel_id} not found for thread {$thread->id}");
         }
 
         return $channel;
     }
 
     /**
-     * Get the available channel for a channel.
-     *
-     * @param Channels $channel
-     * @param Emails $email
-     * @return AvailableChannels|null
+     * Returns the AvailableChannels definition matching a channel's type.
+     * Used to resolve the delivery class for a channel.
      */
-    public static function getAvailableChannel(Channels $channel, Emails $email): ?AvailableChannels
+    public static function getAvailableChannelByType(string $type): ?AvailableChannels
     {
-        $availableChannel = AvailableChannels::where('id', $channel->communication_available_channel_id)->first();
+        $available = AvailableChannels::where('name', $type)->first();
 
-        if (!$availableChannel) {
-            Log::error(__METHOD__ . ": Available channel with ID {$channel->communication_available_channel_id} not found");
-            return null;
+        if (!$available) {
+            Log::error(__METHOD__ . ": No AvailableChannels entry found for type '{$type}'");
         }
 
-        return $availableChannel;
+        return $available;
     }
 
     /**
-     * Get the channel class for an available channel.
-     *
-     * @param AvailableChannels $availableChannel
-     * @param Emails $email
-     * @return string|null
+     * Resolves and validates the delivery class registered on an AvailableChannels record.
      */
-    public static function getChannelClass(AvailableChannels $availableChannel, Emails $email): ?string
+    public static function getChannelClass(AvailableChannels $availableChannel): ?string
     {
         $class = $availableChannel->class;
 
         if (!class_exists($class)) {
-            Log::error(__METHOD__ . ": Class {$class} not found");
+            Log::error(__METHOD__ . ": Delivery class {$class} not found");
             return null;
         }
 
@@ -71,57 +56,30 @@ class ChannelHelper
     }
 
     /**
-     * Mark an email as delivered.
-     *
-     * @param Emails $email
+     * Returns the highest-priority active channel for an account by type.
+     * Use this to pick the sending transport when dispatching messages.
      */
-    public static function markEmailAsDelivered(Emails $email): void
+    public static function getPrimaryForAccount(int $accountId, string $type): ?Channels
     {
-        $email->delivered_at = Carbon::now();
-        $email->save();
+        return Channels::where('iam_account_id', $accountId)
+            ->where('type', $type)
+            ->where('is_active', true)
+            ->orderBy('priority')
+            ->first();
     }
 
     /**
-     * Log an error message and exception.
-     *
-     * @param string $message
-     * @param \Exception $exception
+     * Returns queued messages due for delivery, optionally capped to a limit.
+     * Replaces V1 getPendingEmails — works on communication_messages.
      */
+    public static function getDueMessages(int $limit = 100): Collection
+    {
+        return MessagesService::getDueForDelivery()->take($limit);
+    }
+
     public static function logError(string $message, \Exception $exception): void
     {
-        $errorMessage = __METHOD__ . ": {$message}: " . $exception->getMessage();
-        Log::error($errorMessage);
+        Log::error(__METHOD__ . ": {$message}: " . $exception->getMessage());
         Log::error($exception->getTraceAsString());
-    }
-
-    /**
-     * Get pending emails that are due for delivery.
-     *
-     * @param int $limit Maximum number of emails to retrieve
-     * @return Collection
-     */
-    public static function getPendingEmails(int $limit): Collection
-    {
-        return Emails::whereNull('delivered_at')
-            ->where(function ($query) {
-                $query->whereNull('deliver_at')
-                    ->orWhere('deliver_at', '<=', Carbon::now());
-            })
-            ->orderBy('created_at')
-            ->limit($limit)
-            ->get();
-    }
-
-    /**
-     * Deliver an email via the default channel.
-     *
-     * @param Emails $email
-     * @throws BindingResolutionException
-     */
-    public static function deliverViaDefaultChannel(Emails $email): void
-    {
-        // Use Laravel's service container to resolve the Deliver class
-        $deliver = App::makeWith(Deliver::class, ['email' => $email]);
-        $deliver->handle();
     }
 }

@@ -13,9 +13,7 @@ class NotificationsUpdateRequest extends AbstractFormRequest
     public function rules()
     {
         return [
-            'is_info' => 'boolean',
-        'is_warning' => 'boolean',
-        'is_error' => 'boolean',
+            'severity' => 'string',
         'object_id' => 'nullable',
         'object_type' => 'nullable|string',
         'data' => 'nullable|string',

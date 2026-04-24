@@ -3,22 +3,20 @@
 namespace NextDeveloper\Communication\Http\Controllers\Channels;
 
 use Illuminate\Http\Request;
+use NextDeveloper\Communication\Http\Controllers\AbstractController;
 use NextDeveloper\Commons\Http\Response\ResponsableFactory;
-use NextDeveloper\Commons\Http\Traits\Addresses;
-use NextDeveloper\Commons\Http\Traits\Tags;
+use NextDeveloper\Communication\Http\Requests\Channels\ChannelsUpdateRequest;
 use NextDeveloper\Communication\Database\Filters\ChannelsQueryFilter;
 use NextDeveloper\Communication\Database\Models\Channels;
-use NextDeveloper\Communication\Http\Controllers\AbstractController;
-use NextDeveloper\Communication\Http\Requests\Channels\ChannelsCreateRequest;
-use NextDeveloper\Communication\Http\Requests\Channels\ChannelsUpdateRequest;
 use NextDeveloper\Communication\Services\ChannelsService;
-
+use NextDeveloper\Communication\Http\Requests\Channels\ChannelsCreateRequest;
+use NextDeveloper\Commons\Http\Traits\Tags as TagsTrait;use NextDeveloper\Commons\Http\Traits\Addresses as AddressesTrait;
 class ChannelsController extends AbstractController
 {
     private $model = Channels::class;
 
-    use Tags;
-    use Addresses;
+    use TagsTrait;
+    use AddressesTrait;
     /**
      * This method returns the list of channels.
      *
@@ -116,9 +114,6 @@ class ChannelsController extends AbstractController
 
         $model = ChannelsService::create($request->validated());
 
-        // remove fields from request, because this affects the response
-        $request->offsetUnset('fields');
-
         return ResponsableFactory::makeResponse($this, $model);
     }
 
@@ -159,21 +154,4 @@ class ChannelsController extends AbstractController
 
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
 
-    public function sendCode($ref)
-    {
-        $model = ChannelsService::sendCode($ref);
-
-        return $this->withArray([
-            'code_sent' => $model
-        ]);
-    }
-
-    public function verifyCode($ref, Request $request)
-    {
-        $model = ChannelsService::verifyCode($request->all(), $ref);
-
-        return $this->withArray([
-            'code_verified' => $model
-        ]);
-    }
 }

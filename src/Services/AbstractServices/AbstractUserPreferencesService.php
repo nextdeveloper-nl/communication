@@ -2,18 +2,19 @@
 
 namespace NextDeveloper\Communication\Services\AbstractServices;
 
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Str;
-use NextDeveloper\Commons\Database\Models\AvailableActions;
-use NextDeveloper\Commons\Exceptions\ModelNotFoundException;
-use NextDeveloper\Commons\Exceptions\NotAllowedException;
-use NextDeveloper\Commons\Helpers\DatabaseHelper;
-use NextDeveloper\Communication\Database\Filters\UserPreferencesQueryFilter;
-use NextDeveloper\Communication\Database\Models\UserPreferences;
-use NextDeveloper\Events\Services\Events;
 use NextDeveloper\IAM\Helpers\UserHelper;
+use NextDeveloper\Commons\Common\Cache\CacheHelper;
+use NextDeveloper\Commons\Helpers\DatabaseHelper;
+use NextDeveloper\Commons\Database\Models\AvailableActions;
+use NextDeveloper\Communication\Database\Models\UserPreferences;
+use NextDeveloper\Communication\Database\Filters\UserPreferencesQueryFilter;
+use NextDeveloper\Commons\Exceptions\ModelNotFoundException;
+use NextDeveloper\Events\Services\Events;
+use NextDeveloper\Commons\Exceptions\NotAllowedException;
 
 /**
  * This class is responsible from managing the data for UserPreferences
@@ -113,14 +114,24 @@ class AbstractUserPreferencesService
     {
         $object = UserPreferences::where('uuid', $objectId)->first();
 
-        $action = '\\NextDeveloper\\Communication\\Actions\\UserPreferences\\' . Str::studly($action);
+        $action = AvailableActions::where('name', $action)
+            ->where('input', 'NextDeveloper\Communication\UserPreferences')
+            ->first();
 
-        if(class_exists($action)) {
-            $action = new $action($object, $params);
+        $class = $action->class;
+
+        if(class_exists($class)) {
+            $action = new $class($object, $params);
+            $actionId = $action->getActionId();
+
+            if(request()->get('fg') == 'true') {
+                $action->handle();
+                return $actionId;
+            }
 
             dispatch($action);
 
-            return $action->getActionId();
+            return $actionId;
         }
 
         return null;
@@ -179,18 +190,16 @@ class AbstractUserPreferencesService
                 $data['iam_user_id']
             );
         }
-
+                    
         if(!array_key_exists('iam_user_id', $data)) {
             $data['iam_user_id']    = UserHelper::me()->id;
         }
-
+            
         try {
             $model = UserPreferences::create($data);
         } catch(\Exception $e) {
             throw $e;
         }
-
-        Events::fire('created:NextDeveloper\Communication\UserPreferences', $model);
 
         return $model->fresh();
     }
@@ -237,17 +246,13 @@ class AbstractUserPreferencesService
                 $data['iam_user_id']
             );
         }
-
-        Events::fire('updating:NextDeveloper\Communication\UserPreferences', $model);
-
+    
         try {
             $isUpdated = $model->update($data);
             $model = $model->fresh();
         } catch(\Exception $e) {
             throw $e;
         }
-
-        Events::fire('updated:NextDeveloper\Communication\UserPreferences', $model);
 
         return $model->fresh();
     }
@@ -272,8 +277,6 @@ class AbstractUserPreferencesService
                 'Maybe you dont have the permission to update this object?'
             );
         }
-
-        Events::fire('deleted:NextDeveloper\Communication\UserPreferences', $model);
 
         try {
             $model = $model->delete();

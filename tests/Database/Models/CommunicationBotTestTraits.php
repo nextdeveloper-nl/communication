@@ -9,6 +9,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use League\Fractal\Resource\Collection;
 use NextDeveloper\Communication\Database\Filters\CommunicationBotQueryFilter;
 use NextDeveloper\Communication\Services\AbstractServices\AbstractCommunicationBotService;
+use Tests\TestCase;
 
 trait CommunicationBotTestTraits
 {
@@ -59,8 +60,6 @@ trait CommunicationBotTestTraits
             'form_params'   =>  [
                 'name'  =>  'a',
                 'description'  =>  'a',
-                'token'  =>  'a',
-                'class'  =>  'a',
                             ],
                 ['http_errors' => false]
             ]
@@ -381,44 +380,6 @@ trait CommunicationBotTestTraits
         $this->assertTrue(true);
     }
 
-    public function test_communicationbot_event_token_filter()
-    {
-        try {
-            $request = new Request(
-                [
-                'token'  =>  'a'
-                ]
-            );
-
-            $filter = new CommunicationBotQueryFilter($request);
-
-            $model = \NextDeveloper\Communication\Database\Models\CommunicationBot::filter($filter)->first();
-        } catch (\Exception $e) {
-            $this->assertFalse(false, $e->getMessage());
-        }
-
-        $this->assertTrue(true);
-    }
-
-    public function test_communicationbot_event_class_filter()
-    {
-        try {
-            $request = new Request(
-                [
-                'class'  =>  'a'
-                ]
-            );
-
-            $filter = new CommunicationBotQueryFilter($request);
-
-            $model = \NextDeveloper\Communication\Database\Models\CommunicationBot::filter($filter)->first();
-        } catch (\Exception $e) {
-            $this->assertFalse(false, $e->getMessage());
-        }
-
-        $this->assertTrue(true);
-    }
-
     public function test_communicationbot_event_created_at_filter_start()
     {
         try {
@@ -593,4 +554,5 @@ trait CommunicationBotTestTraits
         $this->assertTrue(true);
     }
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
 }

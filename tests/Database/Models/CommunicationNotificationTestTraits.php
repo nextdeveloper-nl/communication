@@ -9,6 +9,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use League\Fractal\Resource\Collection;
 use NextDeveloper\Communication\Database\Filters\CommunicationNotificationQueryFilter;
 use NextDeveloper\Communication\Services\AbstractServices\AbstractCommunicationNotificationService;
+use Tests\TestCase;
 
 trait CommunicationNotificationTestTraits
 {
@@ -57,6 +58,7 @@ trait CommunicationNotificationTestTraits
         $response = $this->http->request(
             'POST', '/communication/communicationnotification', [
             'form_params'   =>  [
+                'severity'  =>  'a',
                 'object_type'  =>  'a',
                 'data'  =>  'a',
                     'read_at'  =>  now(),
@@ -342,6 +344,25 @@ trait CommunicationNotificationTestTraits
         $this->assertTrue(true);
     }
 
+    public function test_communicationnotification_event_severity_filter()
+    {
+        try {
+            $request = new Request(
+                [
+                'severity'  =>  'a'
+                ]
+            );
+
+            $filter = new CommunicationNotificationQueryFilter($request);
+
+            $model = \NextDeveloper\Communication\Database\Models\CommunicationNotification::filter($filter)->first();
+        } catch (\Exception $e) {
+            $this->assertFalse(false, $e->getMessage());
+        }
+
+        $this->assertTrue(true);
+    }
+
     public function test_communicationnotification_event_object_type_filter()
     {
         try {
@@ -612,4 +633,5 @@ trait CommunicationNotificationTestTraits
         $this->assertTrue(true);
     }
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
 }

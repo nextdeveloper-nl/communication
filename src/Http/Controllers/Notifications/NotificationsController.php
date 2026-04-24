@@ -3,22 +3,20 @@
 namespace NextDeveloper\Communication\Http\Controllers\Notifications;
 
 use Illuminate\Http\Request;
+use NextDeveloper\Communication\Http\Controllers\AbstractController;
 use NextDeveloper\Commons\Http\Response\ResponsableFactory;
-use NextDeveloper\Commons\Http\Traits\Addresses;
-use NextDeveloper\Commons\Http\Traits\Tags;
+use NextDeveloper\Communication\Http\Requests\Notifications\NotificationsUpdateRequest;
 use NextDeveloper\Communication\Database\Filters\NotificationsQueryFilter;
 use NextDeveloper\Communication\Database\Models\Notifications;
-use NextDeveloper\Communication\Http\Controllers\AbstractController;
-use NextDeveloper\Communication\Http\Requests\Notifications\NotificationsCreateRequest;
-use NextDeveloper\Communication\Http\Requests\Notifications\NotificationsUpdateRequest;
 use NextDeveloper\Communication\Services\NotificationsService;
-
+use NextDeveloper\Communication\Http\Requests\Notifications\NotificationsCreateRequest;
+use NextDeveloper\Commons\Http\Traits\Tags as TagsTrait;use NextDeveloper\Commons\Http\Traits\Addresses as AddressesTrait;
 class NotificationsController extends AbstractController
 {
     private $model = Notifications::class;
 
-    use Tags;
-    use Addresses;
+    use TagsTrait;
+    use AddressesTrait;
     /**
      * This method returns the list of notifications.
      *

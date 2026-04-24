@@ -2,13 +2,17 @@
 
 namespace NextDeveloper\Communication\Database\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use NextDeveloper\Commons\Common\Cache\Traits\CleanCache;
+use NextDeveloper\Commons\Database\Traits\HasStates;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Model;
 use NextDeveloper\Commons\Database\Traits\Filterable;
-use NextDeveloper\Commons\Database\Traits\Taggable;
-use NextDeveloper\Commons\Database\Traits\UuidId;
 use NextDeveloper\Communication\Database\Observers\AvailableChannelsObserver;
+use NextDeveloper\Commons\Database\Traits\UuidId;
+use NextDeveloper\Commons\Database\Traits\HasObject;
+use NextDeveloper\Commons\Common\Cache\Traits\CleanCache;
+use NextDeveloper\Commons\Database\Traits\Taggable;
+use NextDeveloper\Commons\Database\Traits\RunAsAdministrator;
 
 /**
  * AvailableChannels model.
@@ -18,25 +22,20 @@ use NextDeveloper\Communication\Database\Observers\AvailableChannelsObserver;
  * @property string $uuid
  * @property string $name
  * @property string $class
- * @property $config
  * @property $parameters
  * @property integer $iam_user_id
  * @property integer $iam_account_id
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  * @property \Carbon\Carbon $deleted_at
+ * @property $config
  */
 class AvailableChannels extends Model
 {
-    use Filterable, CleanCache, Taggable;
-    use UuidId;
+    use Filterable, UuidId, CleanCache, Taggable, HasStates, RunAsAdministrator, HasObject;
     use SoftDeletes;
 
-
     public $timestamps = true;
-
-
-
 
     protected $table = 'communication_available_channels';
 
@@ -49,10 +48,10 @@ class AvailableChannels extends Model
     protected $fillable = [
             'name',
             'class',
-            'config',
             'parameters',
             'iam_user_id',
             'iam_account_id',
+            'config',
     ];
 
     /**
@@ -78,11 +77,11 @@ class AvailableChannels extends Model
     'id' => 'integer',
     'name' => 'string',
     'class' => 'string',
-    'config' => 'array',
     'parameters' => 'array',
     'created_at' => 'datetime',
     'updated_at' => 'datetime',
     'deleted_at' => 'datetime',
+    'config' => 'array',
     ];
 
     /**
@@ -144,6 +143,4 @@ class AvailableChannels extends Model
     }
 
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
-
-
 }

@@ -3,22 +3,20 @@
 namespace NextDeveloper\Communication\Http\Controllers\UserPreferences;
 
 use Illuminate\Http\Request;
+use NextDeveloper\Communication\Http\Controllers\AbstractController;
 use NextDeveloper\Commons\Http\Response\ResponsableFactory;
-use NextDeveloper\Commons\Http\Traits\Addresses;
-use NextDeveloper\Commons\Http\Traits\Tags;
+use NextDeveloper\Communication\Http\Requests\UserPreferences\UserPreferencesUpdateRequest;
 use NextDeveloper\Communication\Database\Filters\UserPreferencesQueryFilter;
 use NextDeveloper\Communication\Database\Models\UserPreferences;
-use NextDeveloper\Communication\Http\Controllers\AbstractController;
-use NextDeveloper\Communication\Http\Requests\UserPreferences\UserPreferencesCreateRequest;
-use NextDeveloper\Communication\Http\Requests\UserPreferences\UserPreferencesUpdateRequest;
 use NextDeveloper\Communication\Services\UserPreferencesService;
-
+use NextDeveloper\Communication\Http\Requests\UserPreferences\UserPreferencesCreateRequest;
+use NextDeveloper\Commons\Http\Traits\Tags as TagsTrait;use NextDeveloper\Commons\Http\Traits\Addresses as AddressesTrait;
 class UserPreferencesController extends AbstractController
 {
     private $model = UserPreferences::class;
 
-    use Tags;
-    use Addresses;
+    use TagsTrait;
+    use AddressesTrait;
     /**
      * This method returns the list of userpreferences.
      *

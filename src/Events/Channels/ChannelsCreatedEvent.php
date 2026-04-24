@@ -4,7 +4,7 @@ namespace NextDeveloper\Communication\Events\Channels;
 
 use Illuminate\Queue\SerializesModels;
 use NextDeveloper\Communication\Database\Models\Channels;
-use NextDeveloper\Communication\Services\ChannelsService;
+use NextDeveloper\Communication\Services\BackupChannelsService;
 use NextDeveloper\Events\Services\Events;
 
 /**
@@ -58,7 +58,7 @@ class ChannelsCreatedEvent extends Events
     public function sendVerificationCode(): void
     {
         // Send verification code to the user
-        ChannelsService::sendCode($this->_model);
+        BackupChannelsService::sendCode($this->_model);
     }
 
     public function handle()

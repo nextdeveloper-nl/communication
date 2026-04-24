@@ -5,6 +5,7 @@ namespace NextDeveloper\Communication\Http\Transformers;
 use Illuminate\Support\Facades\Cache;
 use NextDeveloper\Commons\Common\Cache\CacheHelper;
 use NextDeveloper\Communication\Database\Models\Bots;
+use NextDeveloper\Commons\Http\Transformers\AbstractTransformer;
 use NextDeveloper\Communication\Http\Transformers\AbstractTransformers\AbstractBotsTransformer;
 
 /**
