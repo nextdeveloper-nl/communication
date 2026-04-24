@@ -28,11 +28,19 @@ class Communicate
     }
 
     /**
-     * Sends a Laravel mailable directly to the user's email address.
+     * Sends a Laravel mailable directly to the user's email address (queued if the mailable implements ShouldQueue).
      */
     public function sendEnvelope($envelope): void
     {
         Mail::to($this->user->email)->send($envelope);
+    }
+
+    /**
+     * Sends a Laravel mailable synchronously, bypassing any queue even if the mailable implements ShouldQueue.
+     */
+    public function sendEnvelopeNow($envelope): void
+    {
+        $envelope->to($this->user->email)->send(Mail::getFacadeRoot());
     }
 
     /**
