@@ -20,25 +20,45 @@ class CommunicationMemberRole extends AbstractRole implements IAuthorizationRole
 
     public const DB_PREFIX = 'communication';
 
-    /**
-     * Applies basic member role sql for Eloquent
-     *
-     * @param Builder $builder
-     * @param Model $model
-     * @return void
-     */
     public function apply(Builder $builder, Model $model)
     {
-        if($model->getTable() == 'communication_available_channels') {
+        $table = $model->getTable();
+
+        // System/lookup table and join tables without ownership — no filter
+        if (in_array($table, [
+            'communication_available_channels',
+            'communication_contact_identifiers',
+            'communication_message_events',
+            'communication_thread_assignments',
+        ])) {
             return;
         }
 
-        /**
-         * Here user will be able to list all models, because by default, sales manager can see everybody.
-         */
+        // Only has iam_user_id
+        if ($table === 'communication_user_preferences') {
+            $builder->where('iam_user_id', UserHelper::me()->id);
+            return;
+        }
+
+        // Only has iam_account_id
+        if (in_array($table, [
+            'communication_accounts',
+            'communication_bots',
+            'communication_channels',
+            'communication_contacts',
+            'communication_messages',
+            'communication_smtp_servers',
+            'communication_threads',
+            'communication_unsubscribes',
+        ])) {
+            $builder->where('iam_account_id', UserHelper::currentAccount()->id);
+            return;
+        }
+
+        // Has both iam_account_id and iam_user_id (notifications, remindables)
         $builder->where([
-            'iam_account_id'    =>  UserHelper::currentAccount()->id,
-            'iam_user_id'       =>  UserHelper::me()->id
+            'iam_account_id' => UserHelper::currentAccount()->id,
+            'iam_user_id'    => UserHelper::me()->id,
         ]);
     }
 
@@ -55,10 +75,65 @@ class CommunicationMemberRole extends AbstractRole implements IAuthorizationRole
     public function allowedOperations() :array
     {
         return [
-            'communication_emails:read',
+            // System definitions — read only
+            'communication_accounts:read',
+            'communication_available_channels:read',
+
+            // Account config — full CRUD (member manages their own)
+            'communication_bots:read',
+            'communication_bots:create',
+            'communication_bots:update',
+            'communication_bots:delete',
+            'communication_channels:read',
+            'communication_channels:create',
+            'communication_channels:update',
+            'communication_channels:delete',
+            'communication_smtp_servers:read',
+            'communication_smtp_servers:create',
+            'communication_smtp_servers:update',
+            'communication_smtp_servers:delete',
+
+            // Operational objects — full CRUD (member manages their own)
+            'communication_contact_identifiers:read',
+            'communication_contact_identifiers:create',
+            'communication_contact_identifiers:update',
+            'communication_contact_identifiers:delete',
+            'communication_contacts:read',
+            'communication_contacts:create',
+            'communication_contacts:update',
+            'communication_contacts:delete',
+            'communication_messages:read',
+            'communication_messages:create',
+            'communication_messages:update',
+            'communication_messages:delete',
+            'communication_thread_assignments:read',
+            'communication_thread_assignments:create',
+            'communication_thread_assignments:update',
+            'communication_thread_assignments:delete',
+            'communication_threads:read',
+            'communication_threads:create',
+            'communication_threads:update',
+            'communication_threads:delete',
+
+            // Audit/events — read only
+            'communication_message_events:read',
+
+            // Notifications — read only (system-generated for the member)
             'communication_notifications:read',
+
+            // Personal objects — full CRUD (member owns these)
             'communication_remindables:read',
+            'communication_remindables:create',
+            'communication_remindables:update',
+            'communication_remindables:delete',
+            'communication_unsubscribes:read',
+            'communication_unsubscribes:create',
+            'communication_unsubscribes:update',
+            'communication_unsubscribes:delete',
             'communication_user_preferences:read',
+            'communication_user_preferences:create',
+            'communication_user_preferences:update',
+            'communication_user_preferences:delete',
         ];
     }
 
@@ -97,6 +172,6 @@ class CommunicationMemberRole extends AbstractRole implements IAuthorizationRole
 
     public function checkRules(Users $users): bool
     {
-        // TODO: Implement checkRules() method.
+        return true;
     }
 }
