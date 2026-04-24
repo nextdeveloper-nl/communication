@@ -19,13 +19,6 @@ class CommunicationAdminRole extends AbstractRole implements IAuthorizationRole
 
     public const DB_PREFIX = 'communication';
 
-    /**
-     * Applies basic member role sql for Eloquent
-     *
-     * @param Builder $builder
-     * @param Model $model
-     * @return void
-     */
     public function apply(Builder $builder, Model $model)
     {
         //  Returns everything about communications
@@ -44,10 +37,38 @@ class CommunicationAdminRole extends AbstractRole implements IAuthorizationRole
     public function allowedOperations() :array
     {
         return [
-            'communication_emails:read',
-            'communication_emails:update',
-            'communication_emails:create',
-            'communication_emails:delete',
+            'communication_accounts:read',
+            'communication_accounts:update',
+            'communication_accounts:create',
+            'communication_accounts:delete',
+            'communication_available_channels:read',
+            'communication_available_channels:update',
+            'communication_available_channels:create',
+            'communication_available_channels:delete',
+            'communication_bots:read',
+            'communication_bots:update',
+            'communication_bots:create',
+            'communication_bots:delete',
+            'communication_channels:read',
+            'communication_channels:update',
+            'communication_channels:create',
+            'communication_channels:delete',
+            'communication_contact_identifiers:read',
+            'communication_contact_identifiers:update',
+            'communication_contact_identifiers:create',
+            'communication_contact_identifiers:delete',
+            'communication_contacts:read',
+            'communication_contacts:update',
+            'communication_contacts:create',
+            'communication_contacts:delete',
+            'communication_message_events:read',
+            'communication_message_events:update',
+            'communication_message_events:create',
+            'communication_message_events:delete',
+            'communication_messages:read',
+            'communication_messages:update',
+            'communication_messages:create',
+            'communication_messages:delete',
             'communication_notifications:read',
             'communication_notifications:update',
             'communication_notifications:create',
@@ -56,10 +77,26 @@ class CommunicationAdminRole extends AbstractRole implements IAuthorizationRole
             'communication_remindables:update',
             'communication_remindables:create',
             'communication_remindables:delete',
+            'communication_smtp_servers:read',
+            'communication_smtp_servers:update',
+            'communication_smtp_servers:create',
+            'communication_smtp_servers:delete',
+            'communication_thread_assignments:read',
+            'communication_thread_assignments:update',
+            'communication_thread_assignments:create',
+            'communication_thread_assignments:delete',
+            'communication_threads:read',
+            'communication_threads:update',
+            'communication_threads:create',
+            'communication_threads:delete',
+            'communication_unsubscribes:read',
+            'communication_unsubscribes:update',
+            'communication_unsubscribes:create',
+            'communication_unsubscribes:delete',
             'communication_user_preferences:read',
             'communication_user_preferences:update',
             'communication_user_preferences:create',
-            'communication_user_preferences:delete'
+            'communication_user_preferences:delete',
         ];
     }
 
