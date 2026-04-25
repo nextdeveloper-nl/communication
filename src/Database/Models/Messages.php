@@ -208,5 +208,14 @@ class Messages extends Model
 
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
 
+    const DIRECTION_INBOUND  = 0;
+    const DIRECTION_OUTBOUND = 1;
+
+    const STATUS_QUEUED    = 'queued';
+    const STATUS_SENT      = 'sent';
+    const STATUS_DELIVERED = 'delivered';
+    const STATUS_READ      = 'read';
+    const STATUS_FAILED    = 'failed';
+    const STATUS_BOUNCED   = 'bounced';
 
 }
