@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Mail;
 use NextDeveloper\Communication\Database\Models\Channels;
 use NextDeveloper\Communication\Services\MessagesService;
 use NextDeveloper\Communication\Services\NotificationsService;
+use NextDeveloper\Communication\Services\UserPreferencesService;
 use NextDeveloper\IAM\Database\Models\AccountUsers;
 use NextDeveloper\IAM\Database\Models\Users;
 use NextDeveloper\IAM\Database\Scopes\AuthorizationScope;
@@ -58,6 +59,12 @@ class Communicate
             Log::warning('[Communicate::sendNotification] No account found for user, skipping notification', [
                 'user_id' => $this->user->id,
             ]);
+            return;
+        }
+
+        $preferences = UserPreferencesService::getForUser($this->user->id);
+
+        if ($preferences->is_system_email_optout) {
             return;
         }
 
