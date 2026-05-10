@@ -14,8 +14,8 @@ class UnsubscribesQueryFilter extends AbstractQueryFilter
 {
 
     /**
-     * @var Builder
-     */
+    * @var Builder
+    */
     protected $builder;
     
     public function channelType($value)
@@ -26,7 +26,7 @@ class UnsubscribesQueryFilter extends AbstractQueryFilter
         //  This is an alias function of channelType
     public function channel_type($value)
     {
-        return $this->channelType($value);
+    return $this->channelType($value);
     }
         
     public function identifier($value)
@@ -49,24 +49,24 @@ class UnsubscribesQueryFilter extends AbstractQueryFilter
     
     public function createdAtStart($date)
     {
-        return $this->builder->where('created_at', '>=', $date);
+        return $this->builder->where( 'created_at', '>=', $date );
     }
 
     public function createdAtEnd($date)
     {
-        return $this->builder->where('created_at', '<=', $date);
+        return $this->builder->where( 'created_at', '<=', $date );
     }
 
     //  This is an alias function of createdAt
     public function created_at_start($value)
     {
-        return $this->createdAtStart($value);
+    return $this->createdAtStart($value);
     }
 
     //  This is an alias function of createdAt
     public function created_at_end($value)
     {
-        return $this->createdAtEnd($value);
+    return $this->createdAtEnd($value);
     }
 
     public function communicationContactId($value)
@@ -76,12 +76,12 @@ class UnsubscribesQueryFilter extends AbstractQueryFilter
         if($communicationContact) {
             return $this->builder->where('communication_contact_id', '=', $communicationContact->id);
         }
-    }
+        }
 
         //  This is an alias function of communicationContact
     public function communication_contact_id($value)
     {
-        return $this->communicationContact($value);
+    return $this->communicationContact($value);
     }
     
     public function iamAccountId($value)
@@ -91,10 +91,11 @@ class UnsubscribesQueryFilter extends AbstractQueryFilter
         if($iamAccount) {
             return $this->builder->where('iam_account_id', '=', $iamAccount->id);
         }
-    }
+        }
 
     
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
 
 
 }

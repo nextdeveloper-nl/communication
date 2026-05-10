@@ -10,12 +10,11 @@ class BotsUpdateRequest extends AbstractFormRequest
     /**
      * @return array
      */
-    public function rules()
-    {
+    public function rules() {
         return [
             'name' => 'nullable|string',
-        'description' => 'nullable|string',
-        'is_active' => 'boolean',
+'description' => 'nullable|string',
+'is_active' => 'boolean',
         ];
     }
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE

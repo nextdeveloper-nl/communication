@@ -15,50 +15,50 @@ use NextDeveloper\Commons\Database\Traits\Taggable;
 use NextDeveloper\Commons\Database\Traits\RunAsAdministrator;
 
 /**
- * Messages model.
- *
- * @package  NextDeveloper\Communication\Database\Models
- * @property integer $id
- * @property string $uuid
- * @property integer $communication_thread_id
- * @property integer $crm_campaign_id
- * @property integer $direction
- * @property string $content_type
- * @property string $body
- * @property array $attachments
- * @property integer $sent_by_user_id
- * @property integer $sent_by_bot_id
- * @property integer $reply_to_id
- * @property string $external_message_id
- * @property string $status
- * @property \Carbon\Carbon $deliver_at
- * @property \Carbon\Carbon $delivered_at
- * @property \Carbon\Carbon $read_at
- * @property \Carbon\Carbon $failed_at
- * @property string $failure_reason
- * @property boolean $is_internal
- * @property $metadata
- * @property integer $iam_account_id
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
- * @property \Carbon\Carbon $deleted_at
- */
+* Messages model.
+*
+* @package NextDeveloper\Communication\Database\Models
+* @property integer $id
+* @property string $uuid
+* @property integer $communication_thread_id
+* @property integer $crm_campaign_id
+* @property integer $direction
+* @property string $content_type
+* @property string $body
+* @property array $attachments
+* @property integer $sent_by_user_id
+* @property integer $sent_by_bot_id
+* @property integer $reply_to_id
+* @property string $external_message_id
+* @property string $status
+* @property \Carbon\Carbon $deliver_at
+* @property \Carbon\Carbon $delivered_at
+* @property \Carbon\Carbon $read_at
+* @property \Carbon\Carbon $failed_at
+* @property string $failure_reason
+* @property boolean $is_internal
+* @property  $metadata
+* @property integer $iam_account_id
+* @property \Carbon\Carbon $created_at
+* @property \Carbon\Carbon $updated_at
+* @property \Carbon\Carbon $deleted_at
+*/
 class Messages extends Model
 {
-    use Filterable, UuidId, CleanCache, Taggable, HasStates, RunAsAdministrator, HasObject;
-    use SoftDeletes;
+use Filterable, UuidId, CleanCache, Taggable, HasStates, RunAsAdministrator, HasObject;
+	use SoftDeletes;
 
-    public $timestamps = true;
+	public $timestamps = true;
 
-    protected $table = 'communication_messages';
+protected $table = 'communication_messages';
 
 
-    /**
-     @var array
-     */
-    protected $guarded = [];
+/**
+* @var array
+*/
+protected $guarded = [];
 
-    protected $fillable = [
+protected $fillable = [
             'communication_thread_id',
             'crm_campaign_id',
             'direction',
@@ -80,113 +80,109 @@ class Messages extends Model
             'iam_account_id',
     ];
 
-    /**
-      Here we have the fulltext fields. We can use these for fulltext search if enabled.
-     */
-    protected $fullTextFields = [
+/**
+*  Here we have the fulltext fields. We can use these for fulltext search if enabled.
+*/
+protected $fullTextFields = [
 
-    ];
+];
 
-    /**
-     @var array
-     */
-    protected $appends = [
+/**
+* @var array
+*/
+protected $appends = [
 
-    ];
+];
 
-    /**
-     We are casting fields to objects so that we can work on them better
-     *
-     @var array
-     */
-    protected $casts = [
-    'id' => 'integer',
-    'communication_thread_id' => 'integer',
-    'crm_campaign_id' => 'integer',
-    'direction' => 'integer',
-    'content_type' => 'string',
-    'body' => 'string',
-    'attachments' => \NextDeveloper\Commons\Database\Casts\TextArray::class,
-    'sent_by_user_id' => 'integer',
-    'sent_by_bot_id' => 'integer',
-    'reply_to_id' => 'integer',
-    'external_message_id' => 'string',
-    'status' => 'string',
-    'deliver_at' => 'datetime',
-    'delivered_at' => 'datetime',
-    'read_at' => 'datetime',
-    'failed_at' => 'datetime',
-    'failure_reason' => 'string',
-    'is_internal' => 'boolean',
-    'metadata' => 'array',
-    'created_at' => 'datetime',
-    'updated_at' => 'datetime',
-    'deleted_at' => 'datetime',
-    ];
+/**
+* We are casting fields to objects so that we can work on them better
+* @var array
+*/
+protected $casts = [
+'id' => 'integer',
+'communication_thread_id' => 'integer',
+'crm_campaign_id' => 'integer',
+'direction' => 'integer',
+'content_type' => 'string',
+'body' => 'string',
+'attachments' => \NextDeveloper\Commons\Database\Casts\TextArray::class,
+'sent_by_user_id' => 'integer',
+'sent_by_bot_id' => 'integer',
+'reply_to_id' => 'integer',
+'external_message_id' => 'string',
+'status' => 'string',
+'deliver_at' => 'datetime',
+'delivered_at' => 'datetime',
+'read_at' => 'datetime',
+'failed_at' => 'datetime',
+'failure_reason' => 'string',
+'is_internal' => 'boolean',
+'metadata' => 'array',
+'created_at' => 'datetime',
+'updated_at' => 'datetime',
+'deleted_at' => 'datetime',
+];
 
-    /**
-     We are casting data fields.
-     *
-     @var array
-     */
-    protected $dates = [
-    'deliver_at',
-    'delivered_at',
-    'read_at',
-    'failed_at',
-    'created_at',
-    'updated_at',
-    'deleted_at',
-    ];
+/**
+* We are casting data fields.
+* @var array
+*/
+protected $dates = [
+'deliver_at',
+'delivered_at',
+'read_at',
+'failed_at',
+'created_at',
+'updated_at',
+'deleted_at',
+];
 
-    /**
-     @var array
-     */
-    protected $with = [
+/**
+* @var array
+*/
+protected $with = [
 
-    ];
+];
 
-    /**
-     @var int
-     */
-    protected $perPage = 20;
+/**
+* @var int
+*/
+protected $perPage = 20;
 
-    /**
-     @return void
-     */
-    public static function boot()
-    {
-        parent::boot();
+/**
+* @return void
+*/
+public static function boot()
+{
+parent::boot();
 
-        //  We create and add Observer even if we wont use it.
-        parent::observe(MessagesObserver::class);
+//  We create and add Observer even if we wont use it.
+parent::observe(MessagesObserver::class);
 
-        self::registerScopes();
-    }
+self::registerScopes();
+}
 
-    public static function registerScopes()
-    {
-        $globalScopes = config('communication.scopes.global');
-        $modelScopes = config('communication.scopes.communication_messages');
+public static function registerScopes()
+{
+$globalScopes = config('communication.scopes.global');
+$modelScopes = config('communication.scopes.communication_messages');
 
-        if(!$modelScopes) { $modelScopes = [];
-        }
-        if (!$globalScopes) { $globalScopes = [];
-        }
+if(!$modelScopes) $modelScopes = [];
+if (!$globalScopes) $globalScopes = [];
 
-        $scopes = array_merge(
-            $globalScopes,
-            $modelScopes
-        );
+$scopes = array_merge(
+$globalScopes,
+$modelScopes
+);
 
-        if($scopes) {
-            foreach ($scopes as $scope) {
-                static::addGlobalScope(app($scope));
-            }
-        }
-    }
+if($scopes) {
+foreach ($scopes as $scope) {
+static::addGlobalScope(app($scope));
+}
+}
+}
 
-    public function campaigns() : \Illuminate\Database\Eloquent\Relations\BelongsTo
+public function campaigns() : \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(\NextDeveloper\CRM\Database\Models\Campaigns::class);
     }
@@ -217,5 +213,6 @@ class Messages extends Model
     const STATUS_READ      = 'read';
     const STATUS_FAILED    = 'failed';
     const STATUS_BOUNCED   = 'bounced';
+
 
 }

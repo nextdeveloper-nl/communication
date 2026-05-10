@@ -16,20 +16,18 @@ trait CommunicationContactIdentifierTestTraits
     public $http;
 
     /**
-     *   Creating the Guzzle object
-     */
+    *   Creating the Guzzle object
+    */
     public function setupGuzzle()
     {
-        $this->http = new Client(
-            [
+        $this->http = new Client([
             'base_uri'  =>  '127.0.0.1:8000'
-            ]
-        );
+        ]);
     }
 
     /**
-     *   Destroying the Guzzle object
-     */
+    *   Destroying the Guzzle object
+    */
     public function destroyGuzzle()
     {
         $this->http = null;
@@ -44,19 +42,16 @@ trait CommunicationContactIdentifierTestTraits
             ['http_errors' => false]
         );
 
-        $this->assertContains(
-            $response->getStatusCode(), [
+        $this->assertContains($response->getStatusCode(), [
             Response::HTTP_OK,
             Response::HTTP_NOT_FOUND
-            ]
-        );
+        ]);
     }
 
     public function test_http_communicationcontactidentifier_post()
     {
         $this->setupGuzzle();
-        $response = $this->http->request(
-            'POST', '/communication/communicationcontactidentifier', [
+        $response = $this->http->request('POST', '/communication/communicationcontactidentifier', [
             'form_params'   =>  [
                 'channel_type'  =>  'a',
                 'identifier'  =>  'a',
@@ -71,10 +66,10 @@ trait CommunicationContactIdentifierTestTraits
     }
 
     /**
-     * Get test
-     *
-     * @return bool
-     */
+    * Get test
+    *
+    * @return bool
+    */
     public function test_communicationcontactidentifier_model_get()
     {
         $result = AbstractCommunicationContactIdentifierService::get();
@@ -91,11 +86,9 @@ trait CommunicationContactIdentifierTestTraits
 
     public function test_communicationcontactidentifier_get_paginated()
     {
-        $result = AbstractCommunicationContactIdentifierService::get(
-            null, [
+        $result = AbstractCommunicationContactIdentifierService::get(null, [
             'paginated' =>  'true'
-            ]
-        );
+        ]);
 
         $this->assertIsObject($result, LengthAwarePaginator::class);
     }
@@ -103,7 +96,7 @@ trait CommunicationContactIdentifierTestTraits
     public function test_communicationcontactidentifier_event_retrieved_without_object()
     {
         try {
-            event(new \NextDeveloper\Communication\Events\CommunicationContactIdentifier\CommunicationContactIdentifierRetrievedEvent());
+            event( new \NextDeveloper\Communication\Events\CommunicationContactIdentifier\CommunicationContactIdentifierRetrievedEvent() );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -113,7 +106,7 @@ trait CommunicationContactIdentifierTestTraits
     public function test_communicationcontactidentifier_event_created_without_object()
     {
         try {
-            event(new \NextDeveloper\Communication\Events\CommunicationContactIdentifier\CommunicationContactIdentifierCreatedEvent());
+            event( new \NextDeveloper\Communication\Events\CommunicationContactIdentifier\CommunicationContactIdentifierCreatedEvent() );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -123,7 +116,7 @@ trait CommunicationContactIdentifierTestTraits
     public function test_communicationcontactidentifier_event_creating_without_object()
     {
         try {
-            event(new \NextDeveloper\Communication\Events\CommunicationContactIdentifier\CommunicationContactIdentifierCreatingEvent());
+            event( new \NextDeveloper\Communication\Events\CommunicationContactIdentifier\CommunicationContactIdentifierCreatingEvent() );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -133,7 +126,7 @@ trait CommunicationContactIdentifierTestTraits
     public function test_communicationcontactidentifier_event_saving_without_object()
     {
         try {
-            event(new \NextDeveloper\Communication\Events\CommunicationContactIdentifier\CommunicationContactIdentifierSavingEvent());
+            event( new \NextDeveloper\Communication\Events\CommunicationContactIdentifier\CommunicationContactIdentifierSavingEvent() );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -143,7 +136,7 @@ trait CommunicationContactIdentifierTestTraits
     public function test_communicationcontactidentifier_event_saved_without_object()
     {
         try {
-            event(new \NextDeveloper\Communication\Events\CommunicationContactIdentifier\CommunicationContactIdentifierSavedEvent());
+            event( new \NextDeveloper\Communication\Events\CommunicationContactIdentifier\CommunicationContactIdentifierSavedEvent() );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -153,7 +146,7 @@ trait CommunicationContactIdentifierTestTraits
     public function test_communicationcontactidentifier_event_updating_without_object()
     {
         try {
-            event(new \NextDeveloper\Communication\Events\CommunicationContactIdentifier\CommunicationContactIdentifierUpdatingEvent());
+            event( new \NextDeveloper\Communication\Events\CommunicationContactIdentifier\CommunicationContactIdentifierUpdatingEvent() );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -163,7 +156,7 @@ trait CommunicationContactIdentifierTestTraits
     public function test_communicationcontactidentifier_event_updated_without_object()
     {
         try {
-            event(new \NextDeveloper\Communication\Events\CommunicationContactIdentifier\CommunicationContactIdentifierUpdatedEvent());
+            event( new \NextDeveloper\Communication\Events\CommunicationContactIdentifier\CommunicationContactIdentifierUpdatedEvent() );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -173,7 +166,7 @@ trait CommunicationContactIdentifierTestTraits
     public function test_communicationcontactidentifier_event_deleting_without_object()
     {
         try {
-            event(new \NextDeveloper\Communication\Events\CommunicationContactIdentifier\CommunicationContactIdentifierDeletingEvent());
+            event( new \NextDeveloper\Communication\Events\CommunicationContactIdentifier\CommunicationContactIdentifierDeletingEvent() );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -183,7 +176,7 @@ trait CommunicationContactIdentifierTestTraits
     public function test_communicationcontactidentifier_event_deleted_without_object()
     {
         try {
-            event(new \NextDeveloper\Communication\Events\CommunicationContactIdentifier\CommunicationContactIdentifierDeletedEvent());
+            event( new \NextDeveloper\Communication\Events\CommunicationContactIdentifier\CommunicationContactIdentifierDeletedEvent() );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -193,7 +186,7 @@ trait CommunicationContactIdentifierTestTraits
     public function test_communicationcontactidentifier_event_restoring_without_object()
     {
         try {
-            event(new \NextDeveloper\Communication\Events\CommunicationContactIdentifier\CommunicationContactIdentifierRestoringEvent());
+            event( new \NextDeveloper\Communication\Events\CommunicationContactIdentifier\CommunicationContactIdentifierRestoringEvent() );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -203,7 +196,7 @@ trait CommunicationContactIdentifierTestTraits
     public function test_communicationcontactidentifier_event_restored_without_object()
     {
         try {
-            event(new \NextDeveloper\Communication\Events\CommunicationContactIdentifier\CommunicationContactIdentifierRestoredEvent());
+            event( new \NextDeveloper\Communication\Events\CommunicationContactIdentifier\CommunicationContactIdentifierRestoredEvent() );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -216,7 +209,7 @@ trait CommunicationContactIdentifierTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationContactIdentifier::first();
 
-            event(new \NextDeveloper\Communication\Events\CommunicationContactIdentifier\CommunicationContactIdentifierRetrievedEvent($model));
+            event( new \NextDeveloper\Communication\Events\CommunicationContactIdentifier\CommunicationContactIdentifierRetrievedEvent($model) );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -228,7 +221,7 @@ trait CommunicationContactIdentifierTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationContactIdentifier::first();
 
-            event(new \NextDeveloper\Communication\Events\CommunicationContactIdentifier\CommunicationContactIdentifierCreatedEvent($model));
+            event( new \NextDeveloper\Communication\Events\CommunicationContactIdentifier\CommunicationContactIdentifierCreatedEvent($model) );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -240,7 +233,7 @@ trait CommunicationContactIdentifierTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationContactIdentifier::first();
 
-            event(new \NextDeveloper\Communication\Events\CommunicationContactIdentifier\CommunicationContactIdentifierCreatingEvent($model));
+            event( new \NextDeveloper\Communication\Events\CommunicationContactIdentifier\CommunicationContactIdentifierCreatingEvent($model) );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -252,7 +245,7 @@ trait CommunicationContactIdentifierTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationContactIdentifier::first();
 
-            event(new \NextDeveloper\Communication\Events\CommunicationContactIdentifier\CommunicationContactIdentifierSavingEvent($model));
+            event( new \NextDeveloper\Communication\Events\CommunicationContactIdentifier\CommunicationContactIdentifierSavingEvent($model) );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -264,7 +257,7 @@ trait CommunicationContactIdentifierTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationContactIdentifier::first();
 
-            event(new \NextDeveloper\Communication\Events\CommunicationContactIdentifier\CommunicationContactIdentifierSavedEvent($model));
+            event( new \NextDeveloper\Communication\Events\CommunicationContactIdentifier\CommunicationContactIdentifierSavedEvent($model) );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -276,7 +269,7 @@ trait CommunicationContactIdentifierTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationContactIdentifier::first();
 
-            event(new \NextDeveloper\Communication\Events\CommunicationContactIdentifier\CommunicationContactIdentifierUpdatingEvent($model));
+            event( new \NextDeveloper\Communication\Events\CommunicationContactIdentifier\CommunicationContactIdentifierUpdatingEvent($model) );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -288,7 +281,7 @@ trait CommunicationContactIdentifierTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationContactIdentifier::first();
 
-            event(new \NextDeveloper\Communication\Events\CommunicationContactIdentifier\CommunicationContactIdentifierUpdatedEvent($model));
+            event( new \NextDeveloper\Communication\Events\CommunicationContactIdentifier\CommunicationContactIdentifierUpdatedEvent($model) );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -300,7 +293,7 @@ trait CommunicationContactIdentifierTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationContactIdentifier::first();
 
-            event(new \NextDeveloper\Communication\Events\CommunicationContactIdentifier\CommunicationContactIdentifierDeletingEvent($model));
+            event( new \NextDeveloper\Communication\Events\CommunicationContactIdentifier\CommunicationContactIdentifierDeletingEvent($model) );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -312,7 +305,7 @@ trait CommunicationContactIdentifierTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationContactIdentifier::first();
 
-            event(new \NextDeveloper\Communication\Events\CommunicationContactIdentifier\CommunicationContactIdentifierDeletedEvent($model));
+            event( new \NextDeveloper\Communication\Events\CommunicationContactIdentifier\CommunicationContactIdentifierDeletedEvent($model) );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -324,7 +317,7 @@ trait CommunicationContactIdentifierTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationContactIdentifier::first();
 
-            event(new \NextDeveloper\Communication\Events\CommunicationContactIdentifier\CommunicationContactIdentifierRestoringEvent($model));
+            event( new \NextDeveloper\Communication\Events\CommunicationContactIdentifier\CommunicationContactIdentifierRestoringEvent($model) );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -336,7 +329,7 @@ trait CommunicationContactIdentifierTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationContactIdentifier::first();
 
-            event(new \NextDeveloper\Communication\Events\CommunicationContactIdentifier\CommunicationContactIdentifierRestoredEvent($model));
+            event( new \NextDeveloper\Communication\Events\CommunicationContactIdentifier\CommunicationContactIdentifierRestoredEvent($model) );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -347,11 +340,9 @@ trait CommunicationContactIdentifierTestTraits
     public function test_communicationcontactidentifier_event_channel_type_filter()
     {
         try {
-            $request = new Request(
-                [
+            $request = new Request([
                 'channel_type'  =>  'a'
-                ]
-            );
+            ]);
 
             $filter = new CommunicationContactIdentifierQueryFilter($request);
 
@@ -366,11 +357,9 @@ trait CommunicationContactIdentifierTestTraits
     public function test_communicationcontactidentifier_event_identifier_filter()
     {
         try {
-            $request = new Request(
-                [
+            $request = new Request([
                 'identifier'  =>  'a'
-                ]
-            );
+            ]);
 
             $filter = new CommunicationContactIdentifierQueryFilter($request);
 
@@ -385,11 +374,9 @@ trait CommunicationContactIdentifierTestTraits
     public function test_communicationcontactidentifier_event_suppressed_reason_filter()
     {
         try {
-            $request = new Request(
-                [
+            $request = new Request([
                 'suppressed_reason'  =>  'a'
-                ]
-            );
+            ]);
 
             $filter = new CommunicationContactIdentifierQueryFilter($request);
 
@@ -404,11 +391,9 @@ trait CommunicationContactIdentifierTestTraits
     public function test_communicationcontactidentifier_event_suppressed_at_filter_start()
     {
         try {
-            $request = new Request(
-                [
+            $request = new Request([
                 'suppressed_atStart'  =>  now()
-                ]
-            );
+            ]);
 
             $filter = new CommunicationContactIdentifierQueryFilter($request);
 
@@ -423,11 +408,9 @@ trait CommunicationContactIdentifierTestTraits
     public function test_communicationcontactidentifier_event_created_at_filter_start()
     {
         try {
-            $request = new Request(
-                [
+            $request = new Request([
                 'created_atStart'  =>  now()
-                ]
-            );
+            ]);
 
             $filter = new CommunicationContactIdentifierQueryFilter($request);
 
@@ -442,11 +425,9 @@ trait CommunicationContactIdentifierTestTraits
     public function test_communicationcontactidentifier_event_updated_at_filter_start()
     {
         try {
-            $request = new Request(
-                [
+            $request = new Request([
                 'updated_atStart'  =>  now()
-                ]
-            );
+            ]);
 
             $filter = new CommunicationContactIdentifierQueryFilter($request);
 
@@ -461,11 +442,9 @@ trait CommunicationContactIdentifierTestTraits
     public function test_communicationcontactidentifier_event_deleted_at_filter_start()
     {
         try {
-            $request = new Request(
-                [
+            $request = new Request([
                 'deleted_atStart'  =>  now()
-                ]
-            );
+            ]);
 
             $filter = new CommunicationContactIdentifierQueryFilter($request);
 
@@ -480,11 +459,9 @@ trait CommunicationContactIdentifierTestTraits
     public function test_communicationcontactidentifier_event_suppressed_at_filter_end()
     {
         try {
-            $request = new Request(
-                [
+            $request = new Request([
                 'suppressed_atEnd'  =>  now()
-                ]
-            );
+            ]);
 
             $filter = new CommunicationContactIdentifierQueryFilter($request);
 
@@ -499,11 +476,9 @@ trait CommunicationContactIdentifierTestTraits
     public function test_communicationcontactidentifier_event_created_at_filter_end()
     {
         try {
-            $request = new Request(
-                [
+            $request = new Request([
                 'created_atEnd'  =>  now()
-                ]
-            );
+            ]);
 
             $filter = new CommunicationContactIdentifierQueryFilter($request);
 
@@ -518,11 +493,9 @@ trait CommunicationContactIdentifierTestTraits
     public function test_communicationcontactidentifier_event_updated_at_filter_end()
     {
         try {
-            $request = new Request(
-                [
+            $request = new Request([
                 'updated_atEnd'  =>  now()
-                ]
-            );
+            ]);
 
             $filter = new CommunicationContactIdentifierQueryFilter($request);
 
@@ -537,11 +510,9 @@ trait CommunicationContactIdentifierTestTraits
     public function test_communicationcontactidentifier_event_deleted_at_filter_end()
     {
         try {
-            $request = new Request(
-                [
+            $request = new Request([
                 'deleted_atEnd'  =>  now()
-                ]
-            );
+            ]);
 
             $filter = new CommunicationContactIdentifierQueryFilter($request);
 
@@ -556,12 +527,10 @@ trait CommunicationContactIdentifierTestTraits
     public function test_communicationcontactidentifier_event_suppressed_at_filter_start_and_end()
     {
         try {
-            $request = new Request(
-                [
+            $request = new Request([
                 'suppressed_atStart'  =>  now(),
                 'suppressed_atEnd'  =>  now()
-                ]
-            );
+            ]);
 
             $filter = new CommunicationContactIdentifierQueryFilter($request);
 
@@ -576,12 +545,10 @@ trait CommunicationContactIdentifierTestTraits
     public function test_communicationcontactidentifier_event_created_at_filter_start_and_end()
     {
         try {
-            $request = new Request(
-                [
+            $request = new Request([
                 'created_atStart'  =>  now(),
                 'created_atEnd'  =>  now()
-                ]
-            );
+            ]);
 
             $filter = new CommunicationContactIdentifierQueryFilter($request);
 
@@ -596,12 +563,10 @@ trait CommunicationContactIdentifierTestTraits
     public function test_communicationcontactidentifier_event_updated_at_filter_start_and_end()
     {
         try {
-            $request = new Request(
-                [
+            $request = new Request([
                 'updated_atStart'  =>  now(),
                 'updated_atEnd'  =>  now()
-                ]
-            );
+            ]);
 
             $filter = new CommunicationContactIdentifierQueryFilter($request);
 
@@ -616,12 +581,10 @@ trait CommunicationContactIdentifierTestTraits
     public function test_communicationcontactidentifier_event_deleted_at_filter_start_and_end()
     {
         try {
-            $request = new Request(
-                [
+            $request = new Request([
                 'deleted_atStart'  =>  now(),
                 'deleted_atEnd'  =>  now()
-                ]
-            );
+            ]);
 
             $filter = new CommunicationContactIdentifierQueryFilter($request);
 

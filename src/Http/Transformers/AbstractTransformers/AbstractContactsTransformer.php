@@ -29,12 +29,11 @@ use NextDeveloper\IAM\Database\Scopes\AuthorizationScope;
  *
  * @package NextDeveloper\Communication\Http\Transformers
  */
-class AbstractContactsTransformer extends AbstractTransformer
-{
+class AbstractContactsTransformer extends AbstractTransformer {
 
     /**
-     * @var array
-     */
+    * @var array
+    */
     protected array $availableIncludes = [
         'states',
         'actions',
@@ -52,22 +51,19 @@ class AbstractContactsTransformer extends AbstractTransformer
      *
      * @return array
      */
-    public function transform(Contacts $model)
-    {
+    public function transform(Contacts $model) {
                                                 $iamAccountId = \NextDeveloper\IAM\Database\Models\Accounts::where('id', $model->iam_account_id)->first();
                         
-        return $this->buildPayload(
-            [
-            'id'  =>  $model->uuid,
-            'full_name'  =>  $model->full_name,
-            'notes'  =>  $model->notes,
-            'tags'  =>  $model->tags,
-            'iam_account_id'  =>  $iamAccountId ? $iamAccountId->uuid : null,
-            'created_at'  =>  $model->created_at,
-            'updated_at'  =>  $model->updated_at,
-            'deleted_at'  =>  $model->deleted_at,
-            ]
-        );
+        return $this->buildPayload([
+'id'  =>  $model->uuid,
+'full_name'  =>  $model->full_name,
+'notes'  =>  $model->notes,
+'tags'  =>  $model->tags,
+'iam_account_id'  =>  $iamAccountId ? $iamAccountId->uuid : null,
+'created_at'  =>  $model->created_at,
+'updated_at'  =>  $model->updated_at,
+'deleted_at'  =>  $model->deleted_at,
+    ]);
     }
 
     public function includeStates(Contacts $model)
@@ -154,6 +150,7 @@ class AbstractContactsTransformer extends AbstractTransformer
         return $this->collection($addresses, new AddressesTransformer());
     }
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
 
 
 }

@@ -16,20 +16,18 @@ trait CommunicationThreadAssignmentTestTraits
     public $http;
 
     /**
-     *   Creating the Guzzle object
-     */
+    *   Creating the Guzzle object
+    */
     public function setupGuzzle()
     {
-        $this->http = new Client(
-            [
+        $this->http = new Client([
             'base_uri'  =>  '127.0.0.1:8000'
-            ]
-        );
+        ]);
     }
 
     /**
-     *   Destroying the Guzzle object
-     */
+    *   Destroying the Guzzle object
+    */
     public function destroyGuzzle()
     {
         $this->http = null;
@@ -44,19 +42,16 @@ trait CommunicationThreadAssignmentTestTraits
             ['http_errors' => false]
         );
 
-        $this->assertContains(
-            $response->getStatusCode(), [
+        $this->assertContains($response->getStatusCode(), [
             Response::HTTP_OK,
             Response::HTTP_NOT_FOUND
-            ]
-        );
+        ]);
     }
 
     public function test_http_communicationthreadassignment_post()
     {
         $this->setupGuzzle();
-        $response = $this->http->request(
-            'POST', '/communication/communicationthreadassignment', [
+        $response = $this->http->request('POST', '/communication/communicationthreadassignment', [
             'form_params'   =>  [
                     ],
                 ['http_errors' => false]
@@ -67,10 +62,10 @@ trait CommunicationThreadAssignmentTestTraits
     }
 
     /**
-     * Get test
-     *
-     * @return bool
-     */
+    * Get test
+    *
+    * @return bool
+    */
     public function test_communicationthreadassignment_model_get()
     {
         $result = AbstractCommunicationThreadAssignmentService::get();
@@ -87,11 +82,9 @@ trait CommunicationThreadAssignmentTestTraits
 
     public function test_communicationthreadassignment_get_paginated()
     {
-        $result = AbstractCommunicationThreadAssignmentService::get(
-            null, [
+        $result = AbstractCommunicationThreadAssignmentService::get(null, [
             'paginated' =>  'true'
-            ]
-        );
+        ]);
 
         $this->assertIsObject($result, LengthAwarePaginator::class);
     }
@@ -99,7 +92,7 @@ trait CommunicationThreadAssignmentTestTraits
     public function test_communicationthreadassignment_event_retrieved_without_object()
     {
         try {
-            event(new \NextDeveloper\Communication\Events\CommunicationThreadAssignment\CommunicationThreadAssignmentRetrievedEvent());
+            event( new \NextDeveloper\Communication\Events\CommunicationThreadAssignment\CommunicationThreadAssignmentRetrievedEvent() );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -109,7 +102,7 @@ trait CommunicationThreadAssignmentTestTraits
     public function test_communicationthreadassignment_event_created_without_object()
     {
         try {
-            event(new \NextDeveloper\Communication\Events\CommunicationThreadAssignment\CommunicationThreadAssignmentCreatedEvent());
+            event( new \NextDeveloper\Communication\Events\CommunicationThreadAssignment\CommunicationThreadAssignmentCreatedEvent() );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -119,7 +112,7 @@ trait CommunicationThreadAssignmentTestTraits
     public function test_communicationthreadassignment_event_creating_without_object()
     {
         try {
-            event(new \NextDeveloper\Communication\Events\CommunicationThreadAssignment\CommunicationThreadAssignmentCreatingEvent());
+            event( new \NextDeveloper\Communication\Events\CommunicationThreadAssignment\CommunicationThreadAssignmentCreatingEvent() );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -129,7 +122,7 @@ trait CommunicationThreadAssignmentTestTraits
     public function test_communicationthreadassignment_event_saving_without_object()
     {
         try {
-            event(new \NextDeveloper\Communication\Events\CommunicationThreadAssignment\CommunicationThreadAssignmentSavingEvent());
+            event( new \NextDeveloper\Communication\Events\CommunicationThreadAssignment\CommunicationThreadAssignmentSavingEvent() );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -139,7 +132,7 @@ trait CommunicationThreadAssignmentTestTraits
     public function test_communicationthreadassignment_event_saved_without_object()
     {
         try {
-            event(new \NextDeveloper\Communication\Events\CommunicationThreadAssignment\CommunicationThreadAssignmentSavedEvent());
+            event( new \NextDeveloper\Communication\Events\CommunicationThreadAssignment\CommunicationThreadAssignmentSavedEvent() );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -149,7 +142,7 @@ trait CommunicationThreadAssignmentTestTraits
     public function test_communicationthreadassignment_event_updating_without_object()
     {
         try {
-            event(new \NextDeveloper\Communication\Events\CommunicationThreadAssignment\CommunicationThreadAssignmentUpdatingEvent());
+            event( new \NextDeveloper\Communication\Events\CommunicationThreadAssignment\CommunicationThreadAssignmentUpdatingEvent() );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -159,7 +152,7 @@ trait CommunicationThreadAssignmentTestTraits
     public function test_communicationthreadassignment_event_updated_without_object()
     {
         try {
-            event(new \NextDeveloper\Communication\Events\CommunicationThreadAssignment\CommunicationThreadAssignmentUpdatedEvent());
+            event( new \NextDeveloper\Communication\Events\CommunicationThreadAssignment\CommunicationThreadAssignmentUpdatedEvent() );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -169,7 +162,7 @@ trait CommunicationThreadAssignmentTestTraits
     public function test_communicationthreadassignment_event_deleting_without_object()
     {
         try {
-            event(new \NextDeveloper\Communication\Events\CommunicationThreadAssignment\CommunicationThreadAssignmentDeletingEvent());
+            event( new \NextDeveloper\Communication\Events\CommunicationThreadAssignment\CommunicationThreadAssignmentDeletingEvent() );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -179,7 +172,7 @@ trait CommunicationThreadAssignmentTestTraits
     public function test_communicationthreadassignment_event_deleted_without_object()
     {
         try {
-            event(new \NextDeveloper\Communication\Events\CommunicationThreadAssignment\CommunicationThreadAssignmentDeletedEvent());
+            event( new \NextDeveloper\Communication\Events\CommunicationThreadAssignment\CommunicationThreadAssignmentDeletedEvent() );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -189,7 +182,7 @@ trait CommunicationThreadAssignmentTestTraits
     public function test_communicationthreadassignment_event_restoring_without_object()
     {
         try {
-            event(new \NextDeveloper\Communication\Events\CommunicationThreadAssignment\CommunicationThreadAssignmentRestoringEvent());
+            event( new \NextDeveloper\Communication\Events\CommunicationThreadAssignment\CommunicationThreadAssignmentRestoringEvent() );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -199,7 +192,7 @@ trait CommunicationThreadAssignmentTestTraits
     public function test_communicationthreadassignment_event_restored_without_object()
     {
         try {
-            event(new \NextDeveloper\Communication\Events\CommunicationThreadAssignment\CommunicationThreadAssignmentRestoredEvent());
+            event( new \NextDeveloper\Communication\Events\CommunicationThreadAssignment\CommunicationThreadAssignmentRestoredEvent() );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -212,7 +205,7 @@ trait CommunicationThreadAssignmentTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationThreadAssignment::first();
 
-            event(new \NextDeveloper\Communication\Events\CommunicationThreadAssignment\CommunicationThreadAssignmentRetrievedEvent($model));
+            event( new \NextDeveloper\Communication\Events\CommunicationThreadAssignment\CommunicationThreadAssignmentRetrievedEvent($model) );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -224,7 +217,7 @@ trait CommunicationThreadAssignmentTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationThreadAssignment::first();
 
-            event(new \NextDeveloper\Communication\Events\CommunicationThreadAssignment\CommunicationThreadAssignmentCreatedEvent($model));
+            event( new \NextDeveloper\Communication\Events\CommunicationThreadAssignment\CommunicationThreadAssignmentCreatedEvent($model) );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -236,7 +229,7 @@ trait CommunicationThreadAssignmentTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationThreadAssignment::first();
 
-            event(new \NextDeveloper\Communication\Events\CommunicationThreadAssignment\CommunicationThreadAssignmentCreatingEvent($model));
+            event( new \NextDeveloper\Communication\Events\CommunicationThreadAssignment\CommunicationThreadAssignmentCreatingEvent($model) );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -248,7 +241,7 @@ trait CommunicationThreadAssignmentTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationThreadAssignment::first();
 
-            event(new \NextDeveloper\Communication\Events\CommunicationThreadAssignment\CommunicationThreadAssignmentSavingEvent($model));
+            event( new \NextDeveloper\Communication\Events\CommunicationThreadAssignment\CommunicationThreadAssignmentSavingEvent($model) );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -260,7 +253,7 @@ trait CommunicationThreadAssignmentTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationThreadAssignment::first();
 
-            event(new \NextDeveloper\Communication\Events\CommunicationThreadAssignment\CommunicationThreadAssignmentSavedEvent($model));
+            event( new \NextDeveloper\Communication\Events\CommunicationThreadAssignment\CommunicationThreadAssignmentSavedEvent($model) );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -272,7 +265,7 @@ trait CommunicationThreadAssignmentTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationThreadAssignment::first();
 
-            event(new \NextDeveloper\Communication\Events\CommunicationThreadAssignment\CommunicationThreadAssignmentUpdatingEvent($model));
+            event( new \NextDeveloper\Communication\Events\CommunicationThreadAssignment\CommunicationThreadAssignmentUpdatingEvent($model) );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -284,7 +277,7 @@ trait CommunicationThreadAssignmentTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationThreadAssignment::first();
 
-            event(new \NextDeveloper\Communication\Events\CommunicationThreadAssignment\CommunicationThreadAssignmentUpdatedEvent($model));
+            event( new \NextDeveloper\Communication\Events\CommunicationThreadAssignment\CommunicationThreadAssignmentUpdatedEvent($model) );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -296,7 +289,7 @@ trait CommunicationThreadAssignmentTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationThreadAssignment::first();
 
-            event(new \NextDeveloper\Communication\Events\CommunicationThreadAssignment\CommunicationThreadAssignmentDeletingEvent($model));
+            event( new \NextDeveloper\Communication\Events\CommunicationThreadAssignment\CommunicationThreadAssignmentDeletingEvent($model) );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -308,7 +301,7 @@ trait CommunicationThreadAssignmentTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationThreadAssignment::first();
 
-            event(new \NextDeveloper\Communication\Events\CommunicationThreadAssignment\CommunicationThreadAssignmentDeletedEvent($model));
+            event( new \NextDeveloper\Communication\Events\CommunicationThreadAssignment\CommunicationThreadAssignmentDeletedEvent($model) );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -320,7 +313,7 @@ trait CommunicationThreadAssignmentTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationThreadAssignment::first();
 
-            event(new \NextDeveloper\Communication\Events\CommunicationThreadAssignment\CommunicationThreadAssignmentRestoringEvent($model));
+            event( new \NextDeveloper\Communication\Events\CommunicationThreadAssignment\CommunicationThreadAssignmentRestoringEvent($model) );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -332,7 +325,7 @@ trait CommunicationThreadAssignmentTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationThreadAssignment::first();
 
-            event(new \NextDeveloper\Communication\Events\CommunicationThreadAssignment\CommunicationThreadAssignmentRestoredEvent($model));
+            event( new \NextDeveloper\Communication\Events\CommunicationThreadAssignment\CommunicationThreadAssignmentRestoredEvent($model) );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -343,11 +336,9 @@ trait CommunicationThreadAssignmentTestTraits
     public function test_communicationthreadassignment_event_created_at_filter_start()
     {
         try {
-            $request = new Request(
-                [
+            $request = new Request([
                 'created_atStart'  =>  now()
-                ]
-            );
+            ]);
 
             $filter = new CommunicationThreadAssignmentQueryFilter($request);
 
@@ -362,11 +353,9 @@ trait CommunicationThreadAssignmentTestTraits
     public function test_communicationthreadassignment_event_created_at_filter_end()
     {
         try {
-            $request = new Request(
-                [
+            $request = new Request([
                 'created_atEnd'  =>  now()
-                ]
-            );
+            ]);
 
             $filter = new CommunicationThreadAssignmentQueryFilter($request);
 
@@ -381,12 +370,10 @@ trait CommunicationThreadAssignmentTestTraits
     public function test_communicationthreadassignment_event_created_at_filter_start_and_end()
     {
         try {
-            $request = new Request(
-                [
+            $request = new Request([
                 'created_atStart'  =>  now(),
                 'created_atEnd'  =>  now()
-                ]
-            );
+            ]);
 
             $filter = new CommunicationThreadAssignmentQueryFilter($request);
 

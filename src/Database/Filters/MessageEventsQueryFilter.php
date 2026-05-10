@@ -14,8 +14,8 @@ class MessageEventsQueryFilter extends AbstractQueryFilter
 {
 
     /**
-     * @var Builder
-     */
+    * @var Builder
+    */
     protected $builder;
     
     public function eventType($value)
@@ -26,51 +26,51 @@ class MessageEventsQueryFilter extends AbstractQueryFilter
         //  This is an alias function of eventType
     public function event_type($value)
     {
-        return $this->eventType($value);
+    return $this->eventType($value);
     }
     
     public function occurredAtStart($date)
     {
-        return $this->builder->where('occurred_at', '>=', $date);
+        return $this->builder->where( 'occurred_at', '>=', $date );
     }
 
     public function occurredAtEnd($date)
     {
-        return $this->builder->where('occurred_at', '<=', $date);
+        return $this->builder->where( 'occurred_at', '<=', $date );
     }
 
     //  This is an alias function of occurredAt
     public function occurred_at_start($value)
     {
-        return $this->occurredAtStart($value);
+    return $this->occurredAtStart($value);
     }
 
     //  This is an alias function of occurredAt
     public function occurred_at_end($value)
     {
-        return $this->occurredAtEnd($value);
+    return $this->occurredAtEnd($value);
     }
 
     public function createdAtStart($date)
     {
-        return $this->builder->where('created_at', '>=', $date);
+        return $this->builder->where( 'created_at', '>=', $date );
     }
 
     public function createdAtEnd($date)
     {
-        return $this->builder->where('created_at', '<=', $date);
+        return $this->builder->where( 'created_at', '<=', $date );
     }
 
     //  This is an alias function of createdAt
     public function created_at_start($value)
     {
-        return $this->createdAtStart($value);
+    return $this->createdAtStart($value);
     }
 
     //  This is an alias function of createdAt
     public function created_at_end($value)
     {
-        return $this->createdAtEnd($value);
+    return $this->createdAtEnd($value);
     }
 
     public function communicationMessageId($value)
@@ -80,15 +80,16 @@ class MessageEventsQueryFilter extends AbstractQueryFilter
         if($communicationMessage) {
             return $this->builder->where('communication_message_id', '=', $communicationMessage->id);
         }
-    }
+        }
 
         //  This is an alias function of communicationMessage
     public function communication_message_id($value)
     {
-        return $this->communicationMessage($value);
+    return $this->communicationMessage($value);
     }
     
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
 
 
 }

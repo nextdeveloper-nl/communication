@@ -10,15 +10,14 @@ class ChannelsCreateRequest extends AbstractFormRequest
     /**
      * @return array
      */
-    public function rules()
-    {
+    public function rules() {
         return [
             'name' => 'required|string',
-        'type' => 'required|string',
-        'configuration' => 'required',
-        'credentials' => 'nullable',
-        'is_active' => 'boolean',
-        'priority' => 'integer',
+'type' => 'required|string',
+'configuration' => 'required',
+'credentials' => 'nullable',
+'is_active' => 'boolean',
+'priority' => 'integer',
         ];
     }
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE

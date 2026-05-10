@@ -73,6 +73,16 @@ class Communicate
      */
     public function sendEmail(string $subject, string $body): void
     {
+        if (!$this->user->iam_account_id) {
+            Log::warning('[Communicate::sendEmail] User has no iam_account_id, falling back to direct SMTP', [
+                'user_id' => $this->user->id,
+                'email'   => $this->user->email,
+            ]);
+
+            $this->sendDirectEmail($subject, $body);
+            return;
+        }
+
         $channel = ChannelHelper::getPrimaryForAccount($this->user->iam_account_id, 'email');
 
         if (!$channel) {
