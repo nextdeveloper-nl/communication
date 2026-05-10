@@ -49,6 +49,13 @@ class Communicate
      */
     public function sendNotification(string $severity, string $message, mixed $object = null): void
     {
+        if (!$this->user->iam_account_id) {
+            Log::warning('[Communicate::sendNotification] User has no iam_account_id, skipping notification', [
+                'user_id' => $this->user->id,
+            ]);
+            return;
+        }
+
         $preferences = UserPreferencesService::getForUser($this->user->id);
 
         if ($preferences->is_system_email_optout && $severity === 'info') {
