@@ -9,7 +9,9 @@ use NextDeveloper\Communication\Database\Models\Channels;
 use NextDeveloper\Communication\Services\MessagesService;
 use NextDeveloper\Communication\Services\NotificationsService;
 use NextDeveloper\Communication\Services\UserPreferencesService;
+use NextDeveloper\IAM\Database\Models\AccountUsers;
 use NextDeveloper\IAM\Database\Models\Users;
+use NextDeveloper\IAM\Database\Scopes\AuthorizationScope;
 
 /**
  * Convenience wrapper for communicating with an IAM user via the V2 communication module.
@@ -49,8 +51,12 @@ class Communicate
      */
     public function sendNotification(string $severity, string $message, mixed $object = null): void
     {
-        if (!$this->user->iam_account_id) {
-            Log::warning('[Communicate::sendNotification] User has no iam_account_id, skipping notification', [
+        $accountUser = AccountUsers::withoutGlobalScope(AuthorizationScope::class)
+            ->where('iam_user_id', $this->user->id)
+            ->first();
+
+        if (!$accountUser) {
+            Log::warning('[Communicate::sendNotification] No account found for user, skipping notification', [
                 'user_id' => $this->user->id,
             ]);
             return;
@@ -70,7 +76,7 @@ class Communicate
             'object_id'      => $object?->id,
             'object_type'    => $object ? get_class($object) : null,
             'iam_user_id'    => $this->user->id,
-            'iam_account_id' => $this->user->iam_account_id,
+            'iam_account_id' => $accountUser->iam_account_id,
         ]);
     }
 
