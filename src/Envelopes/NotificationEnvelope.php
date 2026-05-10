@@ -45,8 +45,8 @@ class NotificationEnvelope extends Mailable
     {
         return new Envelope(
             from: new Address(
-                address: config('leo.mail.from'),
-                name: config('leo.mail.from_name')
+                address: config('leo.mail.from', config('mail.from.address')),
+                name: config('leo.mail.from_name', config('mail.from.name'))
             ),
             to: [
                 new Address(
