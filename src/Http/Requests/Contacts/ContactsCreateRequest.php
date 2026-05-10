@@ -10,12 +10,11 @@ class ContactsCreateRequest extends AbstractFormRequest
     /**
      * @return array
      */
-    public function rules()
-    {
+    public function rules() {
         return [
             'full_name' => 'nullable|string',
-        'notes' => 'nullable|string',
-        'tags' => 'nullable',
+'notes' => 'nullable|string',
+'tags' => 'nullable',
         ];
     }
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE

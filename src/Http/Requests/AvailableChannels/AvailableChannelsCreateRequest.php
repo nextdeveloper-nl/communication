@@ -10,13 +10,12 @@ class AvailableChannelsCreateRequest extends AbstractFormRequest
     /**
      * @return array
      */
-    public function rules()
-    {
+    public function rules() {
         return [
             'name' => 'required|string',
-        'class' => 'required|string',
-        'parameters' => 'nullable',
-        'config' => 'required',
+'class' => 'required|string',
+'parameters' => 'nullable',
+'config' => 'required',
         ];
     }
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE

@@ -29,12 +29,11 @@ use NextDeveloper\IAM\Database\Scopes\AuthorizationScope;
  *
  * @package NextDeveloper\Communication\Http\Transformers
  */
-class AbstractNotificationsTransformer extends AbstractTransformer
-{
+class AbstractNotificationsTransformer extends AbstractTransformer {
 
     /**
-     * @var array
-     */
+    * @var array
+    */
     protected array $availableIncludes = [
         'states',
         'actions',
@@ -52,26 +51,23 @@ class AbstractNotificationsTransformer extends AbstractTransformer
      *
      * @return array
      */
-    public function transform(Notifications $model)
-    {
+    public function transform(Notifications $model) {
                                                 $iamUserId = \NextDeveloper\IAM\Database\Models\Users::where('id', $model->iam_user_id)->first();
                                                             $iamAccountId = \NextDeveloper\IAM\Database\Models\Accounts::where('id', $model->iam_account_id)->first();
                         
-        return $this->buildPayload(
-            [
-            'id'  =>  $model->uuid,
-            'severity'  =>  $model->severity,
-            'object_id'  =>  $model->object_id,
-            'object_type'  =>  $model->object_type,
-            'data'  =>  $model->data,
-            'read_at'  =>  $model->read_at,
-            'iam_user_id'  =>  $iamUserId ? $iamUserId->uuid : null,
-            'iam_account_id'  =>  $iamAccountId ? $iamAccountId->uuid : null,
-            'created_at'  =>  $model->created_at,
-            'updated_at'  =>  $model->updated_at,
-            'deleted_at'  =>  $model->deleted_at,
-            ]
-        );
+        return $this->buildPayload([
+'id'  =>  $model->uuid,
+'severity'  =>  $model->severity,
+'object_id'  =>  $model->object_id,
+'object_type'  =>  $model->object_type,
+'data'  =>  $model->data,
+'read_at'  =>  $model->read_at,
+'iam_user_id'  =>  $iamUserId ? $iamUserId->uuid : null,
+'iam_account_id'  =>  $iamAccountId ? $iamAccountId->uuid : null,
+'created_at'  =>  $model->created_at,
+'updated_at'  =>  $model->updated_at,
+'deleted_at'  =>  $model->deleted_at,
+    ]);
     }
 
     public function includeStates(Notifications $model)
@@ -158,6 +154,7 @@ class AbstractNotificationsTransformer extends AbstractTransformer
         return $this->collection($addresses, new AddressesTransformer());
     }
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
 
 
 }

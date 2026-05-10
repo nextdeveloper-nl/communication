@@ -16,20 +16,18 @@ trait CommunicationUserPreferenceTestTraits
     public $http;
 
     /**
-     *   Creating the Guzzle object
-     */
+    *   Creating the Guzzle object
+    */
     public function setupGuzzle()
     {
-        $this->http = new Client(
-            [
+        $this->http = new Client([
             'base_uri'  =>  '127.0.0.1:8000'
-            ]
-        );
+        ]);
     }
 
     /**
-     *   Destroying the Guzzle object
-     */
+    *   Destroying the Guzzle object
+    */
     public function destroyGuzzle()
     {
         $this->http = null;
@@ -44,19 +42,16 @@ trait CommunicationUserPreferenceTestTraits
             ['http_errors' => false]
         );
 
-        $this->assertContains(
-            $response->getStatusCode(), [
+        $this->assertContains($response->getStatusCode(), [
             Response::HTTP_OK,
             Response::HTTP_NOT_FOUND
-            ]
-        );
+        ]);
     }
 
     public function test_http_communicationuserpreference_post()
     {
         $this->setupGuzzle();
-        $response = $this->http->request(
-            'POST', '/communication/communicationuserpreference', [
+        $response = $this->http->request('POST', '/communication/communicationuserpreference', [
             'form_params'   =>  [
                             ],
                 ['http_errors' => false]
@@ -67,10 +62,10 @@ trait CommunicationUserPreferenceTestTraits
     }
 
     /**
-     * Get test
-     *
-     * @return bool
-     */
+    * Get test
+    *
+    * @return bool
+    */
     public function test_communicationuserpreference_model_get()
     {
         $result = AbstractCommunicationUserPreferenceService::get();
@@ -87,11 +82,9 @@ trait CommunicationUserPreferenceTestTraits
 
     public function test_communicationuserpreference_get_paginated()
     {
-        $result = AbstractCommunicationUserPreferenceService::get(
-            null, [
+        $result = AbstractCommunicationUserPreferenceService::get(null, [
             'paginated' =>  'true'
-            ]
-        );
+        ]);
 
         $this->assertIsObject($result, LengthAwarePaginator::class);
     }
@@ -99,7 +92,7 @@ trait CommunicationUserPreferenceTestTraits
     public function test_communicationuserpreference_event_retrieved_without_object()
     {
         try {
-            event(new \NextDeveloper\Communication\Events\CommunicationUserPreference\CommunicationUserPreferenceRetrievedEvent());
+            event( new \NextDeveloper\Communication\Events\CommunicationUserPreference\CommunicationUserPreferenceRetrievedEvent() );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -109,7 +102,7 @@ trait CommunicationUserPreferenceTestTraits
     public function test_communicationuserpreference_event_created_without_object()
     {
         try {
-            event(new \NextDeveloper\Communication\Events\CommunicationUserPreference\CommunicationUserPreferenceCreatedEvent());
+            event( new \NextDeveloper\Communication\Events\CommunicationUserPreference\CommunicationUserPreferenceCreatedEvent() );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -119,7 +112,7 @@ trait CommunicationUserPreferenceTestTraits
     public function test_communicationuserpreference_event_creating_without_object()
     {
         try {
-            event(new \NextDeveloper\Communication\Events\CommunicationUserPreference\CommunicationUserPreferenceCreatingEvent());
+            event( new \NextDeveloper\Communication\Events\CommunicationUserPreference\CommunicationUserPreferenceCreatingEvent() );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -129,7 +122,7 @@ trait CommunicationUserPreferenceTestTraits
     public function test_communicationuserpreference_event_saving_without_object()
     {
         try {
-            event(new \NextDeveloper\Communication\Events\CommunicationUserPreference\CommunicationUserPreferenceSavingEvent());
+            event( new \NextDeveloper\Communication\Events\CommunicationUserPreference\CommunicationUserPreferenceSavingEvent() );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -139,7 +132,7 @@ trait CommunicationUserPreferenceTestTraits
     public function test_communicationuserpreference_event_saved_without_object()
     {
         try {
-            event(new \NextDeveloper\Communication\Events\CommunicationUserPreference\CommunicationUserPreferenceSavedEvent());
+            event( new \NextDeveloper\Communication\Events\CommunicationUserPreference\CommunicationUserPreferenceSavedEvent() );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -149,7 +142,7 @@ trait CommunicationUserPreferenceTestTraits
     public function test_communicationuserpreference_event_updating_without_object()
     {
         try {
-            event(new \NextDeveloper\Communication\Events\CommunicationUserPreference\CommunicationUserPreferenceUpdatingEvent());
+            event( new \NextDeveloper\Communication\Events\CommunicationUserPreference\CommunicationUserPreferenceUpdatingEvent() );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -159,7 +152,7 @@ trait CommunicationUserPreferenceTestTraits
     public function test_communicationuserpreference_event_updated_without_object()
     {
         try {
-            event(new \NextDeveloper\Communication\Events\CommunicationUserPreference\CommunicationUserPreferenceUpdatedEvent());
+            event( new \NextDeveloper\Communication\Events\CommunicationUserPreference\CommunicationUserPreferenceUpdatedEvent() );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -169,7 +162,7 @@ trait CommunicationUserPreferenceTestTraits
     public function test_communicationuserpreference_event_deleting_without_object()
     {
         try {
-            event(new \NextDeveloper\Communication\Events\CommunicationUserPreference\CommunicationUserPreferenceDeletingEvent());
+            event( new \NextDeveloper\Communication\Events\CommunicationUserPreference\CommunicationUserPreferenceDeletingEvent() );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -179,7 +172,7 @@ trait CommunicationUserPreferenceTestTraits
     public function test_communicationuserpreference_event_deleted_without_object()
     {
         try {
-            event(new \NextDeveloper\Communication\Events\CommunicationUserPreference\CommunicationUserPreferenceDeletedEvent());
+            event( new \NextDeveloper\Communication\Events\CommunicationUserPreference\CommunicationUserPreferenceDeletedEvent() );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -189,7 +182,7 @@ trait CommunicationUserPreferenceTestTraits
     public function test_communicationuserpreference_event_restoring_without_object()
     {
         try {
-            event(new \NextDeveloper\Communication\Events\CommunicationUserPreference\CommunicationUserPreferenceRestoringEvent());
+            event( new \NextDeveloper\Communication\Events\CommunicationUserPreference\CommunicationUserPreferenceRestoringEvent() );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -199,7 +192,7 @@ trait CommunicationUserPreferenceTestTraits
     public function test_communicationuserpreference_event_restored_without_object()
     {
         try {
-            event(new \NextDeveloper\Communication\Events\CommunicationUserPreference\CommunicationUserPreferenceRestoredEvent());
+            event( new \NextDeveloper\Communication\Events\CommunicationUserPreference\CommunicationUserPreferenceRestoredEvent() );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -212,7 +205,7 @@ trait CommunicationUserPreferenceTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationUserPreference::first();
 
-            event(new \NextDeveloper\Communication\Events\CommunicationUserPreference\CommunicationUserPreferenceRetrievedEvent($model));
+            event( new \NextDeveloper\Communication\Events\CommunicationUserPreference\CommunicationUserPreferenceRetrievedEvent($model) );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -224,7 +217,7 @@ trait CommunicationUserPreferenceTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationUserPreference::first();
 
-            event(new \NextDeveloper\Communication\Events\CommunicationUserPreference\CommunicationUserPreferenceCreatedEvent($model));
+            event( new \NextDeveloper\Communication\Events\CommunicationUserPreference\CommunicationUserPreferenceCreatedEvent($model) );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -236,7 +229,7 @@ trait CommunicationUserPreferenceTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationUserPreference::first();
 
-            event(new \NextDeveloper\Communication\Events\CommunicationUserPreference\CommunicationUserPreferenceCreatingEvent($model));
+            event( new \NextDeveloper\Communication\Events\CommunicationUserPreference\CommunicationUserPreferenceCreatingEvent($model) );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -248,7 +241,7 @@ trait CommunicationUserPreferenceTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationUserPreference::first();
 
-            event(new \NextDeveloper\Communication\Events\CommunicationUserPreference\CommunicationUserPreferenceSavingEvent($model));
+            event( new \NextDeveloper\Communication\Events\CommunicationUserPreference\CommunicationUserPreferenceSavingEvent($model) );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -260,7 +253,7 @@ trait CommunicationUserPreferenceTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationUserPreference::first();
 
-            event(new \NextDeveloper\Communication\Events\CommunicationUserPreference\CommunicationUserPreferenceSavedEvent($model));
+            event( new \NextDeveloper\Communication\Events\CommunicationUserPreference\CommunicationUserPreferenceSavedEvent($model) );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -272,7 +265,7 @@ trait CommunicationUserPreferenceTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationUserPreference::first();
 
-            event(new \NextDeveloper\Communication\Events\CommunicationUserPreference\CommunicationUserPreferenceUpdatingEvent($model));
+            event( new \NextDeveloper\Communication\Events\CommunicationUserPreference\CommunicationUserPreferenceUpdatingEvent($model) );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -284,7 +277,7 @@ trait CommunicationUserPreferenceTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationUserPreference::first();
 
-            event(new \NextDeveloper\Communication\Events\CommunicationUserPreference\CommunicationUserPreferenceUpdatedEvent($model));
+            event( new \NextDeveloper\Communication\Events\CommunicationUserPreference\CommunicationUserPreferenceUpdatedEvent($model) );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -296,7 +289,7 @@ trait CommunicationUserPreferenceTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationUserPreference::first();
 
-            event(new \NextDeveloper\Communication\Events\CommunicationUserPreference\CommunicationUserPreferenceDeletingEvent($model));
+            event( new \NextDeveloper\Communication\Events\CommunicationUserPreference\CommunicationUserPreferenceDeletingEvent($model) );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -308,7 +301,7 @@ trait CommunicationUserPreferenceTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationUserPreference::first();
 
-            event(new \NextDeveloper\Communication\Events\CommunicationUserPreference\CommunicationUserPreferenceDeletedEvent($model));
+            event( new \NextDeveloper\Communication\Events\CommunicationUserPreference\CommunicationUserPreferenceDeletedEvent($model) );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -320,7 +313,7 @@ trait CommunicationUserPreferenceTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationUserPreference::first();
 
-            event(new \NextDeveloper\Communication\Events\CommunicationUserPreference\CommunicationUserPreferenceRestoringEvent($model));
+            event( new \NextDeveloper\Communication\Events\CommunicationUserPreference\CommunicationUserPreferenceRestoringEvent($model) );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -332,7 +325,7 @@ trait CommunicationUserPreferenceTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationUserPreference::first();
 
-            event(new \NextDeveloper\Communication\Events\CommunicationUserPreference\CommunicationUserPreferenceRestoredEvent($model));
+            event( new \NextDeveloper\Communication\Events\CommunicationUserPreference\CommunicationUserPreferenceRestoredEvent($model) );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -343,11 +336,9 @@ trait CommunicationUserPreferenceTestTraits
     public function test_communicationuserpreference_event_created_at_filter_start()
     {
         try {
-            $request = new Request(
-                [
+            $request = new Request([
                 'created_atStart'  =>  now()
-                ]
-            );
+            ]);
 
             $filter = new CommunicationUserPreferenceQueryFilter($request);
 
@@ -362,11 +353,9 @@ trait CommunicationUserPreferenceTestTraits
     public function test_communicationuserpreference_event_updated_at_filter_start()
     {
         try {
-            $request = new Request(
-                [
+            $request = new Request([
                 'updated_atStart'  =>  now()
-                ]
-            );
+            ]);
 
             $filter = new CommunicationUserPreferenceQueryFilter($request);
 
@@ -381,11 +370,9 @@ trait CommunicationUserPreferenceTestTraits
     public function test_communicationuserpreference_event_deleted_at_filter_start()
     {
         try {
-            $request = new Request(
-                [
+            $request = new Request([
                 'deleted_atStart'  =>  now()
-                ]
-            );
+            ]);
 
             $filter = new CommunicationUserPreferenceQueryFilter($request);
 
@@ -400,11 +387,9 @@ trait CommunicationUserPreferenceTestTraits
     public function test_communicationuserpreference_event_created_at_filter_end()
     {
         try {
-            $request = new Request(
-                [
+            $request = new Request([
                 'created_atEnd'  =>  now()
-                ]
-            );
+            ]);
 
             $filter = new CommunicationUserPreferenceQueryFilter($request);
 
@@ -419,11 +404,9 @@ trait CommunicationUserPreferenceTestTraits
     public function test_communicationuserpreference_event_updated_at_filter_end()
     {
         try {
-            $request = new Request(
-                [
+            $request = new Request([
                 'updated_atEnd'  =>  now()
-                ]
-            );
+            ]);
 
             $filter = new CommunicationUserPreferenceQueryFilter($request);
 
@@ -438,11 +421,9 @@ trait CommunicationUserPreferenceTestTraits
     public function test_communicationuserpreference_event_deleted_at_filter_end()
     {
         try {
-            $request = new Request(
-                [
+            $request = new Request([
                 'deleted_atEnd'  =>  now()
-                ]
-            );
+            ]);
 
             $filter = new CommunicationUserPreferenceQueryFilter($request);
 
@@ -457,12 +438,10 @@ trait CommunicationUserPreferenceTestTraits
     public function test_communicationuserpreference_event_created_at_filter_start_and_end()
     {
         try {
-            $request = new Request(
-                [
+            $request = new Request([
                 'created_atStart'  =>  now(),
                 'created_atEnd'  =>  now()
-                ]
-            );
+            ]);
 
             $filter = new CommunicationUserPreferenceQueryFilter($request);
 
@@ -477,12 +456,10 @@ trait CommunicationUserPreferenceTestTraits
     public function test_communicationuserpreference_event_updated_at_filter_start_and_end()
     {
         try {
-            $request = new Request(
-                [
+            $request = new Request([
                 'updated_atStart'  =>  now(),
                 'updated_atEnd'  =>  now()
-                ]
-            );
+            ]);
 
             $filter = new CommunicationUserPreferenceQueryFilter($request);
 
@@ -497,12 +474,10 @@ trait CommunicationUserPreferenceTestTraits
     public function test_communicationuserpreference_event_deleted_at_filter_start_and_end()
     {
         try {
-            $request = new Request(
-                [
+            $request = new Request([
                 'deleted_atStart'  =>  now(),
                 'deleted_atEnd'  =>  now()
-                ]
-            );
+            ]);
 
             $filter = new CommunicationUserPreferenceQueryFilter($request);
 

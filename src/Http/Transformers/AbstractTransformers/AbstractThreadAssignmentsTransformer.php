@@ -29,12 +29,11 @@ use NextDeveloper\IAM\Database\Scopes\AuthorizationScope;
  *
  * @package NextDeveloper\Communication\Http\Transformers
  */
-class AbstractThreadAssignmentsTransformer extends AbstractTransformer
-{
+class AbstractThreadAssignmentsTransformer extends AbstractTransformer {
 
     /**
-     * @var array
-     */
+    * @var array
+    */
     protected array $availableIncludes = [
         'states',
         'actions',
@@ -52,21 +51,18 @@ class AbstractThreadAssignmentsTransformer extends AbstractTransformer
      *
      * @return array
      */
-    public function transform(ThreadAssignments $model)
-    {
+    public function transform(ThreadAssignments $model) {
                                                 $communicationThreadId = \NextDeveloper\Communication\Database\Models\Threads::where('id', $model->communication_thread_id)->first();
                                                             $assignedToUserId = \NextDeveloper\IAM\Database\Models\Users::where('id', $model->assigned_to_user_id)->first();
                                                             $assignedByUserId = \NextDeveloper\IAM\Database\Models\Users::where('id', $model->assigned_by_user_id)->first();
                         
-        return $this->buildPayload(
-            [
-            'id'  =>  $model->uuid,
-            'communication_thread_id'  =>  $communicationThreadId ? $communicationThreadId->uuid : null,
-            'assigned_to_user_id'  =>  $assignedToUserId ? $assignedToUserId->uuid : null,
-            'assigned_by_user_id'  =>  $assignedByUserId ? $assignedByUserId->uuid : null,
-            'created_at'  =>  $model->created_at,
-            ]
-        );
+        return $this->buildPayload([
+'id'  =>  $model->uuid,
+'communication_thread_id'  =>  $communicationThreadId ? $communicationThreadId->uuid : null,
+'assigned_to_user_id'  =>  $assignedToUserId ? $assignedToUserId->uuid : null,
+'assigned_by_user_id'  =>  $assignedByUserId ? $assignedByUserId->uuid : null,
+'created_at'  =>  $model->created_at,
+    ]);
     }
 
     public function includeStates(ThreadAssignments $model)
@@ -153,6 +149,7 @@ class AbstractThreadAssignmentsTransformer extends AbstractTransformer
         return $this->collection($addresses, new AddressesTransformer());
     }
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
 
 
 }

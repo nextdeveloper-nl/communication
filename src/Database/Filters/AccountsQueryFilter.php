@@ -14,8 +14,8 @@ class AccountsQueryFilter extends AbstractQueryFilter
 {
 
     /**
-     * @var Builder
-     */
+    * @var Builder
+    */
     protected $builder;
     
     public function plan($value)
@@ -32,7 +32,7 @@ class AccountsQueryFilter extends AbstractQueryFilter
         //  This is an alias function of suspensionReason
     public function suspension_reason($value)
     {
-        return $this->suspensionReason($value);
+    return $this->suspensionReason($value);
     }
     
     public function maxContacts($value)
@@ -40,7 +40,7 @@ class AccountsQueryFilter extends AbstractQueryFilter
         $operator = substr($value, 0, 1);
 
         if ($operator != '<' || $operator != '>') {
-            $operator = '=';
+           $operator = '=';
         } else {
             $value = substr($value, 1);
         }
@@ -51,7 +51,7 @@ class AccountsQueryFilter extends AbstractQueryFilter
         //  This is an alias function of maxContacts
     public function max_contacts($value)
     {
-        return $this->maxContacts($value);
+    return $this->maxContacts($value);
     }
     
     public function maxEmailsPerMonth($value)
@@ -59,7 +59,7 @@ class AccountsQueryFilter extends AbstractQueryFilter
         $operator = substr($value, 0, 1);
 
         if ($operator != '<' || $operator != '>') {
-            $operator = '=';
+           $operator = '=';
         } else {
             $value = substr($value, 1);
         }
@@ -70,7 +70,7 @@ class AccountsQueryFilter extends AbstractQueryFilter
         //  This is an alias function of maxEmailsPerMonth
     public function max_emails_per_month($value)
     {
-        return $this->maxEmailsPerMonth($value);
+    return $this->maxEmailsPerMonth($value);
     }
     
     public function maxSmsPerMonth($value)
@@ -78,7 +78,7 @@ class AccountsQueryFilter extends AbstractQueryFilter
         $operator = substr($value, 0, 1);
 
         if ($operator != '<' || $operator != '>') {
-            $operator = '=';
+           $operator = '=';
         } else {
             $value = substr($value, 1);
         }
@@ -89,7 +89,7 @@ class AccountsQueryFilter extends AbstractQueryFilter
         //  This is an alias function of maxSmsPerMonth
     public function max_sms_per_month($value)
     {
-        return $this->maxSmsPerMonth($value);
+    return $this->maxSmsPerMonth($value);
     }
     
     public function maxChannels($value)
@@ -97,7 +97,7 @@ class AccountsQueryFilter extends AbstractQueryFilter
         $operator = substr($value, 0, 1);
 
         if ($operator != '<' || $operator != '>') {
-            $operator = '=';
+           $operator = '=';
         } else {
             $value = substr($value, 1);
         }
@@ -108,7 +108,7 @@ class AccountsQueryFilter extends AbstractQueryFilter
         //  This is an alias function of maxChannels
     public function max_channels($value)
     {
-        return $this->maxChannels($value);
+    return $this->maxChannels($value);
     }
     
     public function emailsSentThisPeriod($value)
@@ -116,7 +116,7 @@ class AccountsQueryFilter extends AbstractQueryFilter
         $operator = substr($value, 0, 1);
 
         if ($operator != '<' || $operator != '>') {
-            $operator = '=';
+           $operator = '=';
         } else {
             $value = substr($value, 1);
         }
@@ -127,7 +127,7 @@ class AccountsQueryFilter extends AbstractQueryFilter
         //  This is an alias function of emailsSentThisPeriod
     public function emails_sent_this_period($value)
     {
-        return $this->emailsSentThisPeriod($value);
+    return $this->emailsSentThisPeriod($value);
     }
     
     public function smsSentThisPeriod($value)
@@ -135,7 +135,7 @@ class AccountsQueryFilter extends AbstractQueryFilter
         $operator = substr($value, 0, 1);
 
         if ($operator != '<' || $operator != '>') {
-            $operator = '=';
+           $operator = '=';
         } else {
             $value = substr($value, 1);
         }
@@ -146,7 +146,7 @@ class AccountsQueryFilter extends AbstractQueryFilter
         //  This is an alias function of smsSentThisPeriod
     public function sms_sent_this_period($value)
     {
-        return $this->smsSentThisPeriod($value);
+    return $this->smsSentThisPeriod($value);
     }
     
     public function isSuspended($value)
@@ -157,7 +157,7 @@ class AccountsQueryFilter extends AbstractQueryFilter
         //  This is an alias function of isSuspended
     public function is_suspended($value)
     {
-        return $this->isSuspended($value);
+    return $this->isSuspended($value);
     }
      
     public function isAiBotsEnabled($value)
@@ -168,7 +168,7 @@ class AccountsQueryFilter extends AbstractQueryFilter
         //  This is an alias function of isAiBotsEnabled
     public function is_ai_bots_enabled($value)
     {
-        return $this->isAiBotsEnabled($value);
+    return $this->isAiBotsEnabled($value);
     }
      
     public function isDedicatedIpEnabled($value)
@@ -179,117 +179,117 @@ class AccountsQueryFilter extends AbstractQueryFilter
         //  This is an alias function of isDedicatedIpEnabled
     public function is_dedicated_ip_enabled($value)
     {
-        return $this->isDedicatedIpEnabled($value);
+    return $this->isDedicatedIpEnabled($value);
     }
      
     public function currentPeriodStartStart($date)
     {
-        return $this->builder->where('current_period_start', '>=', $date);
+        return $this->builder->where( 'current_period_start', '>=', $date );
     }
 
     public function currentPeriodStartEnd($date)
     {
-        return $this->builder->where('current_period_start', '<=', $date);
+        return $this->builder->where( 'current_period_start', '<=', $date );
     }
 
     //  This is an alias function of currentPeriodStart
     public function current_period_start_start($value)
     {
-        return $this->currentPeriodStartStart($value);
+    return $this->currentPeriodStartStart($value);
     }
 
     //  This is an alias function of currentPeriodStart
     public function current_period_start_end($value)
     {
-        return $this->currentPeriodStartEnd($value);
+    return $this->currentPeriodStartEnd($value);
     }
 
     public function currentPeriodEndStart($date)
     {
-        return $this->builder->where('current_period_end', '>=', $date);
+        return $this->builder->where( 'current_period_end', '>=', $date );
     }
 
     public function currentPeriodEndEnd($date)
     {
-        return $this->builder->where('current_period_end', '<=', $date);
+        return $this->builder->where( 'current_period_end', '<=', $date );
     }
 
     //  This is an alias function of currentPeriodEnd
     public function current_period_end_start($value)
     {
-        return $this->currentPeriodEndStart($value);
+    return $this->currentPeriodEndStart($value);
     }
 
     //  This is an alias function of currentPeriodEnd
     public function current_period_end_end($value)
     {
-        return $this->currentPeriodEndEnd($value);
+    return $this->currentPeriodEndEnd($value);
     }
 
     public function createdAtStart($date)
     {
-        return $this->builder->where('created_at', '>=', $date);
+        return $this->builder->where( 'created_at', '>=', $date );
     }
 
     public function createdAtEnd($date)
     {
-        return $this->builder->where('created_at', '<=', $date);
+        return $this->builder->where( 'created_at', '<=', $date );
     }
 
     //  This is an alias function of createdAt
     public function created_at_start($value)
     {
-        return $this->createdAtStart($value);
+    return $this->createdAtStart($value);
     }
 
     //  This is an alias function of createdAt
     public function created_at_end($value)
     {
-        return $this->createdAtEnd($value);
+    return $this->createdAtEnd($value);
     }
 
     public function updatedAtStart($date)
     {
-        return $this->builder->where('updated_at', '>=', $date);
+        return $this->builder->where( 'updated_at', '>=', $date );
     }
 
     public function updatedAtEnd($date)
     {
-        return $this->builder->where('updated_at', '<=', $date);
+        return $this->builder->where( 'updated_at', '<=', $date );
     }
 
     //  This is an alias function of updatedAt
     public function updated_at_start($value)
     {
-        return $this->updatedAtStart($value);
+    return $this->updatedAtStart($value);
     }
 
     //  This is an alias function of updatedAt
     public function updated_at_end($value)
     {
-        return $this->updatedAtEnd($value);
+    return $this->updatedAtEnd($value);
     }
 
     public function deletedAtStart($date)
     {
-        return $this->builder->where('deleted_at', '>=', $date);
+        return $this->builder->where( 'deleted_at', '>=', $date );
     }
 
     public function deletedAtEnd($date)
     {
-        return $this->builder->where('deleted_at', '<=', $date);
+        return $this->builder->where( 'deleted_at', '<=', $date );
     }
 
     //  This is an alias function of deletedAt
     public function deleted_at_start($value)
     {
-        return $this->deletedAtStart($value);
+    return $this->deletedAtStart($value);
     }
 
     //  This is an alias function of deletedAt
     public function deleted_at_end($value)
     {
-        return $this->deletedAtEnd($value);
+    return $this->deletedAtEnd($value);
     }
 
     public function iamAccountId($value)
@@ -299,10 +299,11 @@ class AccountsQueryFilter extends AbstractQueryFilter
         if($iamAccount) {
             return $this->builder->where('iam_account_id', '=', $iamAccount->id);
         }
-    }
+        }
 
     
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
 
 
 }

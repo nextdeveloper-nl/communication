@@ -16,20 +16,18 @@ trait CommunicationUnsubscribeTestTraits
     public $http;
 
     /**
-     *   Creating the Guzzle object
-     */
+    *   Creating the Guzzle object
+    */
     public function setupGuzzle()
     {
-        $this->http = new Client(
-            [
+        $this->http = new Client([
             'base_uri'  =>  '127.0.0.1:8000'
-            ]
-        );
+        ]);
     }
 
     /**
-     *   Destroying the Guzzle object
-     */
+    *   Destroying the Guzzle object
+    */
     public function destroyGuzzle()
     {
         $this->http = null;
@@ -44,19 +42,16 @@ trait CommunicationUnsubscribeTestTraits
             ['http_errors' => false]
         );
 
-        $this->assertContains(
-            $response->getStatusCode(), [
+        $this->assertContains($response->getStatusCode(), [
             Response::HTTP_OK,
             Response::HTTP_NOT_FOUND
-            ]
-        );
+        ]);
     }
 
     public function test_http_communicationunsubscribe_post()
     {
         $this->setupGuzzle();
-        $response = $this->http->request(
-            'POST', '/communication/communicationunsubscribe', [
+        $response = $this->http->request('POST', '/communication/communicationunsubscribe', [
             'form_params'   =>  [
                 'channel_type'  =>  'a',
                 'identifier'  =>  'a',
@@ -71,10 +66,10 @@ trait CommunicationUnsubscribeTestTraits
     }
 
     /**
-     * Get test
-     *
-     * @return bool
-     */
+    * Get test
+    *
+    * @return bool
+    */
     public function test_communicationunsubscribe_model_get()
     {
         $result = AbstractCommunicationUnsubscribeService::get();
@@ -91,11 +86,9 @@ trait CommunicationUnsubscribeTestTraits
 
     public function test_communicationunsubscribe_get_paginated()
     {
-        $result = AbstractCommunicationUnsubscribeService::get(
-            null, [
+        $result = AbstractCommunicationUnsubscribeService::get(null, [
             'paginated' =>  'true'
-            ]
-        );
+        ]);
 
         $this->assertIsObject($result, LengthAwarePaginator::class);
     }
@@ -103,7 +96,7 @@ trait CommunicationUnsubscribeTestTraits
     public function test_communicationunsubscribe_event_retrieved_without_object()
     {
         try {
-            event(new \NextDeveloper\Communication\Events\CommunicationUnsubscribe\CommunicationUnsubscribeRetrievedEvent());
+            event( new \NextDeveloper\Communication\Events\CommunicationUnsubscribe\CommunicationUnsubscribeRetrievedEvent() );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -113,7 +106,7 @@ trait CommunicationUnsubscribeTestTraits
     public function test_communicationunsubscribe_event_created_without_object()
     {
         try {
-            event(new \NextDeveloper\Communication\Events\CommunicationUnsubscribe\CommunicationUnsubscribeCreatedEvent());
+            event( new \NextDeveloper\Communication\Events\CommunicationUnsubscribe\CommunicationUnsubscribeCreatedEvent() );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -123,7 +116,7 @@ trait CommunicationUnsubscribeTestTraits
     public function test_communicationunsubscribe_event_creating_without_object()
     {
         try {
-            event(new \NextDeveloper\Communication\Events\CommunicationUnsubscribe\CommunicationUnsubscribeCreatingEvent());
+            event( new \NextDeveloper\Communication\Events\CommunicationUnsubscribe\CommunicationUnsubscribeCreatingEvent() );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -133,7 +126,7 @@ trait CommunicationUnsubscribeTestTraits
     public function test_communicationunsubscribe_event_saving_without_object()
     {
         try {
-            event(new \NextDeveloper\Communication\Events\CommunicationUnsubscribe\CommunicationUnsubscribeSavingEvent());
+            event( new \NextDeveloper\Communication\Events\CommunicationUnsubscribe\CommunicationUnsubscribeSavingEvent() );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -143,7 +136,7 @@ trait CommunicationUnsubscribeTestTraits
     public function test_communicationunsubscribe_event_saved_without_object()
     {
         try {
-            event(new \NextDeveloper\Communication\Events\CommunicationUnsubscribe\CommunicationUnsubscribeSavedEvent());
+            event( new \NextDeveloper\Communication\Events\CommunicationUnsubscribe\CommunicationUnsubscribeSavedEvent() );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -153,7 +146,7 @@ trait CommunicationUnsubscribeTestTraits
     public function test_communicationunsubscribe_event_updating_without_object()
     {
         try {
-            event(new \NextDeveloper\Communication\Events\CommunicationUnsubscribe\CommunicationUnsubscribeUpdatingEvent());
+            event( new \NextDeveloper\Communication\Events\CommunicationUnsubscribe\CommunicationUnsubscribeUpdatingEvent() );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -163,7 +156,7 @@ trait CommunicationUnsubscribeTestTraits
     public function test_communicationunsubscribe_event_updated_without_object()
     {
         try {
-            event(new \NextDeveloper\Communication\Events\CommunicationUnsubscribe\CommunicationUnsubscribeUpdatedEvent());
+            event( new \NextDeveloper\Communication\Events\CommunicationUnsubscribe\CommunicationUnsubscribeUpdatedEvent() );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -173,7 +166,7 @@ trait CommunicationUnsubscribeTestTraits
     public function test_communicationunsubscribe_event_deleting_without_object()
     {
         try {
-            event(new \NextDeveloper\Communication\Events\CommunicationUnsubscribe\CommunicationUnsubscribeDeletingEvent());
+            event( new \NextDeveloper\Communication\Events\CommunicationUnsubscribe\CommunicationUnsubscribeDeletingEvent() );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -183,7 +176,7 @@ trait CommunicationUnsubscribeTestTraits
     public function test_communicationunsubscribe_event_deleted_without_object()
     {
         try {
-            event(new \NextDeveloper\Communication\Events\CommunicationUnsubscribe\CommunicationUnsubscribeDeletedEvent());
+            event( new \NextDeveloper\Communication\Events\CommunicationUnsubscribe\CommunicationUnsubscribeDeletedEvent() );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -193,7 +186,7 @@ trait CommunicationUnsubscribeTestTraits
     public function test_communicationunsubscribe_event_restoring_without_object()
     {
         try {
-            event(new \NextDeveloper\Communication\Events\CommunicationUnsubscribe\CommunicationUnsubscribeRestoringEvent());
+            event( new \NextDeveloper\Communication\Events\CommunicationUnsubscribe\CommunicationUnsubscribeRestoringEvent() );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -203,7 +196,7 @@ trait CommunicationUnsubscribeTestTraits
     public function test_communicationunsubscribe_event_restored_without_object()
     {
         try {
-            event(new \NextDeveloper\Communication\Events\CommunicationUnsubscribe\CommunicationUnsubscribeRestoredEvent());
+            event( new \NextDeveloper\Communication\Events\CommunicationUnsubscribe\CommunicationUnsubscribeRestoredEvent() );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -216,7 +209,7 @@ trait CommunicationUnsubscribeTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationUnsubscribe::first();
 
-            event(new \NextDeveloper\Communication\Events\CommunicationUnsubscribe\CommunicationUnsubscribeRetrievedEvent($model));
+            event( new \NextDeveloper\Communication\Events\CommunicationUnsubscribe\CommunicationUnsubscribeRetrievedEvent($model) );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -228,7 +221,7 @@ trait CommunicationUnsubscribeTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationUnsubscribe::first();
 
-            event(new \NextDeveloper\Communication\Events\CommunicationUnsubscribe\CommunicationUnsubscribeCreatedEvent($model));
+            event( new \NextDeveloper\Communication\Events\CommunicationUnsubscribe\CommunicationUnsubscribeCreatedEvent($model) );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -240,7 +233,7 @@ trait CommunicationUnsubscribeTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationUnsubscribe::first();
 
-            event(new \NextDeveloper\Communication\Events\CommunicationUnsubscribe\CommunicationUnsubscribeCreatingEvent($model));
+            event( new \NextDeveloper\Communication\Events\CommunicationUnsubscribe\CommunicationUnsubscribeCreatingEvent($model) );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -252,7 +245,7 @@ trait CommunicationUnsubscribeTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationUnsubscribe::first();
 
-            event(new \NextDeveloper\Communication\Events\CommunicationUnsubscribe\CommunicationUnsubscribeSavingEvent($model));
+            event( new \NextDeveloper\Communication\Events\CommunicationUnsubscribe\CommunicationUnsubscribeSavingEvent($model) );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -264,7 +257,7 @@ trait CommunicationUnsubscribeTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationUnsubscribe::first();
 
-            event(new \NextDeveloper\Communication\Events\CommunicationUnsubscribe\CommunicationUnsubscribeSavedEvent($model));
+            event( new \NextDeveloper\Communication\Events\CommunicationUnsubscribe\CommunicationUnsubscribeSavedEvent($model) );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -276,7 +269,7 @@ trait CommunicationUnsubscribeTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationUnsubscribe::first();
 
-            event(new \NextDeveloper\Communication\Events\CommunicationUnsubscribe\CommunicationUnsubscribeUpdatingEvent($model));
+            event( new \NextDeveloper\Communication\Events\CommunicationUnsubscribe\CommunicationUnsubscribeUpdatingEvent($model) );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -288,7 +281,7 @@ trait CommunicationUnsubscribeTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationUnsubscribe::first();
 
-            event(new \NextDeveloper\Communication\Events\CommunicationUnsubscribe\CommunicationUnsubscribeUpdatedEvent($model));
+            event( new \NextDeveloper\Communication\Events\CommunicationUnsubscribe\CommunicationUnsubscribeUpdatedEvent($model) );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -300,7 +293,7 @@ trait CommunicationUnsubscribeTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationUnsubscribe::first();
 
-            event(new \NextDeveloper\Communication\Events\CommunicationUnsubscribe\CommunicationUnsubscribeDeletingEvent($model));
+            event( new \NextDeveloper\Communication\Events\CommunicationUnsubscribe\CommunicationUnsubscribeDeletingEvent($model) );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -312,7 +305,7 @@ trait CommunicationUnsubscribeTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationUnsubscribe::first();
 
-            event(new \NextDeveloper\Communication\Events\CommunicationUnsubscribe\CommunicationUnsubscribeDeletedEvent($model));
+            event( new \NextDeveloper\Communication\Events\CommunicationUnsubscribe\CommunicationUnsubscribeDeletedEvent($model) );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -324,7 +317,7 @@ trait CommunicationUnsubscribeTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationUnsubscribe::first();
 
-            event(new \NextDeveloper\Communication\Events\CommunicationUnsubscribe\CommunicationUnsubscribeRestoringEvent($model));
+            event( new \NextDeveloper\Communication\Events\CommunicationUnsubscribe\CommunicationUnsubscribeRestoringEvent($model) );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -336,7 +329,7 @@ trait CommunicationUnsubscribeTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationUnsubscribe::first();
 
-            event(new \NextDeveloper\Communication\Events\CommunicationUnsubscribe\CommunicationUnsubscribeRestoredEvent($model));
+            event( new \NextDeveloper\Communication\Events\CommunicationUnsubscribe\CommunicationUnsubscribeRestoredEvent($model) );
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -347,11 +340,9 @@ trait CommunicationUnsubscribeTestTraits
     public function test_communicationunsubscribe_event_channel_type_filter()
     {
         try {
-            $request = new Request(
-                [
+            $request = new Request([
                 'channel_type'  =>  'a'
-                ]
-            );
+            ]);
 
             $filter = new CommunicationUnsubscribeQueryFilter($request);
 
@@ -366,11 +357,9 @@ trait CommunicationUnsubscribeTestTraits
     public function test_communicationunsubscribe_event_identifier_filter()
     {
         try {
-            $request = new Request(
-                [
+            $request = new Request([
                 'identifier'  =>  'a'
-                ]
-            );
+            ]);
 
             $filter = new CommunicationUnsubscribeQueryFilter($request);
 
@@ -385,11 +374,9 @@ trait CommunicationUnsubscribeTestTraits
     public function test_communicationunsubscribe_event_reason_filter()
     {
         try {
-            $request = new Request(
-                [
+            $request = new Request([
                 'reason'  =>  'a'
-                ]
-            );
+            ]);
 
             $filter = new CommunicationUnsubscribeQueryFilter($request);
 
@@ -404,11 +391,9 @@ trait CommunicationUnsubscribeTestTraits
     public function test_communicationunsubscribe_event_source_filter()
     {
         try {
-            $request = new Request(
-                [
+            $request = new Request([
                 'source'  =>  'a'
-                ]
-            );
+            ]);
 
             $filter = new CommunicationUnsubscribeQueryFilter($request);
 
@@ -423,11 +408,9 @@ trait CommunicationUnsubscribeTestTraits
     public function test_communicationunsubscribe_event_created_at_filter_start()
     {
         try {
-            $request = new Request(
-                [
+            $request = new Request([
                 'created_atStart'  =>  now()
-                ]
-            );
+            ]);
 
             $filter = new CommunicationUnsubscribeQueryFilter($request);
 
@@ -442,11 +425,9 @@ trait CommunicationUnsubscribeTestTraits
     public function test_communicationunsubscribe_event_created_at_filter_end()
     {
         try {
-            $request = new Request(
-                [
+            $request = new Request([
                 'created_atEnd'  =>  now()
-                ]
-            );
+            ]);
 
             $filter = new CommunicationUnsubscribeQueryFilter($request);
 
@@ -461,12 +442,10 @@ trait CommunicationUnsubscribeTestTraits
     public function test_communicationunsubscribe_event_created_at_filter_start_and_end()
     {
         try {
-            $request = new Request(
-                [
+            $request = new Request([
                 'created_atStart'  =>  now(),
                 'created_atEnd'  =>  now()
-                ]
-            );
+            ]);
 
             $filter = new CommunicationUnsubscribeQueryFilter($request);
 

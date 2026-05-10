@@ -14,8 +14,8 @@ class SmtpServersQueryFilter extends AbstractQueryFilter
 {
 
     /**
-     * @var Builder
-     */
+    * @var Builder
+    */
     protected $builder;
     
     public function name($value)
@@ -56,7 +56,7 @@ class SmtpServersQueryFilter extends AbstractQueryFilter
         //  This is an alias function of fromEmail
     public function from_email($value)
     {
-        return $this->fromEmail($value);
+    return $this->fromEmail($value);
     }
         
     public function fromName($value)
@@ -67,7 +67,7 @@ class SmtpServersQueryFilter extends AbstractQueryFilter
         //  This is an alias function of fromName
     public function from_name($value)
     {
-        return $this->fromName($value);
+    return $this->fromName($value);
     }
         
     public function replyTo($value)
@@ -78,7 +78,7 @@ class SmtpServersQueryFilter extends AbstractQueryFilter
         //  This is an alias function of replyTo
     public function reply_to($value)
     {
-        return $this->replyTo($value);
+    return $this->replyTo($value);
     }
         
     public function lastCheckStatus($value)
@@ -89,7 +89,7 @@ class SmtpServersQueryFilter extends AbstractQueryFilter
         //  This is an alias function of lastCheckStatus
     public function last_check_status($value)
     {
-        return $this->lastCheckStatus($value);
+    return $this->lastCheckStatus($value);
     }
         
     public function lastCheckMessage($value)
@@ -100,7 +100,7 @@ class SmtpServersQueryFilter extends AbstractQueryFilter
         //  This is an alias function of lastCheckMessage
     public function last_check_message($value)
     {
-        return $this->lastCheckMessage($value);
+    return $this->lastCheckMessage($value);
     }
     
     public function port($value)
@@ -108,7 +108,7 @@ class SmtpServersQueryFilter extends AbstractQueryFilter
         $operator = substr($value, 0, 1);
 
         if ($operator != '<' || $operator != '>') {
-            $operator = '=';
+           $operator = '=';
         } else {
             $value = substr($value, 1);
         }
@@ -125,117 +125,117 @@ class SmtpServersQueryFilter extends AbstractQueryFilter
         //  This is an alias function of isVerified
     public function is_verified($value)
     {
-        return $this->isVerified($value);
+    return $this->isVerified($value);
     }
      
     public function verifiedAtStart($date)
     {
-        return $this->builder->where('verified_at', '>=', $date);
+        return $this->builder->where( 'verified_at', '>=', $date );
     }
 
     public function verifiedAtEnd($date)
     {
-        return $this->builder->where('verified_at', '<=', $date);
+        return $this->builder->where( 'verified_at', '<=', $date );
     }
 
     //  This is an alias function of verifiedAt
     public function verified_at_start($value)
     {
-        return $this->verifiedAtStart($value);
+    return $this->verifiedAtStart($value);
     }
 
     //  This is an alias function of verifiedAt
     public function verified_at_end($value)
     {
-        return $this->verifiedAtEnd($value);
+    return $this->verifiedAtEnd($value);
     }
 
     public function lastCheckedAtStart($date)
     {
-        return $this->builder->where('last_checked_at', '>=', $date);
+        return $this->builder->where( 'last_checked_at', '>=', $date );
     }
 
     public function lastCheckedAtEnd($date)
     {
-        return $this->builder->where('last_checked_at', '<=', $date);
+        return $this->builder->where( 'last_checked_at', '<=', $date );
     }
 
     //  This is an alias function of lastCheckedAt
     public function last_checked_at_start($value)
     {
-        return $this->lastCheckedAtStart($value);
+    return $this->lastCheckedAtStart($value);
     }
 
     //  This is an alias function of lastCheckedAt
     public function last_checked_at_end($value)
     {
-        return $this->lastCheckedAtEnd($value);
+    return $this->lastCheckedAtEnd($value);
     }
 
     public function createdAtStart($date)
     {
-        return $this->builder->where('created_at', '>=', $date);
+        return $this->builder->where( 'created_at', '>=', $date );
     }
 
     public function createdAtEnd($date)
     {
-        return $this->builder->where('created_at', '<=', $date);
+        return $this->builder->where( 'created_at', '<=', $date );
     }
 
     //  This is an alias function of createdAt
     public function created_at_start($value)
     {
-        return $this->createdAtStart($value);
+    return $this->createdAtStart($value);
     }
 
     //  This is an alias function of createdAt
     public function created_at_end($value)
     {
-        return $this->createdAtEnd($value);
+    return $this->createdAtEnd($value);
     }
 
     public function updatedAtStart($date)
     {
-        return $this->builder->where('updated_at', '>=', $date);
+        return $this->builder->where( 'updated_at', '>=', $date );
     }
 
     public function updatedAtEnd($date)
     {
-        return $this->builder->where('updated_at', '<=', $date);
+        return $this->builder->where( 'updated_at', '<=', $date );
     }
 
     //  This is an alias function of updatedAt
     public function updated_at_start($value)
     {
-        return $this->updatedAtStart($value);
+    return $this->updatedAtStart($value);
     }
 
     //  This is an alias function of updatedAt
     public function updated_at_end($value)
     {
-        return $this->updatedAtEnd($value);
+    return $this->updatedAtEnd($value);
     }
 
     public function deletedAtStart($date)
     {
-        return $this->builder->where('deleted_at', '>=', $date);
+        return $this->builder->where( 'deleted_at', '>=', $date );
     }
 
     public function deletedAtEnd($date)
     {
-        return $this->builder->where('deleted_at', '<=', $date);
+        return $this->builder->where( 'deleted_at', '<=', $date );
     }
 
     //  This is an alias function of deletedAt
     public function deleted_at_start($value)
     {
-        return $this->deletedAtStart($value);
+    return $this->deletedAtStart($value);
     }
 
     //  This is an alias function of deletedAt
     public function deleted_at_end($value)
     {
-        return $this->deletedAtEnd($value);
+    return $this->deletedAtEnd($value);
     }
 
     public function communicationChannelId($value)
@@ -245,12 +245,12 @@ class SmtpServersQueryFilter extends AbstractQueryFilter
         if($communicationChannel) {
             return $this->builder->where('communication_channel_id', '=', $communicationChannel->id);
         }
-    }
+        }
 
         //  This is an alias function of communicationChannel
     public function communication_channel_id($value)
     {
-        return $this->communicationChannel($value);
+    return $this->communicationChannel($value);
     }
     
     public function iamAccountId($value)
@@ -260,10 +260,11 @@ class SmtpServersQueryFilter extends AbstractQueryFilter
         if($iamAccount) {
             return $this->builder->where('iam_account_id', '=', $iamAccount->id);
         }
-    }
+        }
 
     
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
 
 
 }
