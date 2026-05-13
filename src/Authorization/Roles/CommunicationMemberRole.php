@@ -24,9 +24,8 @@ class CommunicationMemberRole extends AbstractRole implements IAuthorizationRole
     {
         $table = $model->getTable();
 
-        // System/lookup table and join tables without ownership — no filter
+        // Join tables and audit tables without ownership — no filter
         if (in_array($table, [
-            'communication_available_channels',
             'communication_contact_identifiers',
             'communication_message_events',
             'communication_thread_assignments',
@@ -55,7 +54,8 @@ class CommunicationMemberRole extends AbstractRole implements IAuthorizationRole
             return;
         }
 
-        // Has both iam_account_id and iam_user_id (notifications, remindables)
+        // Has both iam_account_id and iam_user_id
+        // (communication_available_channels, communication_notifications, communication_remindables)
         $builder->where([
             'iam_account_id' => UserHelper::currentAccount()->id,
             'iam_user_id'    => UserHelper::me()->id,
@@ -77,7 +77,12 @@ class CommunicationMemberRole extends AbstractRole implements IAuthorizationRole
         return [
             // System definitions — read only
             'communication_accounts:read',
+
+            // Per-account/user channel definitions — full CRUD
             'communication_available_channels:read',
+            'communication_available_channels:create',
+            'communication_available_channels:update',
+            'communication_available_channels:delete',
 
             // Account config — full CRUD (member manages their own)
             'communication_bots:read',
