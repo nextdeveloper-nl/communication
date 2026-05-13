@@ -12,6 +12,7 @@ use NextDeveloper\Communication\Services\UserPreferencesService;
 use NextDeveloper\IAM\Database\Models\AccountUsers;
 use NextDeveloper\IAM\Database\Models\Users;
 use NextDeveloper\IAM\Database\Scopes\AuthorizationScope;
+use NextDeveloper\IAM\Helpers\UserHelper;
 
 /**
  * Convenience wrapper for communicating with an IAM user via the V2 communication module.
@@ -51,33 +52,35 @@ class Communicate
      */
     public function sendNotification(string $severity, string $message, mixed $object = null): void
     {
-        $accountUser = AccountUsers::withoutGlobalScope(AuthorizationScope::class)
-            ->where('iam_user_id', $this->user->id)
-            ->first();
+        UserHelper::runAsAdmin(function () {
+            $accountUser = AccountUsers::withoutGlobalScope(AuthorizationScope::class)
+                ->where('iam_user_id', $this->user->id)
+                ->first();
 
-        if (!$accountUser) {
-            Log::warning('[Communicate::sendNotification] No account found for user, skipping notification', [
-                'user_id' => $this->user->id,
+            if (!$accountUser) {
+                Log::warning('[Communicate::sendNotification] No account found for user, skipping notification', [
+                    'user_id' => $this->user->id,
+                ]);
+                return;
+            }
+
+            $preferences = UserPreferencesService::getForUser($this->user->id);
+
+            if ($preferences->is_system_email_optout) {
+                return;
+            }
+
+            $data = ['message' => $message];
+
+            NotificationsService::create([
+                'severity'       => $severity,
+                'data'           => json_encode($data),
+                'object_id'      => $object?->id,
+                'object_type'    => $object ? get_class($object) : null,
+                'iam_user_id'    => $this->user->id,
+                'iam_account_id' => $accountUser->iam_account_id,
             ]);
-            return;
-        }
-
-        $preferences = UserPreferencesService::getForUser($this->user->id);
-
-        if ($preferences->is_system_email_optout) {
-            return;
-        }
-
-        $data = ['message' => $message];
-
-        NotificationsService::create([
-            'severity'       => $severity,
-            'data'           => json_encode($data),
-            'object_id'      => $object?->id,
-            'object_type'    => $object ? get_class($object) : null,
-            'iam_user_id'    => $this->user->id,
-            'iam_account_id' => $accountUser->iam_account_id,
-        ]);
+        });
     }
 
     /**
