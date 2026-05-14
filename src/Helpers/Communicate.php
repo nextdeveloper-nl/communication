@@ -52,7 +52,7 @@ class Communicate
      */
     public function sendNotification(string $severity, string $message, mixed $object = null): void
     {
-        UserHelper::runAsAdmin(function () {
+        UserHelper::runAsAdmin(function () use ($severity, $message, $object) {
             $accountUser = AccountUsers::withoutGlobalScope(AuthorizationScope::class)
                 ->where('iam_user_id', $this->user->id)
                 ->first();
