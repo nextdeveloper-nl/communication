@@ -135,7 +135,9 @@ class MessagesService extends AbstractMessagesService
         }
 
         try {
-            $recipient = Users::find($message->sent_by_user_id)?->email;
+            // Prefer the stored recipient address; fall back to the sender's email.
+            $recipient = $message->recipient
+                ?? Users::find($message->sent_by_user_id)?->email;
 
             $processor = new $class(channel: $channel);
             $processor->send([
