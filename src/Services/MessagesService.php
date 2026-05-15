@@ -2,8 +2,10 @@
 
 namespace NextDeveloper\Communication\Services;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use InvalidArgumentException;
+use NextDeveloper\Commons\Database\Models\ExternalServices;
 use NextDeveloper\Communication\Database\Models\Channels;
 use NextDeveloper\Communication\Database\Models\Messages;
 use NextDeveloper\Communication\Database\Models\Threads;
@@ -133,6 +135,10 @@ class MessagesService extends AbstractMessagesService
      *   2. thread's communication_channel_id       (inherited from conversation)
      *   3. account's highest-priority active email channel (fallback)
      *
+     * Gmail/Google Workspace channels are capped at 50 deliveries per day.
+     * When the cap is reached the message is queued and rescheduled to a
+     * random non-consecutive time slot on the next available day.
+     *
      * Updates message status to 'sent' on success or 'failed' on error.
      */
     public static function deliver(Messages $message): void
@@ -146,6 +152,24 @@ class MessagesService extends AbstractMessagesService
 
             self::markAsFailed($message->uuid, 'No delivery channel available');
             return;
+        }
+
+        // Enforce the 50-email/day cap for Gmail and Google Workspace channels.
+        if (self::isGoogleChannel($channel)) {
+            $sentToday = self::countDeliveredToday($channel);
+
+            if ($sentToday >= 50) {
+                self::scheduleForNextAvailableSlot($message, $channel);
+
+                Log::info('[MessagesService::deliver] Gmail daily cap reached — message rescheduled', [
+                    'message_id'  => $message->id,
+                    'channel_id'  => $channel->id,
+                    'sent_today'  => $sentToday,
+                    'deliver_at'  => $message->fresh()->deliver_at,
+                ]);
+
+                return;
+            }
         }
 
         $available = ChannelHelper::getAvailableChannelByType($channel->type);
@@ -184,6 +208,129 @@ class MessagesService extends AbstractMessagesService
 
             self::markAsFailed($message->uuid, $e->getMessage());
         }
+    }
+
+    /**
+     * Returns true when the channel is backed by a Google Workspace external service.
+     * The link is: communication_channels.configuration['external_services_id']
+     * → common_external_services.id where code = 'google_workspace'.
+     */
+    private static function isGoogleChannel(Channels $channel): bool
+    {
+        $externalServiceId = data_get($channel->configuration, 'external_services_id');
+
+        if (!$externalServiceId) {
+            return false;
+        }
+
+        return ExternalServices::where('id', $externalServiceId)
+            ->where('code', 'google_workspace')
+            ->exists();
+    }
+
+    /**
+     * Counts messages successfully delivered through a channel today.
+     * Uses delivered_at (set by markAsDelivered) as the authoritative timestamp.
+     */
+    private static function countDeliveredToday(Channels $channel): int
+    {
+        return Messages::where('communication_channel_id', $channel->id)
+            ->whereIn('status', ['delivered', 'sent'])
+            ->whereDate('delivered_at', now()->toDateString())
+            ->count();
+    }
+
+    /**
+     * Finds the next calendar day with fewer than 50 sent/scheduled messages for
+     * the given channel, then picks a random time slot that is not within 15 minutes
+     * of any already-scheduled message on that day. Updates the message record in
+     * place with the computed deliver_at; status remains 'queued'.
+     */
+    private static function scheduleForNextAvailableSlot(Messages $message, Channels $channel): void
+    {
+        $dailyCap = 50;
+        $date     = now()->addDay()->startOfDay();
+
+        // Walk forward until we find a day below the cap.
+        while (true) {
+            $delivered = Messages::where('communication_channel_id', $channel->id)
+                ->whereIn('status', ['delivered', 'sent'])
+                ->whereDate('delivered_at', $date->toDateString())
+                ->count();
+
+            $queued = Messages::where('communication_channel_id', $channel->id)
+                ->where('status', 'queued')
+                ->whereDate('deliver_at', $date->toDateString())
+                ->count();
+
+            if ($delivered + $queued < $dailyCap) {
+                break;
+            }
+
+            $date->addDay();
+        }
+
+        // Collect timestamps of already-queued messages on that day to avoid clustering.
+        $occupied = Messages::where('communication_channel_id', $channel->id)
+            ->where('status', 'queued')
+            ->whereDate('deliver_at', $date->toDateString())
+            ->whereNotNull('deliver_at')
+            ->pluck('deliver_at')
+            ->map(fn ($t) => Carbon::parse($t)->timestamp)
+            ->sort()
+            ->values()
+            ->toArray();
+
+        // Delivery window: 08:00–22:00 on the target day.
+        $windowStart = $date->copy()->setTime(8, 0)->timestamp;
+        $windowEnd   = $date->copy()->setTime(22, 0)->timestamp;
+
+        $deliverAt = Carbon::createFromTimestamp(
+            self::findRandomSlot($windowStart, $windowEnd, $occupied, minGapSeconds: 900)
+        );
+
+        Messages::where('id', $message->id)->update([
+            'deliver_at' => $deliverAt,
+            'status'     => 'queued',
+        ]);
+    }
+
+    /**
+     * Picks a random timestamp inside [windowStart, windowEnd] that is at least
+     * minGapSeconds away from every occupied timestamp. Falls back to appending
+     * after the last occupied slot if no free slot is found within maxAttempts.
+     */
+    private static function findRandomSlot(
+        int $windowStart,
+        int $windowEnd,
+        array $occupied,
+        int $minGapSeconds
+    ): int {
+        $maxAttempts = 200;
+
+        for ($i = 0; $i < $maxAttempts; $i++) {
+            $candidate = rand($windowStart, $windowEnd);
+
+            $free = true;
+            foreach ($occupied as $ts) {
+                if (abs($candidate - $ts) < $minGapSeconds) {
+                    $free = false;
+                    break;
+                }
+            }
+
+            if ($free) {
+                return $candidate;
+            }
+        }
+
+        // Fallback: append after the last queued slot with a random extra gap.
+        if (!empty($occupied)) {
+            $after = max($occupied) + $minGapSeconds + rand(0, $minGapSeconds);
+            return min($after, $windowEnd);
+        }
+
+        return rand($windowStart, $windowEnd);
     }
 
     /**
