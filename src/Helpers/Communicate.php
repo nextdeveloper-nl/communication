@@ -2,10 +2,10 @@
 
 namespace NextDeveloper\Communication\Helpers;
 
-use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use NextDeveloper\Communication\Database\Models\Channels;
+use NextDeveloper\Communication\Helpers\ChannelHelper;
 use NextDeveloper\Communication\Services\MessagesService;
 use NextDeveloper\Communication\Services\NotificationsService;
 use NextDeveloper\Communication\Services\UserPreferencesService;
@@ -84,11 +84,23 @@ class Communicate
     }
 
     /**
-     * Sends an email via the account's highest-priority active email channel.
-     * Falls back to direct SMTP if no channel is configured.
+     * Sends an email via a channel and records it as a communication_messages entry.
+     *
+     * Channel resolution order:
+     *   1. $preferredChannel argument — explicit override
+     *   2. Account's highest-priority active email channel
+     *   3. Direct SMTP fallback when no channel is configured
+     *
+     * Pass $threadId to associate the message with an existing conversation thread.
+     * Additional metadata (e.g. 'subject') can be stored via $metadata.
      */
-    public function sendEmail(string $subject, string $body): void
-    {
+    public function sendEmail(
+        string   $subject,
+        string   $body,
+        ?Channels $preferredChannel = null,
+        ?int     $threadId = null,
+        array    $metadata = []
+    ): void {
         if (!$this->user->iam_account_id) {
             Log::warning('[Communicate::sendEmail] User has no iam_account_id, falling back to direct SMTP', [
                 'user_id' => $this->user->id,
@@ -99,7 +111,8 @@ class Communicate
             return;
         }
 
-        $channel = ChannelHelper::getPrimaryForAccount($this->user->iam_account_id, 'email');
+        $channel = $preferredChannel
+            ?? ChannelHelper::getPrimaryForAccount($this->user->iam_account_id, 'email');
 
         if (!$channel) {
             Log::warning('[Communicate::sendEmail] No active email channel found for account, falling back to direct SMTP', [
@@ -111,7 +124,21 @@ class Communicate
             return;
         }
 
-        $this->dispatchViaChannel($channel, $subject, $body);
+        // Record the outbound message before dispatching so it is always logged.
+        $message = MessagesService::create([
+            'communication_thread_id'  => $threadId,
+            'communication_channel_id' => $channel->id,
+            'crm_campaign_id'          => null,
+            'direction'                => 1, // outbound
+            'content_type'             => 'text/html',
+            'body'                     => $body,
+            'status'                   => 'queued',
+            'sent_by_user_id'          => $this->user->id,
+            'iam_account_id'           => $this->user->iam_account_id,
+            'metadata'                 => array_merge($metadata, ['subject' => $subject]),
+        ]);
+
+        MessagesService::deliver($message);
     }
 
     /**
@@ -133,30 +160,4 @@ class Communicate
         });
     }
 
-    private function dispatchViaChannel(Channels $channel, string $subject, string $body): void
-    {
-        $available = ChannelHelper::getAvailableChannelByType($channel->type);
-
-        if (!$available) {
-            Log::error('[Communicate::dispatchViaChannel] No AvailableChannels entry for type: ' . $channel->type);
-            return;
-        }
-
-        $class = ChannelHelper::getChannelClass($available);
-
-        if (!$class) {
-            return;
-        }
-
-        try {
-            $processor = new $class(channel: $channel);
-            $processor->send(['subject' => $subject, 'message' => $body, 'to' => $this->user->email]);
-        } catch (Exception $e) {
-            Log::error('[Communicate::dispatchViaChannel] Delivery failed via ' . $class, [
-                'error'      => $e->getMessage(),
-                'channel_id' => $channel->id,
-                'user_id'    => $this->user->id,
-            ]);
-        }
-    }
 }

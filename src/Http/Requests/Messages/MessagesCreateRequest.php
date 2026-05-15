@@ -13,6 +13,7 @@ class MessagesCreateRequest extends AbstractFormRequest
     public function rules() {
         return [
             'communication_thread_id' => 'nullable|exists:communication_threads,uuid|uuid',
+'communication_channel_id' => 'nullable|exists:communication_channels,uuid|uuid',
 'crm_campaign_id' => 'nullable|exists:crm_campaigns,uuid|uuid',
 'direction' => 'required|integer',
 'content_type' => 'string',
