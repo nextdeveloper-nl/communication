@@ -10,6 +10,8 @@ use NextDeveloper\Communication\Database\Models\Threads;
 use NextDeveloper\Communication\Helpers\ChannelHelper;
 use NextDeveloper\Communication\Services\AbstractServices\AbstractMessagesService;
 use NextDeveloper\IAM\Database\Models\Users;
+use NextDeveloper\IAM\Database\Scopes\AuthorizationScope;
+use NextDeveloper\IAM\Helpers\UserHelper;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -85,6 +87,32 @@ class MessagesService extends AbstractMessagesService
             'failed_at'      => now(),
             'failure_reason' => $reason,
         ]);
+    }
+
+    /**
+     * Creates and immediately delivers a transactional email message.
+     * Resolves the channel from its UUID, records the message, and dispatches it.
+     */
+    public static function sendEmail(array $data): Messages
+    {
+        $channel = Channels::withoutGlobalScope(AuthorizationScope::class)
+            ->where('uuid', $data['communication_channel_id'])
+            ->firstOrFail();
+
+        $message = self::create([
+            'communication_channel_id' => $channel->id,
+            'direction'                => 1,
+            'content_type'             => 'text/html',
+            'body'                     => $data['body'],
+            'recipient'                => $data['recipient'],
+            'status'                   => 'queued',
+            'iam_account_id'           => UserHelper::currentAccount()->id,
+            'metadata'                 => ['subject' => $data['subject']],
+        ]);
+
+        self::deliver($message);
+
+        return $message->fresh();
     }
 
     /**
