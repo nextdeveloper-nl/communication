@@ -109,7 +109,10 @@ class MessagesService extends AbstractMessagesService
             'recipient'                => $data['recipient'],
             'status'                   => 'queued',
             'iam_account_id'           => UserHelper::currentAccount()->id,
-            'metadata'                 => ['subject' => $data['subject']],
+            'metadata'                 => [
+                'subject' => $data['subject'],
+                'cc'      => $data['cc'] ?? [],
+            ],
         ]);
 
         self::deliver($message);
@@ -196,6 +199,7 @@ class MessagesService extends AbstractMessagesService
                 'subject' => $message->metadata['subject'] ?? '(no subject)',
                 'message' => $message->body,
                 'to'      => $recipient,
+                'cc'      => $message->metadata['cc'] ?? [],
             ]);
 
             self::markAsDelivered($message->uuid);

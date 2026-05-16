@@ -13,6 +13,8 @@ class SendEmailRequest extends AbstractFormRequest
             'body'                     => 'required|string',
             'communication_channel_id' => 'required|exists:communication_channels,uuid|uuid',
             'recipient'                => 'required|email',
+            'cc'                       => 'nullable|array',
+            'cc.*'                     => 'email',
         ];
     }
 }
