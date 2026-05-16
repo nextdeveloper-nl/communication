@@ -62,6 +62,12 @@ class MessagesService extends AbstractMessagesService
                 ->id;
         }
 
+        // If subject is provided as a top-level field, store it in metadata.
+        if (!empty($data['subject'])) {
+            $data['metadata'] = array_merge($data['metadata'] ?? [], ['subject' => $data['subject']]);
+            unset($data['subject']);
+        }
+
         $message = parent::create($data);
 
         if ($message->communication_thread_id) {
@@ -219,10 +225,10 @@ class MessagesService extends AbstractMessagesService
 
             $processor = new $class(channel: $channel);
             $processor->send([
-                'subject' => $message->metadata['subject'] ?? '(no subject)',
+                'subject' => data_get($message->metadata, 'subject', '(no subject)'),
                 'message' => $message->body,
                 'to'      => $recipient,
-                'cc'      => $message->metadata['cc'] ?? [],
+                'cc'      => data_get($message->metadata, 'cc', []),
             ]);
 
             self::markAsDelivered($message->uuid);
