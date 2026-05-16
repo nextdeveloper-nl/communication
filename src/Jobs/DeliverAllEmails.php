@@ -8,57 +8,55 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use NextDeveloper\Commons\Actions\AbstractAction;
-use NextDeveloper\Communication\Actions\Emails\Deliver;
-use NextDeveloper\Communication\Database\Models\Emails;
+use NextDeveloper\Communication\Services\MessagesService;
 
 class DeliverAllEmails extends AbstractAction
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    /**
-     * Sample action;
-     * https://.../communication/emails/{email-id}/actions/send
-     */
-
-    private $email;
-
-    /**
-     * This action takes an email and sends it to the user.
-     *
-     * @param Emails $emails
-     */
-    public function __construct(Emails $email = null)
+    public function __construct()
     {
-        return parent::__construct();
+        parent::__construct();
     }
 
     public function handle()
     {
-        $mailer = config('communication.defaults.mailer');
+        $messages = MessagesService::getDueForDelivery();
+        $total    = $messages->count();
 
-        /**
-         * 1)   Gönderilmemiş tüm mailleri çek
-         * 2)   Gönderilmemiş maillerin sayısını bul
-         * 3)   Gönderilmemiş mailleri gönder ve %yi hesapla ve kaydet
-         */
-
-        if(class_exists($mailer)) {
-            $emails = Emails::withoutGlobalScopes()
-                ->where('delivered_at', null)
-                ->get();
-
-            $mailCount = $emails->count();
-            $sentMail = 0;
-
-            foreach ($emails as $email) {
-                (new Deliver($email))->handle();
-                $sentMail++;
-
-                $this->setProgress(ceil($sentMail / $mailCount) * 100, 'Sending emails');
-            }
-        } else {
-            Log::error('Cannot find the delivery method you required.'
-                . ' Please check the configuration and the delivery method is in their place.');
+        if ($total === 0) {
+            $this->setFinished('No queued messages due for delivery.');
+            return;
         }
+
+        Log::info('[DeliverAllEmails] Starting delivery run', ['total' => $total]);
+
+        $delivered = 0;
+        $failed    = 0;
+
+        foreach ($messages as $message) {
+            try {
+                MessagesService::deliver($message);
+                $delivered++;
+            } catch (\Throwable $e) {
+                $failed++;
+                Log::error('[DeliverAllEmails] Failed to deliver message', [
+                    'message_id' => $message->id,
+                    'error'      => $e->getMessage(),
+                ]);
+            }
+
+            $this->setProgress(
+                (int) ceil(($delivered + $failed) / $total * 100),
+                "Delivered {$delivered} / {$total}"
+            );
+        }
+
+        Log::info('[DeliverAllEmails] Delivery run complete', [
+            'delivered' => $delivered,
+            'failed'    => $failed,
+        ]);
+
+        $this->setFinished("Delivered {$delivered}, failed {$failed} out of {$total} messages.");
     }
 }
