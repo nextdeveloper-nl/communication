@@ -31,6 +31,7 @@ class MessagesCreateRequest extends AbstractFormRequest
         'failure_reason' => 'nullable|string',
         'is_internal' => 'boolean',
         'metadata' => 'nullable',
+        'subject' => 'nullable|string',
         'communication_channel_id' => 'nullable|exists:communication_channels,uuid|uuid',
         'recipient' => 'nullable|string',
         ];
