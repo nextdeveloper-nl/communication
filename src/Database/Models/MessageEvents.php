@@ -14,125 +14,130 @@ use NextDeveloper\Commons\Database\Traits\Taggable;
 use NextDeveloper\Commons\Database\Traits\RunAsAdministrator;
 
 /**
-* MessageEvents model.
-*
-* @package NextDeveloper\Communication\Database\Models
-* @property integer $id
-* @property string $uuid
-* @property integer $communication_message_id
-* @property string $event_type
-* @property  $metadata
-* @property \Carbon\Carbon $occurred_at
-* @property \Carbon\Carbon $created_at
-*/
+ * MessageEvents model.
+ *
+ * @package  NextDeveloper\Communication\Database\Models
+ * @property integer $id
+ * @property string $uuid
+ * @property integer $communication_message_id
+ * @property string $event_type
+ * @property $metadata
+ * @property \Carbon\Carbon $occurred_at
+ * @property \Carbon\Carbon $created_at
+ */
 class MessageEvents extends Model
 {
-use Filterable, UuidId, CleanCache, Taggable, HasStates, RunAsAdministrator, HasObject;
+    use Filterable, UuidId, CleanCache, Taggable, HasStates, RunAsAdministrator, HasObject;
 
-	public $timestamps = false;
+    public $timestamps = false;
 
-protected $table = 'communication_message_events';
+    protected $table = 'communication_message_events';
 
 
-/**
-* @var array
-*/
-protected $guarded = [];
+    /**
+     @var array
+     */
+    protected $guarded = [];
 
-protected $fillable = [
+    protected $fillable = [
             'communication_message_id',
             'event_type',
             'metadata',
             'occurred_at',
     ];
 
-/**
-*  Here we have the fulltext fields. We can use these for fulltext search if enabled.
-*/
-protected $fullTextFields = [
+    /**
+      Here we have the fulltext fields. We can use these for fulltext search if enabled.
+     */
+    protected $fullTextFields = [
 
-];
+    ];
 
-/**
-* @var array
-*/
-protected $appends = [
+    /**
+     @var array
+     */
+    protected $appends = [
 
-];
+    ];
 
-/**
-* We are casting fields to objects so that we can work on them better
-* @var array
-*/
-protected $casts = [
-'id' => 'integer',
-'communication_message_id' => 'integer',
-'event_type' => 'string',
-'metadata' => 'array',
-'occurred_at' => 'datetime',
-'created_at' => 'datetime',
-];
+    /**
+     We are casting fields to objects so that we can work on them better
+     *
+     @var array
+     */
+    protected $casts = [
+    'id' => 'integer',
+    'communication_message_id' => 'integer',
+    'event_type' => 'string',
+    'metadata' => 'array',
+    'occurred_at' => 'datetime',
+    'created_at' => 'datetime',
+    ];
 
-/**
-* We are casting data fields.
-* @var array
-*/
-protected $dates = [
-'occurred_at',
-'created_at',
-];
+    /**
+     We are casting data fields.
+     *
+     @var array
+     */
+    protected $dates = [
+    'occurred_at',
+    'created_at',
+    ];
 
-/**
-* @var array
-*/
-protected $with = [
+    /**
+     @var array
+     */
+    protected $with = [
 
-];
+    ];
 
-/**
-* @var int
-*/
-protected $perPage = 20;
+    /**
+     @var int
+     */
+    protected $perPage = 20;
 
-/**
-* @return void
-*/
-public static function boot()
-{
-parent::boot();
+    /**
+     @return void
+     */
+    public static function boot()
+    {
+        parent::boot();
 
-//  We create and add Observer even if we wont use it.
-parent::observe(MessageEventsObserver::class);
+        //  We create and add Observer even if we wont use it.
+        parent::observe(MessageEventsObserver::class);
 
-self::registerScopes();
-}
+        self::registerScopes();
+    }
 
-public static function registerScopes()
-{
-$globalScopes = config('communication.scopes.global');
-$modelScopes = config('communication.scopes.communication_message_events');
+    public static function registerScopes()
+    {
+        $globalScopes = config('communication.scopes.global');
+        $modelScopes = config('communication.scopes.communication_message_events');
 
-if(!$modelScopes) $modelScopes = [];
-if (!$globalScopes) $globalScopes = [];
+        if(!$modelScopes) { $modelScopes = [];
+        }
+        if (!$globalScopes) { $globalScopes = [];
+        }
 
-$scopes = array_merge(
-$globalScopes,
-$modelScopes
-);
+        $scopes = array_merge(
+            $globalScopes,
+            $modelScopes
+        );
 
-if($scopes) {
-foreach ($scopes as $scope) {
-static::addGlobalScope(app($scope));
-}
-}
-}
+        if($scopes) {
+            foreach ($scopes as $scope) {
+                static::addGlobalScope(app($scope));
+            }
+        }
+    }
 
-public function messages() : \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function messages() : \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(\NextDeveloper\Communication\Database\Models\Messages::class);
     }
     
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
 
 
 

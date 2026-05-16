@@ -14,8 +14,8 @@ class NotificationsQueryFilter extends AbstractQueryFilter
 {
 
     /**
-    * @var Builder
-    */
+     * @var Builder
+     */
     protected $builder;
     
     public function severity($value)
@@ -32,7 +32,7 @@ class NotificationsQueryFilter extends AbstractQueryFilter
         //  This is an alias function of objectType
     public function object_type($value)
     {
-    return $this->objectType($value);
+        return $this->objectType($value);
     }
         
     public function data($value)
@@ -43,90 +43,90 @@ class NotificationsQueryFilter extends AbstractQueryFilter
     
     public function readAtStart($date)
     {
-        return $this->builder->where( 'read_at', '>=', $date );
+        return $this->builder->where('read_at', '>=', $date);
     }
 
     public function readAtEnd($date)
     {
-        return $this->builder->where( 'read_at', '<=', $date );
+        return $this->builder->where('read_at', '<=', $date);
     }
 
     //  This is an alias function of readAt
     public function read_at_start($value)
     {
-    return $this->readAtStart($value);
+        return $this->readAtStart($value);
     }
 
     //  This is an alias function of readAt
     public function read_at_end($value)
     {
-    return $this->readAtEnd($value);
+        return $this->readAtEnd($value);
     }
 
     public function createdAtStart($date)
     {
-        return $this->builder->where( 'created_at', '>=', $date );
+        return $this->builder->where('created_at', '>=', $date);
     }
 
     public function createdAtEnd($date)
     {
-        return $this->builder->where( 'created_at', '<=', $date );
+        return $this->builder->where('created_at', '<=', $date);
     }
 
     //  This is an alias function of createdAt
     public function created_at_start($value)
     {
-    return $this->createdAtStart($value);
+        return $this->createdAtStart($value);
     }
 
     //  This is an alias function of createdAt
     public function created_at_end($value)
     {
-    return $this->createdAtEnd($value);
+        return $this->createdAtEnd($value);
     }
 
     public function updatedAtStart($date)
     {
-        return $this->builder->where( 'updated_at', '>=', $date );
+        return $this->builder->where('updated_at', '>=', $date);
     }
 
     public function updatedAtEnd($date)
     {
-        return $this->builder->where( 'updated_at', '<=', $date );
+        return $this->builder->where('updated_at', '<=', $date);
     }
 
     //  This is an alias function of updatedAt
     public function updated_at_start($value)
     {
-    return $this->updatedAtStart($value);
+        return $this->updatedAtStart($value);
     }
 
     //  This is an alias function of updatedAt
     public function updated_at_end($value)
     {
-    return $this->updatedAtEnd($value);
+        return $this->updatedAtEnd($value);
     }
 
     public function deletedAtStart($date)
     {
-        return $this->builder->where( 'deleted_at', '>=', $date );
+        return $this->builder->where('deleted_at', '>=', $date);
     }
 
     public function deletedAtEnd($date)
     {
-        return $this->builder->where( 'deleted_at', '<=', $date );
+        return $this->builder->where('deleted_at', '<=', $date);
     }
 
     //  This is an alias function of deletedAt
     public function deleted_at_start($value)
     {
-    return $this->deletedAtStart($value);
+        return $this->deletedAtStart($value);
     }
 
     //  This is an alias function of deletedAt
     public function deleted_at_end($value)
     {
-    return $this->deletedAtEnd($value);
+        return $this->deletedAtEnd($value);
     }
 
     public function iamUserId($value)
@@ -136,7 +136,7 @@ class NotificationsQueryFilter extends AbstractQueryFilter
         if($iamUser) {
             return $this->builder->where('iam_user_id', '=', $iamUser->id);
         }
-        }
+    }
 
     
     public function iamAccountId($value)
@@ -146,10 +146,11 @@ class NotificationsQueryFilter extends AbstractQueryFilter
         if($iamAccount) {
             return $this->builder->where('iam_account_id', '=', $iamAccount->id);
         }
-        }
+    }
 
     
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
 
 
 

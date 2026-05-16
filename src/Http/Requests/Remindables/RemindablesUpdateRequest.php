@@ -10,16 +10,17 @@ class RemindablesUpdateRequest extends AbstractFormRequest
     /**
      * @return array
      */
-    public function rules() {
+    public function rules()
+    {
         return [
             'object_id' => 'nullable',
-'object_type' => 'nullable|string',
-'remind_datetime' => 'nullable|date',
-'snooze_datetime' => 'nullable|date',
-'note' => 'nullable|string',
-'is_reminded' => 'boolean',
-'is_acknowledged' => 'boolean',
-'is_cancelled' => 'boolean',
+        'object_type' => 'nullable|string',
+        'remind_datetime' => 'nullable|date',
+        'snooze_datetime' => 'nullable|date',
+        'note' => 'nullable|string',
+        'is_reminded' => 'boolean',
+        'is_acknowledged' => 'boolean',
+        'is_cancelled' => 'boolean',
         ];
     }
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE

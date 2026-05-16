@@ -16,18 +16,20 @@ trait CommunicationBotTestTraits
     public $http;
 
     /**
-    *   Creating the Guzzle object
-    */
+     *   Creating the Guzzle object
+     */
     public function setupGuzzle()
     {
-        $this->http = new Client([
+        $this->http = new Client(
+            [
             'base_uri'  =>  '127.0.0.1:8000'
-        ]);
+            ]
+        );
     }
 
     /**
-    *   Destroying the Guzzle object
-    */
+     *   Destroying the Guzzle object
+     */
     public function destroyGuzzle()
     {
         $this->http = null;
@@ -42,16 +44,19 @@ trait CommunicationBotTestTraits
             ['http_errors' => false]
         );
 
-        $this->assertContains($response->getStatusCode(), [
+        $this->assertContains(
+            $response->getStatusCode(), [
             Response::HTTP_OK,
             Response::HTTP_NOT_FOUND
-        ]);
+            ]
+        );
     }
 
     public function test_http_communicationbot_post()
     {
         $this->setupGuzzle();
-        $response = $this->http->request('POST', '/communication/communicationbot', [
+        $response = $this->http->request(
+            'POST', '/communication/communicationbot', [
             'form_params'   =>  [
                 'name'  =>  'a',
                 'description'  =>  'a',
@@ -64,10 +69,10 @@ trait CommunicationBotTestTraits
     }
 
     /**
-    * Get test
-    *
-    * @return bool
-    */
+     * Get test
+     *
+     * @return bool
+     */
     public function test_communicationbot_model_get()
     {
         $result = AbstractCommunicationBotService::get();
@@ -84,9 +89,11 @@ trait CommunicationBotTestTraits
 
     public function test_communicationbot_get_paginated()
     {
-        $result = AbstractCommunicationBotService::get(null, [
+        $result = AbstractCommunicationBotService::get(
+            null, [
             'paginated' =>  'true'
-        ]);
+            ]
+        );
 
         $this->assertIsObject($result, LengthAwarePaginator::class);
     }
@@ -94,7 +101,7 @@ trait CommunicationBotTestTraits
     public function test_communicationbot_event_retrieved_without_object()
     {
         try {
-            event( new \NextDeveloper\Communication\Events\CommunicationBot\CommunicationBotRetrievedEvent() );
+            event(new \NextDeveloper\Communication\Events\CommunicationBot\CommunicationBotRetrievedEvent());
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -104,7 +111,7 @@ trait CommunicationBotTestTraits
     public function test_communicationbot_event_created_without_object()
     {
         try {
-            event( new \NextDeveloper\Communication\Events\CommunicationBot\CommunicationBotCreatedEvent() );
+            event(new \NextDeveloper\Communication\Events\CommunicationBot\CommunicationBotCreatedEvent());
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -114,7 +121,7 @@ trait CommunicationBotTestTraits
     public function test_communicationbot_event_creating_without_object()
     {
         try {
-            event( new \NextDeveloper\Communication\Events\CommunicationBot\CommunicationBotCreatingEvent() );
+            event(new \NextDeveloper\Communication\Events\CommunicationBot\CommunicationBotCreatingEvent());
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -124,7 +131,7 @@ trait CommunicationBotTestTraits
     public function test_communicationbot_event_saving_without_object()
     {
         try {
-            event( new \NextDeveloper\Communication\Events\CommunicationBot\CommunicationBotSavingEvent() );
+            event(new \NextDeveloper\Communication\Events\CommunicationBot\CommunicationBotSavingEvent());
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -134,7 +141,7 @@ trait CommunicationBotTestTraits
     public function test_communicationbot_event_saved_without_object()
     {
         try {
-            event( new \NextDeveloper\Communication\Events\CommunicationBot\CommunicationBotSavedEvent() );
+            event(new \NextDeveloper\Communication\Events\CommunicationBot\CommunicationBotSavedEvent());
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -144,7 +151,7 @@ trait CommunicationBotTestTraits
     public function test_communicationbot_event_updating_without_object()
     {
         try {
-            event( new \NextDeveloper\Communication\Events\CommunicationBot\CommunicationBotUpdatingEvent() );
+            event(new \NextDeveloper\Communication\Events\CommunicationBot\CommunicationBotUpdatingEvent());
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -154,7 +161,7 @@ trait CommunicationBotTestTraits
     public function test_communicationbot_event_updated_without_object()
     {
         try {
-            event( new \NextDeveloper\Communication\Events\CommunicationBot\CommunicationBotUpdatedEvent() );
+            event(new \NextDeveloper\Communication\Events\CommunicationBot\CommunicationBotUpdatedEvent());
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -164,7 +171,7 @@ trait CommunicationBotTestTraits
     public function test_communicationbot_event_deleting_without_object()
     {
         try {
-            event( new \NextDeveloper\Communication\Events\CommunicationBot\CommunicationBotDeletingEvent() );
+            event(new \NextDeveloper\Communication\Events\CommunicationBot\CommunicationBotDeletingEvent());
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -174,7 +181,7 @@ trait CommunicationBotTestTraits
     public function test_communicationbot_event_deleted_without_object()
     {
         try {
-            event( new \NextDeveloper\Communication\Events\CommunicationBot\CommunicationBotDeletedEvent() );
+            event(new \NextDeveloper\Communication\Events\CommunicationBot\CommunicationBotDeletedEvent());
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -184,7 +191,7 @@ trait CommunicationBotTestTraits
     public function test_communicationbot_event_restoring_without_object()
     {
         try {
-            event( new \NextDeveloper\Communication\Events\CommunicationBot\CommunicationBotRestoringEvent() );
+            event(new \NextDeveloper\Communication\Events\CommunicationBot\CommunicationBotRestoringEvent());
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -194,7 +201,7 @@ trait CommunicationBotTestTraits
     public function test_communicationbot_event_restored_without_object()
     {
         try {
-            event( new \NextDeveloper\Communication\Events\CommunicationBot\CommunicationBotRestoredEvent() );
+            event(new \NextDeveloper\Communication\Events\CommunicationBot\CommunicationBotRestoredEvent());
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -207,7 +214,7 @@ trait CommunicationBotTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationBot::first();
 
-            event( new \NextDeveloper\Communication\Events\CommunicationBot\CommunicationBotRetrievedEvent($model) );
+            event(new \NextDeveloper\Communication\Events\CommunicationBot\CommunicationBotRetrievedEvent($model));
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -219,7 +226,7 @@ trait CommunicationBotTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationBot::first();
 
-            event( new \NextDeveloper\Communication\Events\CommunicationBot\CommunicationBotCreatedEvent($model) );
+            event(new \NextDeveloper\Communication\Events\CommunicationBot\CommunicationBotCreatedEvent($model));
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -231,7 +238,7 @@ trait CommunicationBotTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationBot::first();
 
-            event( new \NextDeveloper\Communication\Events\CommunicationBot\CommunicationBotCreatingEvent($model) );
+            event(new \NextDeveloper\Communication\Events\CommunicationBot\CommunicationBotCreatingEvent($model));
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -243,7 +250,7 @@ trait CommunicationBotTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationBot::first();
 
-            event( new \NextDeveloper\Communication\Events\CommunicationBot\CommunicationBotSavingEvent($model) );
+            event(new \NextDeveloper\Communication\Events\CommunicationBot\CommunicationBotSavingEvent($model));
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -255,7 +262,7 @@ trait CommunicationBotTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationBot::first();
 
-            event( new \NextDeveloper\Communication\Events\CommunicationBot\CommunicationBotSavedEvent($model) );
+            event(new \NextDeveloper\Communication\Events\CommunicationBot\CommunicationBotSavedEvent($model));
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -267,7 +274,7 @@ trait CommunicationBotTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationBot::first();
 
-            event( new \NextDeveloper\Communication\Events\CommunicationBot\CommunicationBotUpdatingEvent($model) );
+            event(new \NextDeveloper\Communication\Events\CommunicationBot\CommunicationBotUpdatingEvent($model));
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -279,7 +286,7 @@ trait CommunicationBotTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationBot::first();
 
-            event( new \NextDeveloper\Communication\Events\CommunicationBot\CommunicationBotUpdatedEvent($model) );
+            event(new \NextDeveloper\Communication\Events\CommunicationBot\CommunicationBotUpdatedEvent($model));
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -291,7 +298,7 @@ trait CommunicationBotTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationBot::first();
 
-            event( new \NextDeveloper\Communication\Events\CommunicationBot\CommunicationBotDeletingEvent($model) );
+            event(new \NextDeveloper\Communication\Events\CommunicationBot\CommunicationBotDeletingEvent($model));
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -303,7 +310,7 @@ trait CommunicationBotTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationBot::first();
 
-            event( new \NextDeveloper\Communication\Events\CommunicationBot\CommunicationBotDeletedEvent($model) );
+            event(new \NextDeveloper\Communication\Events\CommunicationBot\CommunicationBotDeletedEvent($model));
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -315,7 +322,7 @@ trait CommunicationBotTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationBot::first();
 
-            event( new \NextDeveloper\Communication\Events\CommunicationBot\CommunicationBotRestoringEvent($model) );
+            event(new \NextDeveloper\Communication\Events\CommunicationBot\CommunicationBotRestoringEvent($model));
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -327,7 +334,7 @@ trait CommunicationBotTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationBot::first();
 
-            event( new \NextDeveloper\Communication\Events\CommunicationBot\CommunicationBotRestoredEvent($model) );
+            event(new \NextDeveloper\Communication\Events\CommunicationBot\CommunicationBotRestoredEvent($model));
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -338,9 +345,11 @@ trait CommunicationBotTestTraits
     public function test_communicationbot_event_name_filter()
     {
         try {
-            $request = new Request([
+            $request = new Request(
+                [
                 'name'  =>  'a'
-            ]);
+                ]
+            );
 
             $filter = new CommunicationBotQueryFilter($request);
 
@@ -355,9 +364,11 @@ trait CommunicationBotTestTraits
     public function test_communicationbot_event_description_filter()
     {
         try {
-            $request = new Request([
+            $request = new Request(
+                [
                 'description'  =>  'a'
-            ]);
+                ]
+            );
 
             $filter = new CommunicationBotQueryFilter($request);
 
@@ -372,9 +383,11 @@ trait CommunicationBotTestTraits
     public function test_communicationbot_event_created_at_filter_start()
     {
         try {
-            $request = new Request([
+            $request = new Request(
+                [
                 'created_atStart'  =>  now()
-            ]);
+                ]
+            );
 
             $filter = new CommunicationBotQueryFilter($request);
 
@@ -389,9 +402,11 @@ trait CommunicationBotTestTraits
     public function test_communicationbot_event_updated_at_filter_start()
     {
         try {
-            $request = new Request([
+            $request = new Request(
+                [
                 'updated_atStart'  =>  now()
-            ]);
+                ]
+            );
 
             $filter = new CommunicationBotQueryFilter($request);
 
@@ -406,9 +421,11 @@ trait CommunicationBotTestTraits
     public function test_communicationbot_event_deleted_at_filter_start()
     {
         try {
-            $request = new Request([
+            $request = new Request(
+                [
                 'deleted_atStart'  =>  now()
-            ]);
+                ]
+            );
 
             $filter = new CommunicationBotQueryFilter($request);
 
@@ -423,9 +440,11 @@ trait CommunicationBotTestTraits
     public function test_communicationbot_event_created_at_filter_end()
     {
         try {
-            $request = new Request([
+            $request = new Request(
+                [
                 'created_atEnd'  =>  now()
-            ]);
+                ]
+            );
 
             $filter = new CommunicationBotQueryFilter($request);
 
@@ -440,9 +459,11 @@ trait CommunicationBotTestTraits
     public function test_communicationbot_event_updated_at_filter_end()
     {
         try {
-            $request = new Request([
+            $request = new Request(
+                [
                 'updated_atEnd'  =>  now()
-            ]);
+                ]
+            );
 
             $filter = new CommunicationBotQueryFilter($request);
 
@@ -457,9 +478,11 @@ trait CommunicationBotTestTraits
     public function test_communicationbot_event_deleted_at_filter_end()
     {
         try {
-            $request = new Request([
+            $request = new Request(
+                [
                 'deleted_atEnd'  =>  now()
-            ]);
+                ]
+            );
 
             $filter = new CommunicationBotQueryFilter($request);
 
@@ -474,10 +497,12 @@ trait CommunicationBotTestTraits
     public function test_communicationbot_event_created_at_filter_start_and_end()
     {
         try {
-            $request = new Request([
+            $request = new Request(
+                [
                 'created_atStart'  =>  now(),
                 'created_atEnd'  =>  now()
-            ]);
+                ]
+            );
 
             $filter = new CommunicationBotQueryFilter($request);
 
@@ -492,10 +517,12 @@ trait CommunicationBotTestTraits
     public function test_communicationbot_event_updated_at_filter_start_and_end()
     {
         try {
-            $request = new Request([
+            $request = new Request(
+                [
                 'updated_atStart'  =>  now(),
                 'updated_atEnd'  =>  now()
-            ]);
+                ]
+            );
 
             $filter = new CommunicationBotQueryFilter($request);
 
@@ -510,10 +537,12 @@ trait CommunicationBotTestTraits
     public function test_communicationbot_event_deleted_at_filter_start_and_end()
     {
         try {
-            $request = new Request([
+            $request = new Request(
+                [
                 'deleted_atStart'  =>  now(),
                 'deleted_atEnd'  =>  now()
-            ]);
+                ]
+            );
 
             $filter = new CommunicationBotQueryFilter($request);
 

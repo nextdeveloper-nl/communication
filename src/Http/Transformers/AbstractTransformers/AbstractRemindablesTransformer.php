@@ -29,11 +29,12 @@ use NextDeveloper\IAM\Database\Scopes\AuthorizationScope;
  *
  * @package NextDeveloper\Communication\Http\Transformers
  */
-class AbstractRemindablesTransformer extends AbstractTransformer {
+class AbstractRemindablesTransformer extends AbstractTransformer
+{
 
     /**
-    * @var array
-    */
+     * @var array
+     */
     protected array $availableIncludes = [
         'states',
         'actions',
@@ -51,26 +52,29 @@ class AbstractRemindablesTransformer extends AbstractTransformer {
      *
      * @return array
      */
-    public function transform(Remindables $model) {
+    public function transform(Remindables $model)
+    {
                                                 $iamUserId = \NextDeveloper\IAM\Database\Models\Users::where('id', $model->iam_user_id)->first();
                                                             $iamAccountId = \NextDeveloper\IAM\Database\Models\Accounts::where('id', $model->iam_account_id)->first();
                         
-        return $this->buildPayload([
-'id'  =>  $model->uuid,
-'object_id'  =>  $model->object_id,
-'object_type'  =>  $model->object_type,
-'remind_datetime'  =>  $model->remind_datetime,
-'snooze_datetime'  =>  $model->snooze_datetime,
-'note'  =>  $model->note,
-'is_reminded'  =>  $model->is_reminded,
-'is_acknowledged'  =>  $model->is_acknowledged,
-'is_cancelled'  =>  $model->is_cancelled,
-'iam_user_id'  =>  $iamUserId ? $iamUserId->uuid : null,
-'iam_account_id'  =>  $iamAccountId ? $iamAccountId->uuid : null,
-'created_at'  =>  $model->created_at,
-'updated_at'  =>  $model->updated_at,
-'deleted_at'  =>  $model->deleted_at,
-    ]);
+        return $this->buildPayload(
+            [
+            'id'  =>  $model->uuid,
+            'object_id'  =>  $model->object_id,
+            'object_type'  =>  $model->object_type,
+            'remind_datetime'  =>  $model->remind_datetime,
+            'snooze_datetime'  =>  $model->snooze_datetime,
+            'note'  =>  $model->note,
+            'is_reminded'  =>  $model->is_reminded,
+            'is_acknowledged'  =>  $model->is_acknowledged,
+            'is_cancelled'  =>  $model->is_cancelled,
+            'iam_user_id'  =>  $iamUserId ? $iamUserId->uuid : null,
+            'iam_account_id'  =>  $iamAccountId ? $iamAccountId->uuid : null,
+            'created_at'  =>  $model->created_at,
+            'updated_at'  =>  $model->updated_at,
+            'deleted_at'  =>  $model->deleted_at,
+            ]
+        );
     }
 
     public function includeStates(Remindables $model)
@@ -157,6 +161,7 @@ class AbstractRemindablesTransformer extends AbstractTransformer {
         return $this->collection($addresses, new AddressesTransformer());
     }
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
 
 
 

@@ -29,11 +29,12 @@ use NextDeveloper\IAM\Database\Scopes\AuthorizationScope;
  *
  * @package NextDeveloper\Communication\Http\Transformers
  */
-class AbstractMessagesTransformer extends AbstractTransformer {
+class AbstractMessagesTransformer extends AbstractTransformer
+{
 
     /**
-    * @var array
-    */
+     * @var array
+     */
     protected array $availableIncludes = [
         'states',
         'actions',
@@ -51,40 +52,44 @@ class AbstractMessagesTransformer extends AbstractTransformer {
      *
      * @return array
      */
-    public function transform(Messages $model) {
+    public function transform(Messages $model)
+    {
                                                 $communicationThreadId = \NextDeveloper\Communication\Database\Models\Threads::where('id', $model->communication_thread_id)->first();
                                                             $crmCampaignId = \NextDeveloper\CRM\Database\Models\Campaigns::where('id', $model->crm_campaign_id)->first();
                                                             $sentByUserId = \NextDeveloper\IAM\Database\Models\Users::where('id', $model->sent_by_user_id)->first();
                                                             $sentByBotId = \NextDeveloper\Communication\Database\Models\Bots::where('id', $model->sent_by_bot_id)->first();
-                                                            $replyToId = \NextDeveloper\\Database\Models\ReplyTos::where('id', $model->reply_to_id)->first();
-                                                            $externalMessageId = \NextDeveloper\\Database\Models\ExternalMessages::where('id', $model->external_message_id)->first();
                                                             $iamAccountId = \NextDeveloper\IAM\Database\Models\Accounts::where('id', $model->iam_account_id)->first();
+                                                            $communicationChannelId = \NextDeveloper\Communication\Database\Models\Channels::where('id', $model->communication_channel_id)->first();
                         
-        return $this->buildPayload([
-'id'  =>  $model->uuid,
-'communication_thread_id'  =>  $communicationThreadId ? $communicationThreadId->uuid : null,
-'crm_campaign_id'  =>  $crmCampaignId ? $crmCampaignId->uuid : null,
-'direction'  =>  $model->direction,
-'content_type'  =>  $model->content_type,
-'body'  =>  $model->body,
-'attachments'  =>  $model->attachments,
-'sent_by_user_id'  =>  $sentByUserId ? $sentByUserId->uuid : null,
-'sent_by_bot_id'  =>  $sentByBotId ? $sentByBotId->uuid : null,
-'reply_to_id'  =>  $replyToId ? $replyToId->uuid : null,
-'external_message_id'  =>  $externalMessageId ? $externalMessageId->uuid : null,
-'status'  =>  $model->status,
-'deliver_at'  =>  $model->deliver_at,
-'delivered_at'  =>  $model->delivered_at,
-'read_at'  =>  $model->read_at,
-'failed_at'  =>  $model->failed_at,
-'failure_reason'  =>  $model->failure_reason,
-'is_internal'  =>  $model->is_internal,
-'metadata'  =>  $model->metadata,
-'iam_account_id'  =>  $iamAccountId ? $iamAccountId->uuid : null,
-'created_at'  =>  $model->created_at,
-'updated_at'  =>  $model->updated_at,
-'deleted_at'  =>  $model->deleted_at,
-    ]);
+        return $this->buildPayload(
+            [
+            'id'  =>  $model->uuid,
+            'communication_thread_id'  =>  $communicationThreadId ? $communicationThreadId->uuid : null,
+            'crm_campaign_id'  =>  $crmCampaignId ? $crmCampaignId->uuid : null,
+            'direction'  =>  $model->direction,
+            'content_type'  =>  $model->content_type,
+            'body'  =>  $model->body,
+            'attachments'  =>  $model->attachments,
+            'sent_by_user_id'  =>  $sentByUserId ? $sentByUserId->uuid : null,
+            'sent_by_bot_id'  =>  $sentByBotId ? $sentByBotId->uuid : null,
+            'reply_to_id'  =>  $model->reply_to_id,
+            'external_message_id'  =>  $model->external_message_id,
+            'status'  =>  $model->status,
+            'deliver_at'  =>  $model->deliver_at,
+            'delivered_at'  =>  $model->delivered_at,
+            'read_at'  =>  $model->read_at,
+            'failed_at'  =>  $model->failed_at,
+            'failure_reason'  =>  $model->failure_reason,
+            'is_internal'  =>  $model->is_internal,
+            'metadata'  =>  $model->metadata,
+            'iam_account_id'  =>  $iamAccountId ? $iamAccountId->uuid : null,
+            'created_at'  =>  $model->created_at,
+            'updated_at'  =>  $model->updated_at,
+            'deleted_at'  =>  $model->deleted_at,
+            'communication_channel_id'  =>  $communicationChannelId ? $communicationChannelId->uuid : null,
+            'recipient'  =>  $model->recipient,
+            ]
+        );
     }
 
     public function includeStates(Messages $model)
@@ -171,6 +176,7 @@ class AbstractMessagesTransformer extends AbstractTransformer {
         return $this->collection($addresses, new AddressesTransformer());
     }
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
 
 
 

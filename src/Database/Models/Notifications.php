@@ -15,38 +15,38 @@ use NextDeveloper\Commons\Database\Traits\Taggable;
 use NextDeveloper\Commons\Database\Traits\RunAsAdministrator;
 
 /**
-* Notifications model.
-*
-* @package NextDeveloper\Communication\Database\Models
-* @property integer $id
-* @property string $uuid
-* @property string $severity
-* @property integer $object_id
-* @property string $object_type
-* @property string $data
-* @property \Carbon\Carbon $read_at
-* @property integer $iam_user_id
-* @property integer $iam_account_id
-* @property \Carbon\Carbon $created_at
-* @property \Carbon\Carbon $updated_at
-* @property \Carbon\Carbon $deleted_at
-*/
+ * Notifications model.
+ *
+ * @package  NextDeveloper\Communication\Database\Models
+ * @property integer $id
+ * @property string $uuid
+ * @property string $severity
+ * @property integer $object_id
+ * @property string $object_type
+ * @property string $data
+ * @property \Carbon\Carbon $read_at
+ * @property integer $iam_user_id
+ * @property integer $iam_account_id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property \Carbon\Carbon $deleted_at
+ */
 class Notifications extends Model
 {
-use Filterable, UuidId, CleanCache, Taggable, HasStates, RunAsAdministrator, HasObject;
-	use SoftDeletes;
+    use Filterable, UuidId, CleanCache, Taggable, HasStates, RunAsAdministrator, HasObject;
+    use SoftDeletes;
 
-	public $timestamps = true;
+    public $timestamps = true;
 
-protected $table = 'communication_notifications';
+    protected $table = 'communication_notifications';
 
 
-/**
-* @var array
-*/
-protected $guarded = [];
+    /**
+     @var array
+     */
+    protected $guarded = [];
 
-protected $fillable = [
+    protected $fillable = [
             'severity',
             'object_id',
             'object_type',
@@ -56,93 +56,97 @@ protected $fillable = [
             'iam_account_id',
     ];
 
-/**
-*  Here we have the fulltext fields. We can use these for fulltext search if enabled.
-*/
-protected $fullTextFields = [
+    /**
+      Here we have the fulltext fields. We can use these for fulltext search if enabled.
+     */
+    protected $fullTextFields = [
 
-];
+    ];
 
-/**
-* @var array
-*/
-protected $appends = [
+    /**
+     @var array
+     */
+    protected $appends = [
 
-];
+    ];
 
-/**
-* We are casting fields to objects so that we can work on them better
-* @var array
-*/
-protected $casts = [
-'id' => 'integer',
-'severity' => 'string',
-'object_id' => 'integer',
-'object_type' => 'string',
-'data' => 'string',
-'read_at' => 'datetime',
-'created_at' => 'datetime',
-'updated_at' => 'datetime',
-'deleted_at' => 'datetime',
-];
+    /**
+     We are casting fields to objects so that we can work on them better
+     *
+     @var array
+     */
+    protected $casts = [
+    'id' => 'integer',
+    'severity' => 'string',
+    'object_id' => 'integer',
+    'object_type' => 'string',
+    'data' => 'string',
+    'read_at' => 'datetime',
+    'created_at' => 'datetime',
+    'updated_at' => 'datetime',
+    'deleted_at' => 'datetime',
+    ];
 
-/**
-* We are casting data fields.
-* @var array
-*/
-protected $dates = [
-'read_at',
-'created_at',
-'updated_at',
-'deleted_at',
-];
+    /**
+     We are casting data fields.
+     *
+     @var array
+     */
+    protected $dates = [
+    'read_at',
+    'created_at',
+    'updated_at',
+    'deleted_at',
+    ];
 
-/**
-* @var array
-*/
-protected $with = [
+    /**
+     @var array
+     */
+    protected $with = [
 
-];
+    ];
 
-/**
-* @var int
-*/
-protected $perPage = 20;
+    /**
+     @var int
+     */
+    protected $perPage = 20;
 
-/**
-* @return void
-*/
-public static function boot()
-{
-parent::boot();
+    /**
+     @return void
+     */
+    public static function boot()
+    {
+        parent::boot();
 
-//  We create and add Observer even if we wont use it.
-parent::observe(NotificationsObserver::class);
+        //  We create and add Observer even if we wont use it.
+        parent::observe(NotificationsObserver::class);
 
-self::registerScopes();
-}
+        self::registerScopes();
+    }
 
-public static function registerScopes()
-{
-$globalScopes = config('communication.scopes.global');
-$modelScopes = config('communication.scopes.communication_notifications');
+    public static function registerScopes()
+    {
+        $globalScopes = config('communication.scopes.global');
+        $modelScopes = config('communication.scopes.communication_notifications');
 
-if(!$modelScopes) $modelScopes = [];
-if (!$globalScopes) $globalScopes = [];
+        if(!$modelScopes) { $modelScopes = [];
+        }
+        if (!$globalScopes) { $globalScopes = [];
+        }
 
-$scopes = array_merge(
-$globalScopes,
-$modelScopes
-);
+        $scopes = array_merge(
+            $globalScopes,
+            $modelScopes
+        );
 
-if($scopes) {
-foreach ($scopes as $scope) {
-static::addGlobalScope(app($scope));
-}
-}
-}
+        if($scopes) {
+            foreach ($scopes as $scope) {
+                static::addGlobalScope(app($scope));
+            }
+        }
+    }
 
-public function users() : \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function users() : \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(\NextDeveloper\IAM\Database\Models\Users::class);
     }
@@ -153,6 +157,7 @@ public function users() : \Illuminate\Database\Eloquent\Relations\BelongsTo
     }
     
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
 
 
 

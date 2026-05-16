@@ -29,11 +29,12 @@ use NextDeveloper\IAM\Database\Scopes\AuthorizationScope;
  *
  * @package NextDeveloper\Communication\Http\Transformers
  */
-class AbstractSmtpServersTransformer extends AbstractTransformer {
+class AbstractSmtpServersTransformer extends AbstractTransformer
+{
 
     /**
-    * @var array
-    */
+     * @var array
+     */
     protected array $availableIncludes = [
         'states',
         'actions',
@@ -51,32 +52,35 @@ class AbstractSmtpServersTransformer extends AbstractTransformer {
      *
      * @return array
      */
-    public function transform(SmtpServers $model) {
+    public function transform(SmtpServers $model)
+    {
                                                 $communicationChannelId = \NextDeveloper\Communication\Database\Models\Channels::where('id', $model->communication_channel_id)->first();
                                                             $iamAccountId = \NextDeveloper\IAM\Database\Models\Accounts::where('id', $model->iam_account_id)->first();
                         
-        return $this->buildPayload([
-'id'  =>  $model->uuid,
-'communication_channel_id'  =>  $communicationChannelId ? $communicationChannelId->uuid : null,
-'name'  =>  $model->name,
-'host'  =>  $model->host,
-'port'  =>  $model->port,
-'encryption'  =>  $model->encryption,
-'username'  =>  $model->username,
-'password'  =>  $model->password,
-'from_email'  =>  $model->from_email,
-'from_name'  =>  $model->from_name,
-'reply_to'  =>  $model->reply_to,
-'is_verified'  =>  $model->is_verified,
-'verified_at'  =>  $model->verified_at,
-'last_checked_at'  =>  $model->last_checked_at,
-'last_check_status'  =>  $model->last_check_status,
-'last_check_message'  =>  $model->last_check_message,
-'iam_account_id'  =>  $iamAccountId ? $iamAccountId->uuid : null,
-'created_at'  =>  $model->created_at,
-'updated_at'  =>  $model->updated_at,
-'deleted_at'  =>  $model->deleted_at,
-    ]);
+        return $this->buildPayload(
+            [
+            'id'  =>  $model->uuid,
+            'communication_channel_id'  =>  $communicationChannelId ? $communicationChannelId->uuid : null,
+            'name'  =>  $model->name,
+            'host'  =>  $model->host,
+            'port'  =>  $model->port,
+            'encryption'  =>  $model->encryption,
+            'username'  =>  $model->username,
+            'password'  =>  $model->password,
+            'from_email'  =>  $model->from_email,
+            'from_name'  =>  $model->from_name,
+            'reply_to'  =>  $model->reply_to,
+            'is_verified'  =>  $model->is_verified,
+            'verified_at'  =>  $model->verified_at,
+            'last_checked_at'  =>  $model->last_checked_at,
+            'last_check_status'  =>  $model->last_check_status,
+            'last_check_message'  =>  $model->last_check_message,
+            'iam_account_id'  =>  $iamAccountId ? $iamAccountId->uuid : null,
+            'created_at'  =>  $model->created_at,
+            'updated_at'  =>  $model->updated_at,
+            'deleted_at'  =>  $model->deleted_at,
+            ]
+        );
     }
 
     public function includeStates(SmtpServers $model)
@@ -163,6 +167,7 @@ class AbstractSmtpServersTransformer extends AbstractTransformer {
         return $this->collection($addresses, new AddressesTransformer());
     }
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
 
 
 

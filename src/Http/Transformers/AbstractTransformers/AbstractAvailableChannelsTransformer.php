@@ -29,11 +29,12 @@ use NextDeveloper\IAM\Database\Scopes\AuthorizationScope;
  *
  * @package NextDeveloper\Communication\Http\Transformers
  */
-class AbstractAvailableChannelsTransformer extends AbstractTransformer {
+class AbstractAvailableChannelsTransformer extends AbstractTransformer
+{
 
     /**
-    * @var array
-    */
+     * @var array
+     */
     protected array $availableIncludes = [
         'states',
         'actions',
@@ -51,22 +52,25 @@ class AbstractAvailableChannelsTransformer extends AbstractTransformer {
      *
      * @return array
      */
-    public function transform(AvailableChannels $model) {
+    public function transform(AvailableChannels $model)
+    {
                                                 $iamUserId = \NextDeveloper\IAM\Database\Models\Users::where('id', $model->iam_user_id)->first();
                                                             $iamAccountId = \NextDeveloper\IAM\Database\Models\Accounts::where('id', $model->iam_account_id)->first();
                         
-        return $this->buildPayload([
-'id'  =>  $model->uuid,
-'name'  =>  $model->name,
-'class'  =>  $model->class,
-'parameters'  =>  $model->parameters,
-'iam_user_id'  =>  $iamUserId ? $iamUserId->uuid : null,
-'iam_account_id'  =>  $iamAccountId ? $iamAccountId->uuid : null,
-'created_at'  =>  $model->created_at,
-'updated_at'  =>  $model->updated_at,
-'deleted_at'  =>  $model->deleted_at,
-'config'  =>  $model->config,
-    ]);
+        return $this->buildPayload(
+            [
+            'id'  =>  $model->uuid,
+            'name'  =>  $model->name,
+            'class'  =>  $model->class,
+            'parameters'  =>  $model->parameters,
+            'iam_user_id'  =>  $iamUserId ? $iamUserId->uuid : null,
+            'iam_account_id'  =>  $iamAccountId ? $iamAccountId->uuid : null,
+            'created_at'  =>  $model->created_at,
+            'updated_at'  =>  $model->updated_at,
+            'deleted_at'  =>  $model->deleted_at,
+            'config'  =>  $model->config,
+            ]
+        );
     }
 
     public function includeStates(AvailableChannels $model)
@@ -153,6 +157,7 @@ class AbstractAvailableChannelsTransformer extends AbstractTransformer {
         return $this->collection($addresses, new AddressesTransformer());
     }
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
 
 
 
