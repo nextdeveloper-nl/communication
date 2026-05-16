@@ -15,41 +15,41 @@ use NextDeveloper\Commons\Database\Traits\Taggable;
 use NextDeveloper\Commons\Database\Traits\RunAsAdministrator;
 
 /**
-* Threads model.
-*
-* @package NextDeveloper\Communication\Database\Models
-* @property integer $id
-* @property string $uuid
-* @property string $subject
-* @property string $status
-* @property integer $communication_channel_id
-* @property integer $communication_contact_id
-* @property integer $communication_bot_id
-* @property integer $assigned_to_user_id
-* @property \Carbon\Carbon $assigned_at
-* @property \Carbon\Carbon $resolved_at
-* @property \Carbon\Carbon $last_message_at
-* @property integer $iam_account_id
-* @property \Carbon\Carbon $created_at
-* @property \Carbon\Carbon $updated_at
-* @property \Carbon\Carbon $deleted_at
-*/
+ * Threads model.
+ *
+ * @package  NextDeveloper\Communication\Database\Models
+ * @property integer $id
+ * @property string $uuid
+ * @property string $subject
+ * @property string $status
+ * @property integer $communication_channel_id
+ * @property integer $communication_contact_id
+ * @property integer $communication_bot_id
+ * @property integer $assigned_to_user_id
+ * @property \Carbon\Carbon $assigned_at
+ * @property \Carbon\Carbon $resolved_at
+ * @property \Carbon\Carbon $last_message_at
+ * @property integer $iam_account_id
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property \Carbon\Carbon $deleted_at
+ */
 class Threads extends Model
 {
-use Filterable, UuidId, CleanCache, Taggable, HasStates, RunAsAdministrator, HasObject;
-	use SoftDeletes;
+    use Filterable, UuidId, CleanCache, Taggable, HasStates, RunAsAdministrator, HasObject;
+    use SoftDeletes;
 
-	public $timestamps = true;
+    public $timestamps = true;
 
-protected $table = 'communication_threads';
+    protected $table = 'communication_threads';
 
 
-/**
-* @var array
-*/
-protected $guarded = [];
+    /**
+     @var array
+     */
+    protected $guarded = [];
 
-protected $fillable = [
+    protected $fillable = [
             'subject',
             'status',
             'communication_channel_id',
@@ -62,99 +62,103 @@ protected $fillable = [
             'iam_account_id',
     ];
 
-/**
-*  Here we have the fulltext fields. We can use these for fulltext search if enabled.
-*/
-protected $fullTextFields = [
+    /**
+      Here we have the fulltext fields. We can use these for fulltext search if enabled.
+     */
+    protected $fullTextFields = [
 
-];
+    ];
 
-/**
-* @var array
-*/
-protected $appends = [
+    /**
+     @var array
+     */
+    protected $appends = [
 
-];
+    ];
 
-/**
-* We are casting fields to objects so that we can work on them better
-* @var array
-*/
-protected $casts = [
-'id' => 'integer',
-'subject' => 'string',
-'status' => 'string',
-'communication_channel_id' => 'integer',
-'communication_contact_id' => 'integer',
-'communication_bot_id' => 'integer',
-'assigned_to_user_id' => 'integer',
-'assigned_at' => 'datetime',
-'resolved_at' => 'datetime',
-'last_message_at' => 'datetime',
-'created_at' => 'datetime',
-'updated_at' => 'datetime',
-'deleted_at' => 'datetime',
-];
+    /**
+     We are casting fields to objects so that we can work on them better
+     *
+     @var array
+     */
+    protected $casts = [
+    'id' => 'integer',
+    'subject' => 'string',
+    'status' => 'string',
+    'communication_channel_id' => 'integer',
+    'communication_contact_id' => 'integer',
+    'communication_bot_id' => 'integer',
+    'assigned_to_user_id' => 'integer',
+    'assigned_at' => 'datetime',
+    'resolved_at' => 'datetime',
+    'last_message_at' => 'datetime',
+    'created_at' => 'datetime',
+    'updated_at' => 'datetime',
+    'deleted_at' => 'datetime',
+    ];
 
-/**
-* We are casting data fields.
-* @var array
-*/
-protected $dates = [
-'assigned_at',
-'resolved_at',
-'last_message_at',
-'created_at',
-'updated_at',
-'deleted_at',
-];
+    /**
+     We are casting data fields.
+     *
+     @var array
+     */
+    protected $dates = [
+    'assigned_at',
+    'resolved_at',
+    'last_message_at',
+    'created_at',
+    'updated_at',
+    'deleted_at',
+    ];
 
-/**
-* @var array
-*/
-protected $with = [
+    /**
+     @var array
+     */
+    protected $with = [
 
-];
+    ];
 
-/**
-* @var int
-*/
-protected $perPage = 20;
+    /**
+     @var int
+     */
+    protected $perPage = 20;
 
-/**
-* @return void
-*/
-public static function boot()
-{
-parent::boot();
+    /**
+     @return void
+     */
+    public static function boot()
+    {
+        parent::boot();
 
-//  We create and add Observer even if we wont use it.
-parent::observe(ThreadsObserver::class);
+        //  We create and add Observer even if we wont use it.
+        parent::observe(ThreadsObserver::class);
 
-self::registerScopes();
-}
+        self::registerScopes();
+    }
 
-public static function registerScopes()
-{
-$globalScopes = config('communication.scopes.global');
-$modelScopes = config('communication.scopes.communication_threads');
+    public static function registerScopes()
+    {
+        $globalScopes = config('communication.scopes.global');
+        $modelScopes = config('communication.scopes.communication_threads');
 
-if(!$modelScopes) $modelScopes = [];
-if (!$globalScopes) $globalScopes = [];
+        if(!$modelScopes) { $modelScopes = [];
+        }
+        if (!$globalScopes) { $globalScopes = [];
+        }
 
-$scopes = array_merge(
-$globalScopes,
-$modelScopes
-);
+        $scopes = array_merge(
+            $globalScopes,
+            $modelScopes
+        );
 
-if($scopes) {
-foreach ($scopes as $scope) {
-static::addGlobalScope(app($scope));
-}
-}
-}
+        if($scopes) {
+            foreach ($scopes as $scope) {
+                static::addGlobalScope(app($scope));
+            }
+        }
+    }
 
-public function channels() : \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function channels() : \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(\NextDeveloper\Communication\Database\Models\Channels::class);
     }
@@ -185,6 +189,7 @@ public function channels() : \Illuminate\Database\Eloquent\Relations\BelongsTo
     }
 
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
 
 
 

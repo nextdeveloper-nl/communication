@@ -29,11 +29,12 @@ use NextDeveloper\IAM\Database\Scopes\AuthorizationScope;
  *
  * @package NextDeveloper\Communication\Http\Transformers
  */
-class AbstractContactIdentifiersTransformer extends AbstractTransformer {
+class AbstractContactIdentifiersTransformer extends AbstractTransformer
+{
 
     /**
-    * @var array
-    */
+     * @var array
+     */
     protected array $availableIncludes = [
         'states',
         'actions',
@@ -51,22 +52,25 @@ class AbstractContactIdentifiersTransformer extends AbstractTransformer {
      *
      * @return array
      */
-    public function transform(ContactIdentifiers $model) {
+    public function transform(ContactIdentifiers $model)
+    {
                                                 $communicationContactId = \NextDeveloper\Communication\Database\Models\Contacts::where('id', $model->communication_contact_id)->first();
                         
-        return $this->buildPayload([
-'id'  =>  $model->uuid,
-'communication_contact_id'  =>  $communicationContactId ? $communicationContactId->uuid : null,
-'channel_type'  =>  $model->channel_type,
-'identifier'  =>  $model->identifier,
-'is_primary'  =>  $model->is_primary,
-'is_suppressed'  =>  $model->is_suppressed,
-'suppressed_at'  =>  $model->suppressed_at,
-'suppressed_reason'  =>  $model->suppressed_reason,
-'created_at'  =>  $model->created_at,
-'updated_at'  =>  $model->updated_at,
-'deleted_at'  =>  $model->deleted_at,
-    ]);
+        return $this->buildPayload(
+            [
+            'id'  =>  $model->uuid,
+            'communication_contact_id'  =>  $communicationContactId ? $communicationContactId->uuid : null,
+            'channel_type'  =>  $model->channel_type,
+            'identifier'  =>  $model->identifier,
+            'is_primary'  =>  $model->is_primary,
+            'is_suppressed'  =>  $model->is_suppressed,
+            'suppressed_at'  =>  $model->suppressed_at,
+            'suppressed_reason'  =>  $model->suppressed_reason,
+            'created_at'  =>  $model->created_at,
+            'updated_at'  =>  $model->updated_at,
+            'deleted_at'  =>  $model->deleted_at,
+            ]
+        );
     }
 
     public function includeStates(ContactIdentifiers $model)
@@ -153,6 +157,7 @@ class AbstractContactIdentifiersTransformer extends AbstractTransformer {
         return $this->collection($addresses, new AddressesTransformer());
     }
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
 
 
 

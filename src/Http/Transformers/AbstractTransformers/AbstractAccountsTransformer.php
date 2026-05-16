@@ -29,11 +29,12 @@ use NextDeveloper\IAM\Database\Scopes\AuthorizationScope;
  *
  * @package NextDeveloper\Communication\Http\Transformers
  */
-class AbstractAccountsTransformer extends AbstractTransformer {
+class AbstractAccountsTransformer extends AbstractTransformer
+{
 
     /**
-    * @var array
-    */
+     * @var array
+     */
     protected array $availableIncludes = [
         'states',
         'actions',
@@ -51,31 +52,34 @@ class AbstractAccountsTransformer extends AbstractTransformer {
      *
      * @return array
      */
-    public function transform(Accounts $model) {
+    public function transform(Accounts $model)
+    {
                                                 $iamAccountId = \NextDeveloper\IAM\Database\Models\Accounts::where('id', $model->iam_account_id)->first();
                         
-        return $this->buildPayload([
-'id'  =>  $model->uuid,
-'iam_account_id'  =>  $iamAccountId ? $iamAccountId->uuid : null,
-'plan'  =>  $model->plan,
-'max_contacts'  =>  $model->max_contacts,
-'max_emails_per_month'  =>  $model->max_emails_per_month,
-'max_sms_per_month'  =>  $model->max_sms_per_month,
-'max_channels'  =>  $model->max_channels,
-'emails_sent_this_period'  =>  $model->emails_sent_this_period,
-'sms_sent_this_period'  =>  $model->sms_sent_this_period,
-'current_period_start'  =>  $model->current_period_start,
-'current_period_end'  =>  $model->current_period_end,
-'is_suspended'  =>  $model->is_suspended,
-'suspension_reason'  =>  $model->suspension_reason,
-'reputation_score'  =>  $model->reputation_score,
-'enabled_channel_types'  =>  $model->enabled_channel_types,
-'is_ai_bots_enabled'  =>  $model->is_ai_bots_enabled,
-'is_dedicated_ip_enabled'  =>  $model->is_dedicated_ip_enabled,
-'created_at'  =>  $model->created_at,
-'updated_at'  =>  $model->updated_at,
-'deleted_at'  =>  $model->deleted_at,
-    ]);
+        return $this->buildPayload(
+            [
+            'id'  =>  $model->uuid,
+            'iam_account_id'  =>  $iamAccountId ? $iamAccountId->uuid : null,
+            'plan'  =>  $model->plan,
+            'max_contacts'  =>  $model->max_contacts,
+            'max_emails_per_month'  =>  $model->max_emails_per_month,
+            'max_sms_per_month'  =>  $model->max_sms_per_month,
+            'max_channels'  =>  $model->max_channels,
+            'emails_sent_this_period'  =>  $model->emails_sent_this_period,
+            'sms_sent_this_period'  =>  $model->sms_sent_this_period,
+            'current_period_start'  =>  $model->current_period_start,
+            'current_period_end'  =>  $model->current_period_end,
+            'is_suspended'  =>  $model->is_suspended,
+            'suspension_reason'  =>  $model->suspension_reason,
+            'reputation_score'  =>  $model->reputation_score,
+            'enabled_channel_types'  =>  $model->enabled_channel_types,
+            'is_ai_bots_enabled'  =>  $model->is_ai_bots_enabled,
+            'is_dedicated_ip_enabled'  =>  $model->is_dedicated_ip_enabled,
+            'created_at'  =>  $model->created_at,
+            'updated_at'  =>  $model->updated_at,
+            'deleted_at'  =>  $model->deleted_at,
+            ]
+        );
     }
 
     public function includeStates(Accounts $model)
@@ -162,6 +166,7 @@ class AbstractAccountsTransformer extends AbstractTransformer {
         return $this->collection($addresses, new AddressesTransformer());
     }
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
 
 
 

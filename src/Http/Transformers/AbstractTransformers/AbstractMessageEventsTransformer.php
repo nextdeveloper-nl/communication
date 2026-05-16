@@ -29,11 +29,12 @@ use NextDeveloper\IAM\Database\Scopes\AuthorizationScope;
  *
  * @package NextDeveloper\Communication\Http\Transformers
  */
-class AbstractMessageEventsTransformer extends AbstractTransformer {
+class AbstractMessageEventsTransformer extends AbstractTransformer
+{
 
     /**
-    * @var array
-    */
+     * @var array
+     */
     protected array $availableIncludes = [
         'states',
         'actions',
@@ -51,17 +52,20 @@ class AbstractMessageEventsTransformer extends AbstractTransformer {
      *
      * @return array
      */
-    public function transform(MessageEvents $model) {
+    public function transform(MessageEvents $model)
+    {
                                                 $communicationMessageId = \NextDeveloper\Communication\Database\Models\Messages::where('id', $model->communication_message_id)->first();
                         
-        return $this->buildPayload([
-'id'  =>  $model->uuid,
-'communication_message_id'  =>  $communicationMessageId ? $communicationMessageId->uuid : null,
-'event_type'  =>  $model->event_type,
-'metadata'  =>  $model->metadata,
-'occurred_at'  =>  $model->occurred_at,
-'created_at'  =>  $model->created_at,
-    ]);
+        return $this->buildPayload(
+            [
+            'id'  =>  $model->uuid,
+            'communication_message_id'  =>  $communicationMessageId ? $communicationMessageId->uuid : null,
+            'event_type'  =>  $model->event_type,
+            'metadata'  =>  $model->metadata,
+            'occurred_at'  =>  $model->occurred_at,
+            'created_at'  =>  $model->created_at,
+            ]
+        );
     }
 
     public function includeStates(MessageEvents $model)
@@ -148,6 +152,7 @@ class AbstractMessageEventsTransformer extends AbstractTransformer {
         return $this->collection($addresses, new AddressesTransformer());
     }
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
 
 
 

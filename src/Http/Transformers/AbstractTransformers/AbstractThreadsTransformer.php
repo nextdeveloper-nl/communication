@@ -29,11 +29,12 @@ use NextDeveloper\IAM\Database\Scopes\AuthorizationScope;
  *
  * @package NextDeveloper\Communication\Http\Transformers
  */
-class AbstractThreadsTransformer extends AbstractTransformer {
+class AbstractThreadsTransformer extends AbstractTransformer
+{
 
     /**
-    * @var array
-    */
+     * @var array
+     */
     protected array $availableIncludes = [
         'states',
         'actions',
@@ -51,29 +52,32 @@ class AbstractThreadsTransformer extends AbstractTransformer {
      *
      * @return array
      */
-    public function transform(Threads $model) {
+    public function transform(Threads $model)
+    {
                                                 $communicationChannelId = \NextDeveloper\Communication\Database\Models\Channels::where('id', $model->communication_channel_id)->first();
                                                             $communicationContactId = \NextDeveloper\Communication\Database\Models\Contacts::where('id', $model->communication_contact_id)->first();
                                                             $communicationBotId = \NextDeveloper\Communication\Database\Models\Bots::where('id', $model->communication_bot_id)->first();
                                                             $assignedToUserId = \NextDeveloper\IAM\Database\Models\Users::where('id', $model->assigned_to_user_id)->first();
                                                             $iamAccountId = \NextDeveloper\IAM\Database\Models\Accounts::where('id', $model->iam_account_id)->first();
                         
-        return $this->buildPayload([
-'id'  =>  $model->uuid,
-'subject'  =>  $model->subject,
-'status'  =>  $model->status,
-'communication_channel_id'  =>  $communicationChannelId ? $communicationChannelId->uuid : null,
-'communication_contact_id'  =>  $communicationContactId ? $communicationContactId->uuid : null,
-'communication_bot_id'  =>  $communicationBotId ? $communicationBotId->uuid : null,
-'assigned_to_user_id'  =>  $assignedToUserId ? $assignedToUserId->uuid : null,
-'assigned_at'  =>  $model->assigned_at,
-'resolved_at'  =>  $model->resolved_at,
-'last_message_at'  =>  $model->last_message_at,
-'iam_account_id'  =>  $iamAccountId ? $iamAccountId->uuid : null,
-'created_at'  =>  $model->created_at,
-'updated_at'  =>  $model->updated_at,
-'deleted_at'  =>  $model->deleted_at,
-    ]);
+        return $this->buildPayload(
+            [
+            'id'  =>  $model->uuid,
+            'subject'  =>  $model->subject,
+            'status'  =>  $model->status,
+            'communication_channel_id'  =>  $communicationChannelId ? $communicationChannelId->uuid : null,
+            'communication_contact_id'  =>  $communicationContactId ? $communicationContactId->uuid : null,
+            'communication_bot_id'  =>  $communicationBotId ? $communicationBotId->uuid : null,
+            'assigned_to_user_id'  =>  $assignedToUserId ? $assignedToUserId->uuid : null,
+            'assigned_at'  =>  $model->assigned_at,
+            'resolved_at'  =>  $model->resolved_at,
+            'last_message_at'  =>  $model->last_message_at,
+            'iam_account_id'  =>  $iamAccountId ? $iamAccountId->uuid : null,
+            'created_at'  =>  $model->created_at,
+            'updated_at'  =>  $model->updated_at,
+            'deleted_at'  =>  $model->deleted_at,
+            ]
+        );
     }
 
     public function includeStates(Threads $model)
@@ -160,6 +164,7 @@ class AbstractThreadsTransformer extends AbstractTransformer {
         return $this->collection($addresses, new AddressesTransformer());
     }
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
 
 
 

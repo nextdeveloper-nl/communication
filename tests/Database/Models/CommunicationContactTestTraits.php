@@ -16,18 +16,20 @@ trait CommunicationContactTestTraits
     public $http;
 
     /**
-    *   Creating the Guzzle object
-    */
+     *   Creating the Guzzle object
+     */
     public function setupGuzzle()
     {
-        $this->http = new Client([
+        $this->http = new Client(
+            [
             'base_uri'  =>  '127.0.0.1:8000'
-        ]);
+            ]
+        );
     }
 
     /**
-    *   Destroying the Guzzle object
-    */
+     *   Destroying the Guzzle object
+     */
     public function destroyGuzzle()
     {
         $this->http = null;
@@ -42,16 +44,19 @@ trait CommunicationContactTestTraits
             ['http_errors' => false]
         );
 
-        $this->assertContains($response->getStatusCode(), [
+        $this->assertContains(
+            $response->getStatusCode(), [
             Response::HTTP_OK,
             Response::HTTP_NOT_FOUND
-        ]);
+            ]
+        );
     }
 
     public function test_http_communicationcontact_post()
     {
         $this->setupGuzzle();
-        $response = $this->http->request('POST', '/communication/communicationcontact', [
+        $response = $this->http->request(
+            'POST', '/communication/communicationcontact', [
             'form_params'   =>  [
                 'full_name'  =>  'a',
                 'notes'  =>  'a',
@@ -64,10 +69,10 @@ trait CommunicationContactTestTraits
     }
 
     /**
-    * Get test
-    *
-    * @return bool
-    */
+     * Get test
+     *
+     * @return bool
+     */
     public function test_communicationcontact_model_get()
     {
         $result = AbstractCommunicationContactService::get();
@@ -84,9 +89,11 @@ trait CommunicationContactTestTraits
 
     public function test_communicationcontact_get_paginated()
     {
-        $result = AbstractCommunicationContactService::get(null, [
+        $result = AbstractCommunicationContactService::get(
+            null, [
             'paginated' =>  'true'
-        ]);
+            ]
+        );
 
         $this->assertIsObject($result, LengthAwarePaginator::class);
     }
@@ -94,7 +101,7 @@ trait CommunicationContactTestTraits
     public function test_communicationcontact_event_retrieved_without_object()
     {
         try {
-            event( new \NextDeveloper\Communication\Events\CommunicationContact\CommunicationContactRetrievedEvent() );
+            event(new \NextDeveloper\Communication\Events\CommunicationContact\CommunicationContactRetrievedEvent());
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -104,7 +111,7 @@ trait CommunicationContactTestTraits
     public function test_communicationcontact_event_created_without_object()
     {
         try {
-            event( new \NextDeveloper\Communication\Events\CommunicationContact\CommunicationContactCreatedEvent() );
+            event(new \NextDeveloper\Communication\Events\CommunicationContact\CommunicationContactCreatedEvent());
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -114,7 +121,7 @@ trait CommunicationContactTestTraits
     public function test_communicationcontact_event_creating_without_object()
     {
         try {
-            event( new \NextDeveloper\Communication\Events\CommunicationContact\CommunicationContactCreatingEvent() );
+            event(new \NextDeveloper\Communication\Events\CommunicationContact\CommunicationContactCreatingEvent());
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -124,7 +131,7 @@ trait CommunicationContactTestTraits
     public function test_communicationcontact_event_saving_without_object()
     {
         try {
-            event( new \NextDeveloper\Communication\Events\CommunicationContact\CommunicationContactSavingEvent() );
+            event(new \NextDeveloper\Communication\Events\CommunicationContact\CommunicationContactSavingEvent());
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -134,7 +141,7 @@ trait CommunicationContactTestTraits
     public function test_communicationcontact_event_saved_without_object()
     {
         try {
-            event( new \NextDeveloper\Communication\Events\CommunicationContact\CommunicationContactSavedEvent() );
+            event(new \NextDeveloper\Communication\Events\CommunicationContact\CommunicationContactSavedEvent());
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -144,7 +151,7 @@ trait CommunicationContactTestTraits
     public function test_communicationcontact_event_updating_without_object()
     {
         try {
-            event( new \NextDeveloper\Communication\Events\CommunicationContact\CommunicationContactUpdatingEvent() );
+            event(new \NextDeveloper\Communication\Events\CommunicationContact\CommunicationContactUpdatingEvent());
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -154,7 +161,7 @@ trait CommunicationContactTestTraits
     public function test_communicationcontact_event_updated_without_object()
     {
         try {
-            event( new \NextDeveloper\Communication\Events\CommunicationContact\CommunicationContactUpdatedEvent() );
+            event(new \NextDeveloper\Communication\Events\CommunicationContact\CommunicationContactUpdatedEvent());
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -164,7 +171,7 @@ trait CommunicationContactTestTraits
     public function test_communicationcontact_event_deleting_without_object()
     {
         try {
-            event( new \NextDeveloper\Communication\Events\CommunicationContact\CommunicationContactDeletingEvent() );
+            event(new \NextDeveloper\Communication\Events\CommunicationContact\CommunicationContactDeletingEvent());
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -174,7 +181,7 @@ trait CommunicationContactTestTraits
     public function test_communicationcontact_event_deleted_without_object()
     {
         try {
-            event( new \NextDeveloper\Communication\Events\CommunicationContact\CommunicationContactDeletedEvent() );
+            event(new \NextDeveloper\Communication\Events\CommunicationContact\CommunicationContactDeletedEvent());
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -184,7 +191,7 @@ trait CommunicationContactTestTraits
     public function test_communicationcontact_event_restoring_without_object()
     {
         try {
-            event( new \NextDeveloper\Communication\Events\CommunicationContact\CommunicationContactRestoringEvent() );
+            event(new \NextDeveloper\Communication\Events\CommunicationContact\CommunicationContactRestoringEvent());
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -194,7 +201,7 @@ trait CommunicationContactTestTraits
     public function test_communicationcontact_event_restored_without_object()
     {
         try {
-            event( new \NextDeveloper\Communication\Events\CommunicationContact\CommunicationContactRestoredEvent() );
+            event(new \NextDeveloper\Communication\Events\CommunicationContact\CommunicationContactRestoredEvent());
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -207,7 +214,7 @@ trait CommunicationContactTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationContact::first();
 
-            event( new \NextDeveloper\Communication\Events\CommunicationContact\CommunicationContactRetrievedEvent($model) );
+            event(new \NextDeveloper\Communication\Events\CommunicationContact\CommunicationContactRetrievedEvent($model));
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -219,7 +226,7 @@ trait CommunicationContactTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationContact::first();
 
-            event( new \NextDeveloper\Communication\Events\CommunicationContact\CommunicationContactCreatedEvent($model) );
+            event(new \NextDeveloper\Communication\Events\CommunicationContact\CommunicationContactCreatedEvent($model));
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -231,7 +238,7 @@ trait CommunicationContactTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationContact::first();
 
-            event( new \NextDeveloper\Communication\Events\CommunicationContact\CommunicationContactCreatingEvent($model) );
+            event(new \NextDeveloper\Communication\Events\CommunicationContact\CommunicationContactCreatingEvent($model));
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -243,7 +250,7 @@ trait CommunicationContactTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationContact::first();
 
-            event( new \NextDeveloper\Communication\Events\CommunicationContact\CommunicationContactSavingEvent($model) );
+            event(new \NextDeveloper\Communication\Events\CommunicationContact\CommunicationContactSavingEvent($model));
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -255,7 +262,7 @@ trait CommunicationContactTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationContact::first();
 
-            event( new \NextDeveloper\Communication\Events\CommunicationContact\CommunicationContactSavedEvent($model) );
+            event(new \NextDeveloper\Communication\Events\CommunicationContact\CommunicationContactSavedEvent($model));
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -267,7 +274,7 @@ trait CommunicationContactTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationContact::first();
 
-            event( new \NextDeveloper\Communication\Events\CommunicationContact\CommunicationContactUpdatingEvent($model) );
+            event(new \NextDeveloper\Communication\Events\CommunicationContact\CommunicationContactUpdatingEvent($model));
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -279,7 +286,7 @@ trait CommunicationContactTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationContact::first();
 
-            event( new \NextDeveloper\Communication\Events\CommunicationContact\CommunicationContactUpdatedEvent($model) );
+            event(new \NextDeveloper\Communication\Events\CommunicationContact\CommunicationContactUpdatedEvent($model));
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -291,7 +298,7 @@ trait CommunicationContactTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationContact::first();
 
-            event( new \NextDeveloper\Communication\Events\CommunicationContact\CommunicationContactDeletingEvent($model) );
+            event(new \NextDeveloper\Communication\Events\CommunicationContact\CommunicationContactDeletingEvent($model));
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -303,7 +310,7 @@ trait CommunicationContactTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationContact::first();
 
-            event( new \NextDeveloper\Communication\Events\CommunicationContact\CommunicationContactDeletedEvent($model) );
+            event(new \NextDeveloper\Communication\Events\CommunicationContact\CommunicationContactDeletedEvent($model));
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -315,7 +322,7 @@ trait CommunicationContactTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationContact::first();
 
-            event( new \NextDeveloper\Communication\Events\CommunicationContact\CommunicationContactRestoringEvent($model) );
+            event(new \NextDeveloper\Communication\Events\CommunicationContact\CommunicationContactRestoringEvent($model));
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -327,7 +334,7 @@ trait CommunicationContactTestTraits
         try {
             $model = \NextDeveloper\Communication\Database\Models\CommunicationContact::first();
 
-            event( new \NextDeveloper\Communication\Events\CommunicationContact\CommunicationContactRestoredEvent($model) );
+            event(new \NextDeveloper\Communication\Events\CommunicationContact\CommunicationContactRestoredEvent($model));
         } catch (\Exception $e) {
             $this->assertFalse(false, $e->getMessage());
         }
@@ -338,9 +345,11 @@ trait CommunicationContactTestTraits
     public function test_communicationcontact_event_full_name_filter()
     {
         try {
-            $request = new Request([
+            $request = new Request(
+                [
                 'full_name'  =>  'a'
-            ]);
+                ]
+            );
 
             $filter = new CommunicationContactQueryFilter($request);
 
@@ -355,9 +364,11 @@ trait CommunicationContactTestTraits
     public function test_communicationcontact_event_notes_filter()
     {
         try {
-            $request = new Request([
+            $request = new Request(
+                [
                 'notes'  =>  'a'
-            ]);
+                ]
+            );
 
             $filter = new CommunicationContactQueryFilter($request);
 
@@ -372,9 +383,11 @@ trait CommunicationContactTestTraits
     public function test_communicationcontact_event_created_at_filter_start()
     {
         try {
-            $request = new Request([
+            $request = new Request(
+                [
                 'created_atStart'  =>  now()
-            ]);
+                ]
+            );
 
             $filter = new CommunicationContactQueryFilter($request);
 
@@ -389,9 +402,11 @@ trait CommunicationContactTestTraits
     public function test_communicationcontact_event_updated_at_filter_start()
     {
         try {
-            $request = new Request([
+            $request = new Request(
+                [
                 'updated_atStart'  =>  now()
-            ]);
+                ]
+            );
 
             $filter = new CommunicationContactQueryFilter($request);
 
@@ -406,9 +421,11 @@ trait CommunicationContactTestTraits
     public function test_communicationcontact_event_deleted_at_filter_start()
     {
         try {
-            $request = new Request([
+            $request = new Request(
+                [
                 'deleted_atStart'  =>  now()
-            ]);
+                ]
+            );
 
             $filter = new CommunicationContactQueryFilter($request);
 
@@ -423,9 +440,11 @@ trait CommunicationContactTestTraits
     public function test_communicationcontact_event_created_at_filter_end()
     {
         try {
-            $request = new Request([
+            $request = new Request(
+                [
                 'created_atEnd'  =>  now()
-            ]);
+                ]
+            );
 
             $filter = new CommunicationContactQueryFilter($request);
 
@@ -440,9 +459,11 @@ trait CommunicationContactTestTraits
     public function test_communicationcontact_event_updated_at_filter_end()
     {
         try {
-            $request = new Request([
+            $request = new Request(
+                [
                 'updated_atEnd'  =>  now()
-            ]);
+                ]
+            );
 
             $filter = new CommunicationContactQueryFilter($request);
 
@@ -457,9 +478,11 @@ trait CommunicationContactTestTraits
     public function test_communicationcontact_event_deleted_at_filter_end()
     {
         try {
-            $request = new Request([
+            $request = new Request(
+                [
                 'deleted_atEnd'  =>  now()
-            ]);
+                ]
+            );
 
             $filter = new CommunicationContactQueryFilter($request);
 
@@ -474,10 +497,12 @@ trait CommunicationContactTestTraits
     public function test_communicationcontact_event_created_at_filter_start_and_end()
     {
         try {
-            $request = new Request([
+            $request = new Request(
+                [
                 'created_atStart'  =>  now(),
                 'created_atEnd'  =>  now()
-            ]);
+                ]
+            );
 
             $filter = new CommunicationContactQueryFilter($request);
 
@@ -492,10 +517,12 @@ trait CommunicationContactTestTraits
     public function test_communicationcontact_event_updated_at_filter_start_and_end()
     {
         try {
-            $request = new Request([
+            $request = new Request(
+                [
                 'updated_atStart'  =>  now(),
                 'updated_atEnd'  =>  now()
-            ]);
+                ]
+            );
 
             $filter = new CommunicationContactQueryFilter($request);
 
@@ -510,10 +537,12 @@ trait CommunicationContactTestTraits
     public function test_communicationcontact_event_deleted_at_filter_start_and_end()
     {
         try {
-            $request = new Request([
+            $request = new Request(
+                [
                 'deleted_atStart'  =>  now(),
                 'deleted_atEnd'  =>  now()
-            ]);
+                ]
+            );
 
             $filter = new CommunicationContactQueryFilter($request);
 
