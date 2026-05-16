@@ -62,85 +62,86 @@ class ChannelSettings
     private static function smtp(): array
     {
         return [
-            self::field('host',         'SMTP Host',       'text',     true,  null,    [],                              'Hostname or IP of your outgoing mail server.'),
-            self::field('port',         'Port',            'number',   true,  587,     [],                              'Common values: 25 (plain), 465 (SSL), 587 (STARTTLS).'),
-            self::field('encryption',   'Encryption',      'select',   true,  'tls',   self::encryptionOptions(),        ''),
-            self::field('username',     'Username',        'text',     true,  null,    [],                              'Usually the full email address used to authenticate.'),
-            self::field('password',     'Password',        'password', true,  null,    [],                              ''),
-            self::field('from_address', 'From Address',    'text',     false, null,    [],                              'Sender address shown in the From header.'),
-            self::field('from_name',    'From Name',       'text',     false, null,    [],                              'Sender name shown in the From header.'),
-            self::field('timeout',      'Timeout (s)',     'number',   false, 30,      [],                              'Connection timeout in seconds.'),
+            self::field('host',                'SMTP Host',            'text',     true,  null,    [],                       'Hostname or IP of your outgoing mail server.'),
+            self::field('port',                'Port',                 'number',   true,  587,     [],                       'Common values: 25 (plain), 465 (SSL), 587 (STARTTLS).'),
+            self::field('encryption',          'Encryption',           'select',   true,  'tls',   self::encryptionOptions(), ''),
+            self::field('username',            'Username',             'text',     true,  null,    [],                       'Usually the full email address used to authenticate.'),
+            self::field('password',            'Password',             'password', true,  null,    [],                       ''),
+            self::field('from_address',        'From Address',         'text',     false, null,    [],                       'Sender address shown in the From header.'),
+            self::field('from_name',           'From Name',            'text',     false, null,    [],                       'Sender name shown in the From header.'),
+            self::field('timeout',             'Timeout (s)',          'number',   false, 30,      [],                       'Connection timeout in seconds.'),
+            self::field('max_emails_per_hour', 'Max Emails / Hour',    'number',   false, null,    [],                       'Leave empty for no limit.'),
         ];
     }
 
     private static function imap(): array
     {
         return [
-            self::field('host',       'IMAP Host',        'text',     true,  null,    [],                              'Hostname of your incoming mail server.'),
-            self::field('port',       'Port',             'number',   true,  993,     [],                              'Common values: 143 (plain/STARTTLS), 993 (SSL).'),
-            self::field('encryption', 'Encryption',       'select',   true,  'ssl',   self::encryptionOptions(),        ''),
-            self::field('username',   'Username',         'text',     true,  null,    [],                              'Usually the full email address.'),
-            self::field('password',   'Password',         'password', true,  null,    [],                              ''),
-            self::field('folder',     'Mailbox Folder',   'text',     false, 'INBOX', [],                              'Folder to watch for incoming messages.'),
-            self::field('timeout',    'Timeout (s)',       'number',   false, 30,      [],                              'Connection timeout in seconds.'),
+            self::field('host',                'IMAP Host',            'text',     true,  null,    [],                       'Hostname of your incoming mail server.'),
+            self::field('port',                'Port',                 'number',   true,  993,     [],                       'Common values: 143 (plain/STARTTLS), 993 (SSL).'),
+            self::field('encryption',          'Encryption',           'select',   true,  'ssl',   self::encryptionOptions(), ''),
+            self::field('username',            'Username',             'text',     true,  null,    [],                       'Usually the full email address.'),
+            self::field('password',            'Password',             'password', true,  null,    [],                       ''),
+            self::field('folder',              'Mailbox Folder',       'text',     false, 'INBOX', [],                       'Folder to watch for incoming messages.'),
+            self::field('timeout',             'Timeout (s)',          'number',   false, 30,      [],                       'Connection timeout in seconds.'),
+            self::field('max_emails_per_hour', 'Max Emails / Hour',    'number',   false, null,    [],                       'Leave empty for no limit.'),
         ];
     }
 
     private static function pop3(): array
     {
         return [
-            self::field('host',            'POP3 Host',           'text',     true,  null,    [],                       'Hostname of your incoming mail server.'),
-            self::field('port',            'Port',                'number',   true,  995,     [],                       'Common values: 110 (plain), 995 (SSL).'),
-            self::field('encryption',      'Encryption',          'select',   true,  'ssl',   self::encryptionOptions(), ''),
-            self::field('username',        'Username',            'text',     true,  null,    [],                       'Usually the full email address.'),
-            self::field('password',        'Password',            'password', true,  null,    [],                       ''),
-            self::field('leave_on_server', 'Leave on Server',     'boolean',  false, false,   [],                       'Keep messages on the server after retrieval.'),
-            self::field('timeout',         'Timeout (s)',          'number',   false, 30,      [],                       'Connection timeout in seconds.'),
+            self::field('host',                'POP3 Host',            'text',     true,  null,  [],                       'Hostname of your incoming mail server.'),
+            self::field('port',                'Port',                 'number',   true,  995,   [],                       'Common values: 110 (plain), 995 (SSL).'),
+            self::field('encryption',          'Encryption',           'select',   true,  'ssl', self::encryptionOptions(), ''),
+            self::field('username',            'Username',             'text',     true,  null,  [],                       'Usually the full email address.'),
+            self::field('password',            'Password',             'password', true,  null,  [],                       ''),
+            self::field('leave_on_server',     'Leave on Server',      'boolean',  false, false, [],                       'Keep messages on the server after retrieval.'),
+            self::field('timeout',             'Timeout (s)',          'number',   false, 30,    [],                       'Connection timeout in seconds.'),
+            self::field('max_emails_per_hour', 'Max Emails / Hour',    'number',   false, null,  [],                       'Leave empty for no limit.'),
         ];
     }
 
     private static function gmail(): array
     {
         return [
-            self::field('client_id',          'OAuth Client ID',     'text',     true,  null, [], 'From Google Cloud Console → Credentials.'),
-            self::field('client_secret',       'OAuth Client Secret', 'password', true,  null, [], ''),
-            self::field('redirect_uri',        'Redirect URI',        'text',     true,  null, [], 'Must match the URI registered in Google Cloud Console.'),
-            self::field('access_token',        'Access Token',        'password', true,  null, [], 'OAuth 2.0 access token obtained after user consent.'),
-            self::field('refresh_token',       'Refresh Token',       'password', true,  null, [], 'Used to obtain a new access token when the current one expires.'),
-            self::field('max_emails_per_day',  'Max Emails / Day',    'number',   false, 50,   [], 'Gmail free accounts are limited to ~500/day; stay conservative.'),
+            self::field('client_id',           'OAuth Client ID',      'text',     true,  null, [], 'From Google Cloud Console → Credentials.'),
+            self::field('client_secret',        'OAuth Client Secret',  'password', true,  null, [], ''),
+            self::field('redirect_uri',         'Redirect URI',         'text',     true,  null, [], 'Must match the URI registered in Google Cloud Console.'),
+            self::field('access_token',         'Access Token',         'password', true,  null, [], 'OAuth 2.0 access token obtained after user consent.'),
+            self::field('refresh_token',        'Refresh Token',        'password', true,  null, [], 'Used to obtain a new access token when the current one expires.'),
+            self::field('max_emails_per_hour',  'Max Emails / Hour',    'number',   false, 500,  [], 'Gmail free accounts support up to ~500/day total.'),
         ];
     }
 
     private static function googleWorkspace(): array
     {
         return [
-            self::field('client_id',          'OAuth Client ID',      'text',     true,  null, [], 'From Google Cloud Console → Credentials.'),
-            self::field('client_secret',       'OAuth Client Secret',  'password', true,  null, [], ''),
-            self::field('redirect_uri',        'Redirect URI',         'text',     true,  null, [], 'Must match the URI registered in Google Cloud Console.'),
-            self::field('access_token',        'Access Token',         'password', true,  null, [], 'OAuth 2.0 access token obtained after user consent.'),
-            self::field('refresh_token',       'Refresh Token',        'password', true,  null, [], 'Used to obtain a new access token when the current one expires.'),
-            self::field('admin_email',         'Admin Email',          'text',     false, null, [], 'Domain admin address for service-account impersonation (optional).'),
-            self::field('max_emails_per_day',  'Max Emails / Day',     'number',   false, 50,   [], 'Google Workspace accounts are limited to ~2000/day; cap at a safe value.'),
+            self::field('external_service_uuid', 'External Service',   'text',   true,  null, [], 'UUID of the linked Google Workspace entry in common_external_services.'),
+            self::field('service_owner',          'Service Owner',      'text',   true,  null, [], 'Email address of the Google Workspace account owner.'),
+            self::field('max_emails_per_hour',    'Max Emails / Hour',  'number', false, 500,  [], 'Google Workspace supports up to 2000/day; set a safe hourly cap.'),
         ];
     }
 
     private static function mattermost(): array
     {
         return [
-            self::field('webhook_url', 'Incoming Webhook URL', 'text',     true,  null, [], 'Created under Mattermost → Integrations → Incoming Webhooks.'),
-            self::field('channel',     'Channel',              'text',     false, null, [], 'Override the default channel the webhook posts to.'),
-            self::field('username',    'Bot Username',         'text',     false, null, [], 'Override the default bot display name.'),
-            self::field('icon_url',    'Bot Icon URL',         'text',     false, null, [], 'Override the default bot icon.'),
+            self::field('webhook_url',         'Incoming Webhook URL', 'text',   true,  null, [], 'Created under Mattermost → Integrations → Incoming Webhooks.'),
+            self::field('channel',             'Channel',              'text',   false, null, [], 'Override the default channel the webhook posts to.'),
+            self::field('username',            'Bot Username',         'text',   false, null, [], 'Override the default bot display name.'),
+            self::field('icon_url',            'Bot Icon URL',         'text',   false, null, [], 'Override the default bot icon.'),
+            self::field('max_emails_per_hour', 'Max Messages / Hour',  'number', false, null, [], 'Leave empty for no limit.'),
         ];
     }
 
     private static function sms(): array
     {
         return [
-            self::field('provider',      'SMS Provider',     'select',   true,  'twilio', self::smsProviderOptions(), ''),
-            self::field('account_sid',   'Account SID',      'text',     true,  null,     [],                         'Twilio Account SID (or equivalent for other providers).'),
-            self::field('auth_token',    'Auth Token',       'password', true,  null,     [],                         'Twilio Auth Token (or API key for other providers).'),
-            self::field('phone_number',  'From Number',      'text',     true,  null,     [],                         'E.164 format, e.g. +12025551234.'),
+            self::field('provider',            'SMS Provider',         'select',   true,  'twilio', self::smsProviderOptions(), ''),
+            self::field('account_sid',         'Account SID',          'text',     true,  null,     [],                         'Twilio Account SID (or equivalent for other providers).'),
+            self::field('auth_token',          'Auth Token',           'password', true,  null,     [],                         'Twilio Auth Token (or API key for other providers).'),
+            self::field('phone_number',        'From Number',          'text',     true,  null,     [],                         'E.164 format, e.g. +12025551234.'),
+            self::field('max_emails_per_hour', 'Max Messages / Hour',  'number',   false, null,     [],                         'Leave empty for no limit.'),
         ];
     }
 

@@ -216,18 +216,18 @@ class MessagesService extends AbstractMessagesService
 
     /**
      * Returns true when the channel is backed by a Google Workspace external service.
-     * The link is: communication_channels.configuration['external_services_id']
-     * → common_external_services.id where code = 'google_workspace'.
+     * The link is: communication_channels.configuration['external_service_uuid']
+     * → common_external_services.uuid where code = 'google_workspace'.
      */
     private static function isGoogleChannel(Channels $channel): bool
     {
-        $externalServiceId = data_get($channel->configuration, 'external_services_id');
+        $externalServiceUuid = data_get($channel->configuration, 'external_service_uuid');
 
-        if (!$externalServiceId) {
+        if (!$externalServiceUuid) {
             return false;
         }
 
-        return ExternalServices::where('id', $externalServiceId)
+        return ExternalServices::where('uuid', $externalServiceUuid)
             ->where('code', 'google_workspace')
             ->exists();
     }
