@@ -135,12 +135,17 @@ class MessagesService extends AbstractMessagesService
     }
 
     /**
-     * Returns all queued messages whose scheduled delivery time has passed.
+     * Returns all queued messages that are due for delivery.
+     * A null deliver_at means deliver immediately; a set value is delivered
+     * once that timestamp has passed.
      */
     public static function getDueForDelivery(): Collection
     {
         return Messages::where('status', 'queued')
-            ->where('deliver_at', '<=', now())
+            ->where(function ($query) {
+                $query->whereNull('deliver_at')
+                      ->orWhere('deliver_at', '<=', now());
+            })
             ->get();
     }
 
