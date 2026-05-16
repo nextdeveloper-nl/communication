@@ -31,6 +31,7 @@ class MessagesCreateRequest extends AbstractFormRequest
 'failure_reason' => 'nullable|string',
 'is_internal' => 'boolean',
 'metadata' => 'nullable',
+'recipient' => 'nullable|email',
         ];
     }
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
