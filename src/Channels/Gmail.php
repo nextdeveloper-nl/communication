@@ -2,66 +2,47 @@
 
 namespace NextDeveloper\Communication\Channels;
 
-use InvalidArgumentException;
 use Exception;
 use Google_Client;
 use Google_Service_Gmail;
 use Google_Service_Gmail_Message;
 use Illuminate\Support\Facades\Log;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\NotFoundExceptionInterface;
+use InvalidArgumentException;
+use NextDeveloper\Communication\Database\Models\Channels;
 
 /**
- * Gmail Channel Implementation
+ * Gmail / Google Workspace channel implementation.
  *
- * Handles sending emails via Gmail API
+ * Configuration keys expected in communication_channels.configuration:
+ *   access_token  (required) — OAuth2 access token
+ *   refresh_token (required) — OAuth2 refresh token
+ *   from_address  (optional) — sender address shown to recipients
+ *   max_messages_per_hour (optional, default 500)
  */
 class Gmail implements ChannelAbstract
 {
-    /**
-     * Channel name identifier
-     */
-    public const NAME = 'Gmail';
+    public const NAME = 'gmail';
 
-    /**
-     * Required configuration fields
-     *
-     * @var array<string, string>
-     */
     public const FIELDS = [
-        'access_token' => 'required',
-        'refresh_token' => 'required',
-        'max_messages_per_hour' => 'nullable'
+        'access_token'          => 'required',
+        'refresh_token'         => 'required',
+        'from_address'          => 'nullable',
+        'max_messages_per_hour' => 'nullable',
     ];
 
-    /**
-     * The Gmail client
-     */
     protected Google_Client $client;
-
-    /**
-     * The Gmail service
-     */
     protected Google_Service_Gmail $service;
+    protected string $fromAddress;
 
-    /**
-     * Maximum emails per hour
-     */
-    protected int $maxEmailsPerHour;
-
-    /**
-     * Creates a new Gmail channel instance
-     *
-     * @param array<string, mixed> $config Configuration array containing access_token, refresh_token, max_messages_per_hour
-     * @throws Exception
-     */
-    public function __construct(array $config)
+    public function __construct(public readonly Channels $channel)
     {
+        $config = $channel->configuration ?? [];
+
         if (!$this->validateConfig($config)) {
-            throw new InvalidArgumentException(__METHOD__ . ': Invalid configuration provided');
+            throw new InvalidArgumentException(__METHOD__ . ': Missing required Gmail configuration (access_token, refresh_token).');
         }
 
-        $this->maxEmailsPerHour = (int)$config['max_messages_per_hour'];
+        $this->fromAddress = $config['from_address'] ?? 'me';
 
         try {
             $this->client = new Google_Client();
@@ -74,20 +55,32 @@ class Gmail implements ChannelAbstract
         }
     }
 
-    /**
-     * Validates the configuration array
-     *
-     * @param array<string, mixed> $config
-     * @return bool
-     */
+    public function send(mixed $message): void
+    {
+        try {
+            $to      = $message['to'] ?? null;
+            $subject = $message['subject'] ?? '(no subject)';
+            $body    = $message['message'] ?? $message['body'] ?? '';
+            $cc      = $message['cc'] ?? [];
+
+            $raw = $this->buildRaw($to, $subject, $body, $this->fromAddress, $cc);
+
+            $gmailMessage = new Google_Service_Gmail_Message();
+            $gmailMessage->setRaw(rtrim(strtr(base64_encode($raw), '+/', '-_'), '='));
+
+            $this->service->users_messages->send('me', $gmailMessage);
+        } catch (Exception $e) {
+            Log::error(__METHOD__ . ': Gmail delivery failed', [
+                'to'    => $message['to'] ?? null,
+                'error' => $e->getMessage(),
+            ]);
+            throw new Exception(__METHOD__ . ': Failed to send via Gmail: ' . $e->getMessage());
+        }
+    }
+
     public function validateConfig(array $config): bool
     {
-        // Get keys with 'required' validation
-        $requiredFields = array_filter(self::FIELDS, function ($rule) {
-            return $rule === 'required';
-        });
-
-        foreach ($requiredFields as $field => $_) {
+        foreach (['access_token', 'refresh_token'] as $field) {
             if (empty($config[$field])) {
                 return false;
             }
@@ -96,101 +89,21 @@ class Gmail implements ChannelAbstract
         return true;
     }
 
-    /**
-     * Sends the message via Gmail
-     *
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
-     * @throws Exception
-     */
-    public function send(mixed $message): void
+    private function buildRaw(string $to, string $subject, string $body, string $from, array $cc = []): string
     {
-        try {
-            // Check rate limit
-            if (!$this->checkRateLimit()) {
-                throw new Exception(__METHOD__ . ': Rate limit exceeded. Maximum emails per hour: ' . $this->maxEmailsPerHour);
-            }
+        $headers  = "From: {$from}\r\n";
+        $headers .= "To: {$to}\r\n";
 
-            // Create the message
-            $email = new Google_Service_Gmail_Message();
-
-            // If $message is an object with properties, extract them
-            $rawMessage = $this->createEmail(
-                $message->to[0],
-                $message->subject,
-                $message->body,
-                $message->from_email_address
-            );
-
-
-            $email->setRaw(base64_encode($rawMessage));
-
-            // Send the message
-            $this->service->users_messages->send('me', $email);
-
-            // Update rate limit counter
-            $this->updateRateLimitCounter();
-
-        } catch (Exception $e) {
-            Log::error(__METHOD__ . ': Error sending email', [
-                'error' => $e->getMessage(),
-                'message' => $message
-            ]);
-            throw  new Exception(__METHOD__ . ': Failed to send message: ' . $e->getMessage());
+        if (!empty($cc)) {
+            $headers .= 'Cc: ' . implode(', ', $cc) . "\r\n";
         }
-    }
 
-    /**
-     * Creates an email message
-     *
-     * @param string $to Recipient email
-     * @param string $subject Email subject
-     * @param string $body Email body
-     * @param string|null $from Sender email (optional)
-     * @return string Raw email message
-     */
-    protected function createEmail(string $to, string $subject, string $body, ?string $from = null): string
-    {
-        $from = $from ?? 'me';
+        $headers .= "Subject: {$subject}\r\n";
+        $headers .= "MIME-Version: 1.0\r\n";
+        $headers .= "Content-Type: text/html; charset=utf-8\r\n";
+        $headers .= "Content-Transfer-Encoding: base64\r\n\r\n";
+        $headers .= base64_encode($body);
 
-        $message = "From: {$from}\r\n";
-        $message .= "To: {$to}\r\n";
-        $message .= "Subject: {$subject}\r\n";
-        $message .= "MIME-Version: 1.0\r\n";
-        $message .= "Content-Type: text/html; charset=utf-8\r\n";
-        $message .= "Content-Transfer-Encoding: base64\r\n\r\n";
-        $message .= base64_encode($body);
-
-        return $message;
-    }
-
-    /**
-     * Checks if the rate limit has been exceeded
-     *
-     * @return bool True if underrate limit, false otherwise
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
-     */
-    protected function checkRateLimit(): bool
-    {
-        $cacheKey = 'gmail_rate_limit_' . date('Y-m-d_H');
-        $count = cache()->get($cacheKey, 0);
-
-        return $count < $this->maxEmailsPerHour;
-    }
-
-    /**
-     * Updates the rate limit counter
-     */
-    protected function updateRateLimitCounter(): void
-    {
-        $cacheKey = 'gmail_rate_limit_' . date('Y-m-d_H');
-        $count = cache()->get($cacheKey, 0);
-
-        // Increment counter and set expiry to the end of the current hour
-        $expiryTime = strtotime(date('Y-m-d H:59:59'));
-        $ttl = $expiryTime - time();
-
-        cache()->put($cacheKey, $count + 1, $ttl);
+        return $headers;
     }
 }
