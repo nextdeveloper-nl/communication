@@ -48,6 +48,20 @@ class MessagesService extends AbstractMessagesService
             );
         }
 
+        // The API accepts UUIDs for FK fields; resolve them to integer IDs before insert.
+        if ($hasChannel && !is_int($data['communication_channel_id'])) {
+            $data['communication_channel_id'] = Channels::withoutGlobalScope(AuthorizationScope::class)
+                ->where('uuid', $data['communication_channel_id'])
+                ->firstOrFail()
+                ->id;
+        }
+
+        if (!empty($data['communication_thread_id']) && !is_int($data['communication_thread_id'])) {
+            $data['communication_thread_id'] = Threads::where('uuid', $data['communication_thread_id'])
+                ->firstOrFail()
+                ->id;
+        }
+
         $message = parent::create($data);
 
         if ($message->communication_thread_id) {
