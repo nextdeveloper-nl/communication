@@ -5,6 +5,7 @@ namespace NextDeveloper\Communication;
 use Illuminate\Console\Scheduling\Schedule;
 use NextDeveloper\Commons\AbstractServiceProvider;
 use NextDeveloper\Communication\Jobs\DeliverAllEmails;
+use NextDeveloper\Communication\Console\Commands\DeliverMessagesCommand;
 use NextDeveloper\Communication\Console\Commands\EmailsDeliveryCommand;
 use NextDeveloper\Communication\Console\Commands\FetchMailgunEventCommand;
 /**
@@ -115,6 +116,7 @@ class CommunicationServiceProvider extends AbstractServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands(
                 [
+                    DeliverMessagesCommand::class,
                     EmailsDeliveryCommand::class,
                     FetchMailgunEventCommand::class,
                 ]
