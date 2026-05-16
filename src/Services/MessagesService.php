@@ -223,12 +223,28 @@ class MessagesService extends AbstractMessagesService
             $recipient = $message->recipient
                 ?? Users::find($message->sent_by_user_id)?->email;
 
+            // Normalise metadata: guard against double-encoded JSON strings stored as text.
+            $metadata = $message->metadata;
+            if (is_string($metadata)) {
+                $metadata = json_decode($metadata, true) ?? [];
+            }
+            $metadata = $metadata ?? [];
+
+            $subject = data_get($metadata, 'subject') ?: '(no subject)';
+
+            Log::debug('[MessagesService::deliver] Payload before send', [
+                'message_id' => $message->id,
+                'metadata'   => $metadata,
+                'subject'    => $subject,
+                'recipient'  => $recipient,
+            ]);
+
             $processor = new $class(channel: $channel);
             $processor->send([
-                'subject' => data_get($message->metadata, 'subject', '(no subject)'),
+                'subject' => $subject,
                 'message' => $message->body,
                 'to'      => $recipient,
-                'cc'      => data_get($message->metadata, 'cc', []),
+                'cc'      => data_get($metadata, 'cc', []),
             ]);
 
             self::markAsDelivered($message->uuid);
