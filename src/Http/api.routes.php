@@ -288,6 +288,13 @@ Route::post('{communication_user_preferences}/addresses ', 'UserPreferences\User
 
 // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
 
+        // Transactional email: subject, body, channel, recipient, optional cc
+        Route::post('/send-email', 'Emails\SendEmailController@send');
+
+        // Channel configuration schemas for frontend form rendering
+        Route::get('/channel-settings', 'Channels\ChannelSettingsController@index');
+        Route::get('/channel-settings/{type}', 'Channels\ChannelSettingsController@show');
+
 
 
 

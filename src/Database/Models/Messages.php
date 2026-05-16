@@ -60,7 +60,9 @@ protected $guarded = [];
 
 protected $fillable = [
             'communication_thread_id',
+            'communication_channel_id',
             'crm_campaign_id',
+            'recipient',
             'direction',
             'content_type',
             'body',
@@ -101,7 +103,9 @@ protected $appends = [
 protected $casts = [
 'id' => 'integer',
 'communication_thread_id' => 'integer',
+'communication_channel_id' => 'integer',
 'crm_campaign_id' => 'integer',
+'recipient' => 'string',
 'direction' => 'integer',
 'content_type' => 'string',
 'body' => 'string',
@@ -203,6 +207,11 @@ public function campaigns() : \Illuminate\Database\Eloquent\Relations\BelongsTo
     }
 
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
+    public function channel(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(\NextDeveloper\Communication\Database\Models\Channels::class, 'communication_channel_id');
+    }
 
     const DIRECTION_INBOUND  = 0;
     const DIRECTION_OUTBOUND = 1;
