@@ -25,6 +25,9 @@ class ChannelSettings
     public const TYPE_GOOGLE_WORKSPACE = 'google_workspace';
     public const TYPE_MATTERMOST       = 'mattermost';
     public const TYPE_SMS              = 'sms';
+    public const TYPE_WHATSAPP         = 'whatsapp';
+    public const TYPE_TELEGRAM         = 'telegram';
+    public const TYPE_SLACK            = 'slack';
 
     /**
      * Returns the field schema for the given channel type, or null when the
@@ -52,6 +55,9 @@ class ChannelSettings
             self::TYPE_GOOGLE_WORKSPACE => self::googleWorkspace(),
             self::TYPE_MATTERMOST       => self::mattermost(),
             self::TYPE_SMS              => self::sms(),
+            self::TYPE_WHATSAPP         => self::whatsapp(),
+            self::TYPE_TELEGRAM         => self::telegram(),
+            self::TYPE_SLACK            => self::slack(),
         ];
     }
 
@@ -145,6 +151,36 @@ class ChannelSettings
         ];
     }
 
+    private static function whatsapp(): array
+    {
+        return [
+            self::field('provider',               'Provider',             'select',   true,  'twilio', self::whatsappProviderOptions(), 'Choose the WhatsApp Business API provider.'),
+            self::field('account_sid',            'Account SID',          'text',     true,  null,     [],                              'Twilio Account SID or Meta app ID depending on provider.'),
+            self::field('auth_token',             'Auth Token / Secret',  'password', true,  null,     [],                              'Twilio Auth Token or Meta app secret.'),
+            self::field('phone_number',           'WhatsApp Number',      'text',     true,  null,     [],                              'E.164 format, e.g. +12025551234. Must be a WhatsApp Business number.'),
+            self::field('max_messages_per_hour',  'Max Messages / Hour',  'number',   false, null,     [],                              'Leave empty for no limit.'),
+        ];
+    }
+
+    private static function telegram(): array
+    {
+        return [
+            self::field('bot_token',              'Bot Token',            'password', true,  null, [], 'Obtain from @BotFather on Telegram.'),
+            self::field('chat_id',                'Default Chat ID',      'text',     false, null, [], 'Default recipient chat/channel ID. Can be overridden per message.'),
+            self::field('max_messages_per_hour',  'Max Messages / Hour',  'number',   false, null, [], 'Leave empty for no limit.'),
+        ];
+    }
+
+    private static function slack(): array
+    {
+        return [
+            self::field('webhook_url',            'Incoming Webhook URL', 'text',     false, null, [], 'From Slack → Your Apps → Incoming Webhooks. Used for simple posting.'),
+            self::field('bot_token',              'Bot OAuth Token',      'password', false, null, [], 'xoxb-… token. Required for advanced features (threads, reactions).'),
+            self::field('channel',                'Default Channel',      'text',     false, null, [], 'Channel name or ID, e.g. #general. Can be overridden per message.'),
+            self::field('max_messages_per_hour',  'Max Messages / Hour',  'number',   false, null, [], 'Leave empty for no limit.'),
+        ];
+    }
+
     // -------------------------------------------------------------------------
     // Helpers
     // -------------------------------------------------------------------------
@@ -181,6 +217,15 @@ class ChannelSettings
     {
         return [
             'twilio' => 'Twilio',
+        ];
+    }
+
+    /** @return array<string, string> */
+    private static function whatsappProviderOptions(): array
+    {
+        return [
+            'twilio' => 'Twilio',
+            'meta'   => 'Meta (WhatsApp Cloud API)',
         ];
     }
 }
