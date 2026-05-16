@@ -288,10 +288,12 @@ Route::post('{communication_user_preferences}/addresses ', 'UserPreferences\User
 
 // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
 
-Route::prefix('communication')->group(function () {
-    // Simple transactional email: subject + body + channel + recipient
-    Route::post('/send-email', 'Emails\SendEmailController@send');
-});
+        // Transactional email: subject, body, channel, recipient, optional cc
+        Route::post('/send-email', 'Emails\SendEmailController@send');
+
+        // Channel configuration schemas for frontend form rendering
+        Route::get('/channel-settings', 'Channels\ChannelSettingsController@index');
+        Route::get('/channel-settings/{type}', 'Channels\ChannelSettingsController@show');
 
 
 
