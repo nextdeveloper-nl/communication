@@ -70,7 +70,7 @@ class ChannelSettings
             self::field('from_address',        'From Address',         'text',     false, null,    [],                       'Sender address shown in the From header.'),
             self::field('from_name',           'From Name',            'text',     false, null,    [],                       'Sender name shown in the From header.'),
             self::field('timeout',             'Timeout (s)',          'number',   false, 30,      [],                       'Connection timeout in seconds.'),
-            self::field('max_emails_per_hour', 'Max Emails / Hour',    'number',   false, null,    [],                       'Leave empty for no limit.'),
+            self::field('max_messages_per_hour', 'Max Messages / Hour',    'number',   false, null,    [],                       'Leave empty for no limit.'),
         ];
     }
 
@@ -84,7 +84,7 @@ class ChannelSettings
             self::field('password',            'Password',             'password', true,  null,    [],                       ''),
             self::field('folder',              'Mailbox Folder',       'text',     false, 'INBOX', [],                       'Folder to watch for incoming messages.'),
             self::field('timeout',             'Timeout (s)',          'number',   false, 30,      [],                       'Connection timeout in seconds.'),
-            self::field('max_emails_per_hour', 'Max Emails / Hour',    'number',   false, null,    [],                       'Leave empty for no limit.'),
+            self::field('max_messages_per_hour', 'Max Messages / Hour',    'number',   false, null,    [],                       'Leave empty for no limit.'),
         ];
     }
 
@@ -98,7 +98,7 @@ class ChannelSettings
             self::field('password',            'Password',             'password', true,  null,  [],                       ''),
             self::field('leave_on_server',     'Leave on Server',      'boolean',  false, false, [],                       'Keep messages on the server after retrieval.'),
             self::field('timeout',             'Timeout (s)',          'number',   false, 30,    [],                       'Connection timeout in seconds.'),
-            self::field('max_emails_per_hour', 'Max Emails / Hour',    'number',   false, null,  [],                       'Leave empty for no limit.'),
+            self::field('max_messages_per_hour', 'Max Messages / Hour',    'number',   false, null,  [],                       'Leave empty for no limit.'),
         ];
     }
 
@@ -110,7 +110,7 @@ class ChannelSettings
             self::field('redirect_uri',         'Redirect URI',         'text',     true,  null, [], 'Must match the URI registered in Google Cloud Console.'),
             self::field('access_token',         'Access Token',         'password', true,  null, [], 'OAuth 2.0 access token obtained after user consent.'),
             self::field('refresh_token',        'Refresh Token',        'password', true,  null, [], 'Used to obtain a new access token when the current one expires.'),
-            self::field('max_emails_per_hour',  'Max Emails / Hour',    'number',   false, 500,  [], 'Gmail free accounts support up to ~500/day total.'),
+            self::field('max_messages_per_hour',  'Max Messages / Hour',    'number',   false, 500,  [], 'Gmail free accounts support up to ~500/day total.'),
         ];
     }
 
@@ -119,7 +119,7 @@ class ChannelSettings
         return [
             self::field('external_service_uuid', 'External Service',   'text',   true,  null, [], 'UUID of the linked Google Workspace entry in common_external_services.'),
             self::field('service_owner',          'Service Owner',      'text',   true,  null, [], 'Email address of the Google Workspace account owner.'),
-            self::field('max_emails_per_hour',    'Max Emails / Hour',  'number', false, 500,  [], 'Google Workspace supports up to 2000/day; set a safe hourly cap.'),
+            self::field('max_messages_per_hour',    'Max Messages / Hour',  'number', false, 500,  [], 'Google Workspace supports up to 2000/day; set a safe hourly cap.'),
         ];
     }
 
@@ -130,7 +130,7 @@ class ChannelSettings
             self::field('channel',             'Channel',              'text',   false, null, [], 'Override the default channel the webhook posts to.'),
             self::field('username',            'Bot Username',         'text',   false, null, [], 'Override the default bot display name.'),
             self::field('icon_url',            'Bot Icon URL',         'text',   false, null, [], 'Override the default bot icon.'),
-            self::field('max_emails_per_hour', 'Max Messages / Hour',  'number', false, null, [], 'Leave empty for no limit.'),
+            self::field('max_messages_per_hour', 'Max Messages / Hour',  'number', false, null, [], 'Leave empty for no limit.'),
         ];
     }
 
@@ -141,7 +141,7 @@ class ChannelSettings
             self::field('account_sid',         'Account SID',          'text',     true,  null,     [],                         'Twilio Account SID (or equivalent for other providers).'),
             self::field('auth_token',          'Auth Token',           'password', true,  null,     [],                         'Twilio Auth Token (or API key for other providers).'),
             self::field('phone_number',        'From Number',          'text',     true,  null,     [],                         'E.164 format, e.g. +12025551234.'),
-            self::field('max_emails_per_hour', 'Max Messages / Hour',  'number',   false, null,     [],                         'Leave empty for no limit.'),
+            self::field('max_messages_per_hour', 'Max Messages / Hour',  'number',   false, null,     [],                         'Leave empty for no limit.'),
         ];
     }
 

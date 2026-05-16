@@ -31,7 +31,7 @@ class Gmail implements ChannelAbstract
     public const FIELDS = [
         'access_token' => 'required',
         'refresh_token' => 'required',
-        'max_emails_per_hour' => 'nullable'
+        'max_messages_per_hour' => 'nullable'
     ];
 
     /**
@@ -52,7 +52,7 @@ class Gmail implements ChannelAbstract
     /**
      * Creates a new Gmail channel instance
      *
-     * @param array<string, mixed> $config Configuration array containing access_token, refresh_token, max_emails_per_hour
+     * @param array<string, mixed> $config Configuration array containing access_token, refresh_token, max_messages_per_hour
      * @throws Exception
      */
     public function __construct(array $config)
@@ -61,7 +61,7 @@ class Gmail implements ChannelAbstract
             throw new InvalidArgumentException(__METHOD__ . ': Invalid configuration provided');
         }
 
-        $this->maxEmailsPerHour = (int)$config['max_emails_per_hour'];
+        $this->maxEmailsPerHour = (int)$config['max_messages_per_hour'];
 
         try {
             $this->client = new Google_Client();
@@ -87,7 +87,7 @@ class Gmail implements ChannelAbstract
             return $rule === 'required';
         });
 
-        foreach ($requiredFields as $field => $rule) {
+        foreach ($requiredFields as $field => $_) {
             if (empty($config[$field])) {
                 return false;
             }
