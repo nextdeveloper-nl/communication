@@ -61,7 +61,7 @@ class Gmail implements ChannelAbstract
             $to      = $message['to'] ?? null;
             $subject = $message['subject'] ?? '(no subject)';
             $body    = $message['message'] ?? $message['body'] ?? '';
-            $cc      = $message['cc'] ?? [];
+            $cc      = array_filter((array) ($message['cc'] ?? []));
 
             $raw = $this->buildRaw($to, $subject, $body, $this->fromAddress, $cc);
 
