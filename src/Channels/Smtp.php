@@ -86,8 +86,9 @@ class Smtp implements ChannelAbstract
                 ->subject($message['subject'] ?? '(no subject)')
                 ->html($message['message'] ?? $message['body'] ?? '');
 
-            foreach ($message['cc'] ?? [] as $cc) {
-                $email->addCc($cc);
+            $ccs = array_filter((array) ($message['cc'] ?? []));
+            if (!empty($ccs)) {
+                $email->cc(...array_map(fn ($addr) => new Address($addr), $ccs));
             }
 
             $this->mailer->send($email);
