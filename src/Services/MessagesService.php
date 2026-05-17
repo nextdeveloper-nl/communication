@@ -13,6 +13,7 @@ use NextDeveloper\Communication\Helpers\ChannelHelper;
 use NextDeveloper\Communication\Services\AbstractServices\AbstractMessagesService;
 use NextDeveloper\IAM\Database\Models\Users;
 use NextDeveloper\IAM\Database\Scopes\AuthorizationScope;
+use NextDeveloper\CRM\Database\Models\EmailTemplates;
 use NextDeveloper\IAM\Helpers\UserHelper;
 use Illuminate\Support\Facades\Log;
 
@@ -232,17 +233,21 @@ class MessagesService extends AbstractMessagesService
 
             $subject = data_get($metadata, 'subject') ?: '(no subject)';
 
+            // Wrap the body in an email template when crm_email_template_id is set in metadata.
+            $body = self::applyTemplate($message->body, $metadata, $subject);
+
             Log::debug('[MessagesService::deliver] Payload before send', [
-                'message_id' => $message->id,
-                'metadata'   => $metadata,
-                'subject'    => $subject,
-                'recipient'  => $recipient,
+                'message_id'          => $message->id,
+                'metadata'            => $metadata,
+                'subject'             => $subject,
+                'recipient'           => $recipient,
+                'template_applied'    => data_get($metadata, 'crm_email_template_id') !== null,
             ]);
 
             $processor = new $class(channel: $channel);
             $processor->send([
                 'subject' => $subject,
-                'message' => $message->body,
+                'message' => $body,
                 'to'      => $recipient,
                 'cc'      => data_get($metadata, 'cc', []),
             ]);
@@ -425,5 +430,54 @@ class MessagesService extends AbstractMessagesService
 
         // 3. Account's highest-priority active email channel
         return ChannelHelper::getPrimaryForAccount($message->iam_account_id, 'email');
+    }
+
+    /**
+     * Wraps $body inside a CRM email template when 'crm_email_template_id' is present in metadata.
+     *
+     * The template's content field is expected to contain a {{content}} placeholder.
+     * The template's subject field is used as the fallback subject when the message
+     * metadata does not already specify one.
+     *
+     * If the template is not found or has no {{content}} placeholder, the original
+     * body is returned unchanged so delivery still proceeds.
+     */
+    private static function applyTemplate(string $body, array &$metadata, string &$subject): string
+    {
+        $templateId = data_get($metadata, 'crm_email_template_id');
+
+        if (!$templateId) {
+            return $body;
+        }
+
+        // Templates belong to CRM — bypass the authorization scope so the job/command
+        // context (which runs as admin) can always resolve the template.
+        $template = EmailTemplates::withoutGlobalScopes()
+            ->where('uuid', $templateId)
+            ->first();
+
+        if (!$template) {
+            Log::warning('[MessagesService::applyTemplate] Template not found', [
+                'crm_email_template_id' => $templateId,
+            ]);
+            return $body;
+        }
+
+        // Use the template's subject when the message has no explicit subject.
+        if ($subject === '(no subject)' && !empty($template->subject)) {
+            $subject = $template->subject;
+        }
+
+        $rendered = str_replace('{{content}}', $body, $template->content ?? '');
+
+        // If the template had no {{content}} token, fall back to the raw body.
+        if ($rendered === ($template->content ?? '')) {
+            Log::warning('[MessagesService::applyTemplate] Template has no {{content}} placeholder — using raw body', [
+                'crm_email_template_id' => $templateId,
+            ]);
+            return $body;
+        }
+
+        return $rendered;
     }
 }
