@@ -85,9 +85,15 @@ class Gmail implements ChannelAbstract
         }
 
         if (!$clientId || !$clientSecret) {
+            $clientId     = config('services.google.client_id');
+            $clientSecret = config('services.google.client_secret');
+        }
+
+        if (!$clientId || !$clientSecret) {
             throw new InvalidArgumentException(
                 __METHOD__ . ': Cannot resolve client_id / client_secret. ' .
-                'Store them in channel credentials or set external_service_uuid in channel configuration.'
+                'Store them in channel credentials, set external_service_uuid in channel configuration, ' .
+                'or set services.google.client_id / client_secret in config.'
             );
         }
 
