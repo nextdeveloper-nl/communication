@@ -15,11 +15,17 @@ use NextDeveloper\Communication\Database\Models\Channels;
  *
  * communication_channels.credentials:
  *   access_token  (required) — OAuth2 access token
- *   refresh_token (required) — OAuth2 refresh token
+ *   refresh_token (required) — OAuth2 refresh token (long-lived)
+ *   expires_in    (optional) — token lifetime in seconds (set by Google)
+ *   created       (optional) — Unix timestamp when token was issued (set by Google)
  *
  * communication_channels.configuration:
- *   from_address  (optional) — sender address shown to recipients
+ *   from_address          (optional) — sender address shown to recipients
  *   max_messages_per_hour (optional, default 500)
+ *
+ * Token lifecycle: the full credentials array (including expiry metadata) is passed
+ * to Google_Client. When the access token is expired, it is refreshed automatically
+ * and the new credentials are persisted back to the channel record.
  */
 class Gmail implements ChannelAbstract
 {
@@ -56,8 +62,25 @@ class Gmail implements ChannelAbstract
 
         try {
             $this->client = new Google_Client();
-            $this->client->setAccessToken($credentials['access_token']);
-            $this->client->refreshToken($credentials['refresh_token']);
+
+            // Pass the full credentials array so Google_Client can track expiry metadata
+            $this->client->setAccessToken($credentials);
+
+            if ($this->client->isAccessTokenExpired()) {
+                $newToken = $this->client->fetchAccessTokenWithRefreshToken($credentials['refresh_token']);
+
+                if (isset($newToken['error'])) {
+                    throw new Exception('Token refresh failed: ' . ($newToken['error_description'] ?? $newToken['error']));
+                }
+
+                // Preserve refresh_token (Google omits it from refresh responses)
+                $updatedCredentials = array_merge($credentials, $newToken);
+                if (empty($updatedCredentials['refresh_token'])) {
+                    $updatedCredentials['refresh_token'] = $credentials['refresh_token'];
+                }
+
+                $channel->update(['credentials' => $updatedCredentials]);
+            }
 
             $this->service = new Google_Service_Gmail($this->client);
         } catch (Exception $e) {
