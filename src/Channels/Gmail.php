@@ -13,9 +13,11 @@ use NextDeveloper\Communication\Database\Models\Channels;
 /**
  * Gmail / Google Workspace channel implementation.
  *
- * Configuration keys expected in communication_channels.configuration:
+ * communication_channels.credentials:
  *   access_token  (required) — OAuth2 access token
  *   refresh_token (required) — OAuth2 refresh token
+ *
+ * communication_channels.configuration:
  *   from_address  (optional) — sender address shown to recipients
  *   max_messages_per_hour (optional, default 500)
  */
@@ -36,23 +38,26 @@ class Gmail implements ChannelAbstract
 
     public function __construct(public readonly Channels $channel)
     {
-        $config = $channel->configuration ?? [];
+        $credentials = $channel->credentials ?? [];
+        if (is_string($credentials)) {
+            $credentials = json_decode($credentials, true) ?? [];
+        }
 
-        // Guard against double-encoded JSON (configuration stored as a string in DB)
+        $config = $channel->configuration ?? [];
         if (is_string($config)) {
             $config = json_decode($config, true) ?? [];
         }
 
-        if (!$this->validateConfig($config)) {
-            throw new InvalidArgumentException(__METHOD__ . ': Missing required Gmail configuration (access_token, refresh_token).');
+        if (!$this->validateConfig($credentials)) {
+            throw new InvalidArgumentException(__METHOD__ . ': Missing required Gmail credentials (access_token, refresh_token).');
         }
 
         $this->fromAddress = $config['from_address'] ?? 'me';
 
         try {
             $this->client = new Google_Client();
-            $this->client->setAccessToken($config['access_token']);
-            $this->client->refreshToken($config['refresh_token']);
+            $this->client->setAccessToken($credentials['access_token']);
+            $this->client->refreshToken($credentials['refresh_token']);
 
             $this->service = new Google_Service_Gmail($this->client);
         } catch (Exception $e) {
