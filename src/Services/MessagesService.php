@@ -9,6 +9,7 @@ use NextDeveloper\Commons\Database\Models\ExternalServices;
 use NextDeveloper\Communication\Database\Models\Channels;
 use NextDeveloper\Communication\Database\Models\Messages;
 use NextDeveloper\Communication\Database\Models\Threads;
+use NextDeveloper\Communication\Exceptions\TokenRefreshedException;
 use NextDeveloper\Communication\Helpers\ChannelHelper;
 use NextDeveloper\Communication\Services\AbstractServices\AbstractMessagesService;
 use NextDeveloper\IAM\Database\Models\Users;
@@ -253,6 +254,17 @@ class MessagesService extends AbstractMessagesService
             ]);
 
             self::markAsDelivered($message->uuid);
+        } catch (TokenRefreshedException $e) {
+            // Token was refreshed and saved — re-queue so the next delivery cycle retries with the new token.
+            self::update($message->uuid, [
+                'status'     => 'queued',
+                'deliver_at' => now(),
+            ]);
+
+            Log::info('[MessagesService::deliver] Token refreshed — message re-queued', [
+                'message_id' => $message->id,
+                'channel_id' => $channel->id,
+            ]);
         } catch (\Throwable $e) {
             Log::error('[MessagesService::deliver] Delivery failed', [
                 'message_id' => $message->id,

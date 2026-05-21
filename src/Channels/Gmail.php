@@ -4,11 +4,13 @@ namespace NextDeveloper\Communication\Channels;
 
 use Exception;
 use Google_Client;
+use Google_Service_Exception;
 use Google_Service_Gmail;
 use Google_Service_Gmail_Message;
 use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 use NextDeveloper\Communication\Database\Models\Channels;
+use NextDeveloper\Communication\Exceptions\TokenRefreshedException;
 
 /**
  * Gmail / Google Workspace channel implementation.
@@ -91,17 +93,26 @@ class Gmail implements ChannelAbstract
     public function send(mixed $message): void
     {
         try {
-            $to      = $message['to'] ?? null;
-            $subject = $message['subject'] ?? '(no subject)';
-            $body    = $message['message'] ?? $message['body'] ?? '';
-            $cc      = array_filter((array) ($message['cc'] ?? []));
+            $this->doSend($message);
+        } catch (Google_Service_Exception $e) {
+            // 401 means the access token was revoked or expired mid-session.
+            // Refresh the token, persist it, then re-queue the message for the
+            // next delivery cycle (the caller catches TokenRefreshedException).
+            if ($e->getCode() === 401) {
+                $this->refreshAndPersistToken();
 
-            $raw = $this->buildRaw($to, $subject, $body, $this->fromAddress, $cc);
+                Log::warning(__METHOD__ . ': Access token expired during send — token refreshed, message will be re-queued', [
+                    'to' => $message['to'] ?? null,
+                ]);
 
-            $gmailMessage = new Google_Service_Gmail_Message();
-            $gmailMessage->setRaw(rtrim(strtr(base64_encode($raw), '+/', '-_'), '='));
+                throw new TokenRefreshedException('Gmail access token was refreshed; message re-queued for retry.');
+            }
 
-            $this->service->users_messages->send('me', $gmailMessage);
+            Log::error(__METHOD__ . ': Gmail delivery failed', [
+                'to'    => $message['to'] ?? null,
+                'error' => $e->getMessage(),
+            ]);
+            throw new Exception(__METHOD__ . ': Failed to send via Gmail: ' . $e->getMessage());
         } catch (Exception $e) {
             Log::error(__METHOD__ . ': Gmail delivery failed', [
                 'to'    => $message['to'] ?? null,
@@ -109,6 +120,44 @@ class Gmail implements ChannelAbstract
             ]);
             throw new Exception(__METHOD__ . ': Failed to send via Gmail: ' . $e->getMessage());
         }
+    }
+
+    private function doSend(mixed $message): void
+    {
+        $to      = $message['to'] ?? null;
+        $subject = $message['subject'] ?? '(no subject)';
+        $body    = $message['message'] ?? $message['body'] ?? '';
+        $cc      = array_filter((array) ($message['cc'] ?? []));
+
+        $raw = $this->buildRaw($to, $subject, $body, $this->fromAddress, $cc);
+
+        $gmailMessage = new Google_Service_Gmail_Message();
+        $gmailMessage->setRaw(rtrim(strtr(base64_encode($raw), '+/', '-_'), '='));
+
+        $this->service->users_messages->send('me', $gmailMessage);
+    }
+
+    private function refreshAndPersistToken(): void
+    {
+        $credentials = $this->channel->credentials ?? [];
+        if (is_string($credentials)) {
+            $credentials = json_decode($credentials, true) ?? [];
+        }
+
+        $newToken = $this->client->fetchAccessTokenWithRefreshToken($credentials['refresh_token']);
+
+        if (isset($newToken['error'])) {
+            throw new Exception('Token refresh failed: ' . ($newToken['error_description'] ?? $newToken['error']));
+        }
+
+        $updatedCredentials = array_merge($credentials, $newToken);
+        if (empty($updatedCredentials['refresh_token'])) {
+            $updatedCredentials['refresh_token'] = $credentials['refresh_token'];
+        }
+
+        $this->channel->update(['credentials' => $updatedCredentials]);
+        $this->client->setAccessToken($updatedCredentials);
+        $this->service = new Google_Service_Gmail($this->client);
     }
 
     public function validateConfig(array $config): bool
