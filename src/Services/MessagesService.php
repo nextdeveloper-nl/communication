@@ -254,7 +254,7 @@ class MessagesService extends AbstractMessagesService
             ]);
 
             self::markAsDelivered($message->uuid);
-        } catch (TokenRefreshedException $e) {
+        } catch (\NextDeveloper\Communication\Exceptions\TokenRefreshedException $e) {
             // Token was refreshed and saved — re-queue so the next delivery cycle retries with the new token.
             self::update($message->uuid, [
                 'status'     => 'queued',
