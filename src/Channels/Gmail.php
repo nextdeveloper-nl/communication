@@ -34,6 +34,8 @@ class Gmail implements ChannelAbstract
     public const NAME = 'gmail';
 
     public const FIELDS = [
+        'client_id'             => 'required',
+        'client_secret'         => 'required',
         'access_token'          => 'required',
         'refresh_token'         => 'required',
         'from_address'          => 'nullable',
@@ -57,13 +59,15 @@ class Gmail implements ChannelAbstract
         }
 
         if (!$this->validateConfig($credentials)) {
-            throw new InvalidArgumentException(__METHOD__ . ': Missing required Gmail credentials (access_token, refresh_token).');
+            throw new InvalidArgumentException(__METHOD__ . ': Missing required Gmail credentials (client_id, client_secret, access_token, refresh_token).');
         }
 
         $this->fromAddress = $config['from_address'] ?? 'me';
 
         try {
             $this->client = new Google_Client();
+            $this->client->setClientId($credentials['client_id']);
+            $this->client->setClientSecret($credentials['client_secret']);
 
             // Pass the full credentials array so Google_Client can track expiry metadata
             $this->client->setAccessToken($credentials);
@@ -162,7 +166,7 @@ class Gmail implements ChannelAbstract
 
     public function validateConfig(array $config): bool
     {
-        foreach (['access_token', 'refresh_token'] as $field) {
+        foreach (['client_id', 'client_secret', 'access_token', 'refresh_token'] as $field) {
             if (empty($config[$field])) {
                 return false;
             }
