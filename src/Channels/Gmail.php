@@ -108,7 +108,7 @@ class Gmail implements ChannelAbstract
             $headers .= 'Cc: ' . implode(', ', $cc) . "\r\n";
         }
 
-        $headers .= "Subject: {$subject}\r\n";
+        $headers .= "Subject: =?UTF-8?B?" . base64_encode($subject) . "?=\r\n";
         $headers .= "MIME-Version: 1.0\r\n";
         $headers .= "Content-Type: text/html; charset=utf-8\r\n";
         $headers .= "Content-Transfer-Encoding: base64\r\n\r\n";
