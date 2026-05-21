@@ -67,17 +67,28 @@ class Gmail implements ChannelAbstract
             throw new InvalidArgumentException(__METHOD__ . ': Missing required Gmail credentials (access_token, refresh_token).');
         }
 
-        // OAuth2 app credentials live on the linked external service, not on the channel.
-        $externalServiceUuid = data_get($config, 'external_service_uuid');
-        $externalService     = $externalServiceUuid
-            ? ExternalServices::withoutGlobalScopes()->where('uuid', $externalServiceUuid)->first()
-            : null;
-
-        $clientId     = data_get($externalService?->configuration, 'client_id');
-        $clientSecret = data_get($externalService?->configuration, 'client_secret');
+        // Resolve OAuth2 app credentials (client_id / client_secret).
+        // Priority:
+        //   1. Directly in channel.credentials
+        //   2. Via channel.configuration['external_service_uuid'] → external service configuration
+        $clientId     = $credentials['client_id'] ?? null;
+        $clientSecret = $credentials['client_secret'] ?? null;
 
         if (!$clientId || !$clientSecret) {
-            throw new InvalidArgumentException(__METHOD__ . ': Cannot resolve client_id / client_secret. Set external_service_uuid in channel configuration.');
+            $externalServiceUuid = data_get($config, 'external_service_uuid');
+            $externalService     = $externalServiceUuid
+                ? ExternalServices::withoutGlobalScopes()->where('uuid', $externalServiceUuid)->first()
+                : null;
+
+            $clientId     = data_get($externalService?->configuration, 'client_id');
+            $clientSecret = data_get($externalService?->configuration, 'client_secret');
+        }
+
+        if (!$clientId || !$clientSecret) {
+            throw new InvalidArgumentException(
+                __METHOD__ . ': Cannot resolve client_id / client_secret. ' .
+                'Store them in channel credentials or set external_service_uuid in channel configuration.'
+            );
         }
 
         $this->fromAddress = $config['from_address'] ?? 'me';
