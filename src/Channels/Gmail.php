@@ -38,6 +38,11 @@ class Gmail implements ChannelAbstract
     {
         $config = $channel->configuration ?? [];
 
+        // Guard against double-encoded JSON (configuration stored as a string in DB)
+        if (is_string($config)) {
+            $config = json_decode($config, true) ?? [];
+        }
+
         if (!$this->validateConfig($config)) {
             throw new InvalidArgumentException(__METHOD__ . ': Missing required Gmail configuration (access_token, refresh_token).');
         }

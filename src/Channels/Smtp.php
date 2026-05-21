@@ -42,6 +42,10 @@ class Smtp implements ChannelAbstract
     {
         $config = $channel->configuration ?? [];
 
+        if (is_string($config)) {
+            $config = json_decode($config, true) ?? [];
+        }
+
         if (!$this->validateConfig($config)) {
             throw new InvalidArgumentException(__METHOD__ . ': Missing required SMTP configuration fields (host, port, encryption, username, password).');
         }

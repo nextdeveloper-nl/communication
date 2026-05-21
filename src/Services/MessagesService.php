@@ -410,8 +410,10 @@ class MessagesService extends AbstractMessagesService
     private static function resolveChannel(Messages $message): ?Channels
     {
         // 1. Explicit channel preference on the message itself
+        // withoutGlobalScope so background workers (no auth session) can still resolve the channel
         if ($message->communication_channel_id) {
-            $channel = Channels::find($message->communication_channel_id);
+            $channel = Channels::withoutGlobalScope(AuthorizationScope::class)
+                ->find($message->communication_channel_id);
             if ($channel) {
                 return $channel;
             }
@@ -419,9 +421,11 @@ class MessagesService extends AbstractMessagesService
 
         // 2. Channel inherited from the thread
         if ($message->communication_thread_id) {
-            $thread = Threads::find($message->communication_thread_id);
+            $thread = Threads::withoutGlobalScope(AuthorizationScope::class)
+                ->find($message->communication_thread_id);
             if ($thread?->communication_channel_id) {
-                $channel = Channels::find($thread->communication_channel_id);
+                $channel = Channels::withoutGlobalScope(AuthorizationScope::class)
+                    ->find($thread->communication_channel_id);
                 if ($channel) {
                     return $channel;
                 }
