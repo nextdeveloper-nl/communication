@@ -9,6 +9,7 @@ use Google_Service_Gmail;
 use Google_Service_Gmail_Message;
 use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
+use NextDeveloper\Commons\Database\Models\ExternalServices;
 use NextDeveloper\Communication\Database\Models\Channels;
 use NextDeveloper\Communication\Exceptions\TokenRefreshedException;
 
@@ -16,14 +17,20 @@ use NextDeveloper\Communication\Exceptions\TokenRefreshedException;
  * Gmail / Google Workspace channel implementation.
  *
  * communication_channels.credentials:
- *   access_token  (required) — OAuth2 access token
- *   refresh_token (required) — OAuth2 refresh token (long-lived)
+ *   access_token  (required) — OAuth2 access token (per-user)
+ *   refresh_token (required) — OAuth2 refresh token, long-lived (per-user)
  *   expires_in    (optional) — token lifetime in seconds (set by Google)
  *   created       (optional) — Unix timestamp when token was issued (set by Google)
  *
  * communication_channels.configuration:
+ *   external_service_uuid (required) — UUID of the common_external_services record
+ *                                       that holds client_id and client_secret
  *   from_address          (optional) — sender address shown to recipients
  *   max_messages_per_hour (optional, default 500)
+ *
+ * common_external_services.configuration (referenced by external_service_uuid):
+ *   client_id     (required) — OAuth2 app client ID
+ *   client_secret (required) — OAuth2 app client secret
  *
  * Token lifecycle: the full credentials array (including expiry metadata) is passed
  * to Google_Client. When the access token is expired, it is refreshed automatically
@@ -34,8 +41,6 @@ class Gmail implements ChannelAbstract
     public const NAME = 'gmail';
 
     public const FIELDS = [
-        'client_id'             => 'required',
-        'client_secret'         => 'required',
         'access_token'          => 'required',
         'refresh_token'         => 'required',
         'from_address'          => 'nullable',
@@ -59,15 +64,28 @@ class Gmail implements ChannelAbstract
         }
 
         if (!$this->validateConfig($credentials)) {
-            throw new InvalidArgumentException(__METHOD__ . ': Missing required Gmail credentials (client_id, client_secret, access_token, refresh_token).');
+            throw new InvalidArgumentException(__METHOD__ . ': Missing required Gmail credentials (access_token, refresh_token).');
+        }
+
+        // OAuth2 app credentials live on the linked external service, not on the channel.
+        $externalServiceUuid = data_get($config, 'external_service_uuid');
+        $externalService     = $externalServiceUuid
+            ? ExternalServices::withoutGlobalScopes()->where('uuid', $externalServiceUuid)->first()
+            : null;
+
+        $clientId     = data_get($externalService?->configuration, 'client_id');
+        $clientSecret = data_get($externalService?->configuration, 'client_secret');
+
+        if (!$clientId || !$clientSecret) {
+            throw new InvalidArgumentException(__METHOD__ . ': Cannot resolve client_id / client_secret. Set external_service_uuid in channel configuration.');
         }
 
         $this->fromAddress = $config['from_address'] ?? 'me';
 
         try {
             $this->client = new Google_Client();
-            $this->client->setClientId($credentials['client_id']);
-            $this->client->setClientSecret($credentials['client_secret']);
+            $this->client->setClientId($clientId);
+            $this->client->setClientSecret($clientSecret);
 
             // Pass the full credentials array so Google_Client can track expiry metadata
             $this->client->setAccessToken($credentials);
@@ -166,7 +184,7 @@ class Gmail implements ChannelAbstract
 
     public function validateConfig(array $config): bool
     {
-        foreach (['client_id', 'client_secret', 'access_token', 'refresh_token'] as $field) {
+        foreach (['access_token', 'refresh_token'] as $field) {
             if (empty($config[$field])) {
                 return false;
             }
