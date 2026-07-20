@@ -2,30 +2,36 @@
 
 namespace NextDeveloper\Communication\Http\Controllers\Notifications;
 
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use NextDeveloper\Communication\Http\Controllers\AbstractController;
+use Laravel\Octane\Exceptions\DdException;
+use NextDeveloper\Commons\Exceptions\CannotCreateModelException;
 use NextDeveloper\Commons\Http\Response\ResponsableFactory;
-use NextDeveloper\Communication\Http\Requests\Notifications\NotificationsUpdateRequest;
+use NextDeveloper\Commons\Http\Traits\Addresses as AddressesTrait;
+use NextDeveloper\Commons\Http\Traits\Tags as TagsTrait;
 use NextDeveloper\Communication\Database\Filters\NotificationsQueryFilter;
 use NextDeveloper\Communication\Database\Models\Notifications;
-use NextDeveloper\Communication\Services\NotificationsService;
+use NextDeveloper\Communication\Http\Controllers\AbstractController;
 use NextDeveloper\Communication\Http\Requests\Notifications\NotificationsCreateRequest;
-use NextDeveloper\Commons\Http\Traits\Tags as TagsTrait;use NextDeveloper\Commons\Http\Traits\Addresses as AddressesTrait;
+use NextDeveloper\Communication\Http\Requests\Notifications\NotificationsUpdateRequest;
+use NextDeveloper\Communication\Services\NotificationsService;
+
 class NotificationsController extends AbstractController
 {
     private $model = Notifications::class;
 
-    use TagsTrait;
     use AddressesTrait;
+    use TagsTrait;
+
     /**
      * This method returns the list of notifications.
      *
      * optional http params:
      * - paginate: If you set paginate parameter, the result will be returned paginated.
      *
-     * @param  NotificationsQueryFilter $filter  An object that builds search query
-     * @param  Request                  $request Laravel request object, this holds all data about request. Automatically populated.
-     * @return \Illuminate\Http\JsonResponse
+     * @param  NotificationsQueryFilter  $filter  An object that builds search query
+     * @param  Request  $request  Laravel request object, this holds all data about request. Automatically populated.
+     * @return JsonResponse
      */
     public function index(NotificationsQueryFilter $filter, Request $request)
     {
@@ -49,8 +55,6 @@ class NotificationsController extends AbstractController
     /**
      * Makes the related action to the object
      *
-     * @param  $objectId
-     * @param  $action
      * @return array
      */
     public function doAction($objectId, $action)
@@ -59,7 +63,7 @@ class NotificationsController extends AbstractController
 
         return $this->withArray(
             [
-            'action_id' =>  $actionId
+                'action_id' => $actionId,
             ]
         );
     }
@@ -69,7 +73,8 @@ class NotificationsController extends AbstractController
      *
      * @param  $notificationsId
      * @return mixed|null
-     * @throws \Laravel\Octane\Exceptions\DdException
+     *
+     * @throws DdException
      */
     public function show($ref)
     {
@@ -86,8 +91,6 @@ class NotificationsController extends AbstractController
      *
      * It can be tags, addresses, states etc.
      *
-     * @param  $ref
-     * @param  $subObject
      * @return void
      */
     public function relatedObjects($ref, $subObject)
@@ -100,15 +103,15 @@ class NotificationsController extends AbstractController
     /**
      * This method created Notifications object on database.
      *
-     * @param  NotificationsCreateRequest $request
      * @return mixed|null
-     * @throws \NextDeveloper\Commons\Exceptions\CannotCreateModelException
+     *
+     * @throws CannotCreateModelException
      */
     public function store(NotificationsCreateRequest $request)
     {
-        if($request->has('validateOnly') && $request->get('validateOnly') == true) {
+        if ($request->has('validateOnly') && $request->get('validateOnly') == true) {
             return [
-                'validation'    =>  'success'
+                'validation' => 'success',
             ];
         }
 
@@ -120,16 +123,15 @@ class NotificationsController extends AbstractController
     /**
      * This method updates Notifications object on database.
      *
-     * @param  $notificationsId
-     * @param  NotificationsUpdateRequest $request
      * @return mixed|null
-     * @throws \NextDeveloper\Commons\Exceptions\CannotCreateModelException
+     *
+     * @throws CannotCreateModelException
      */
     public function update($notificationsId, NotificationsUpdateRequest $request)
     {
-        if($request->has('validateOnly') && $request->get('validateOnly') == true) {
+        if ($request->has('validateOnly') && $request->get('validateOnly') == true) {
             return [
-                'validation'    =>  'success'
+                'validation' => 'success',
             ];
         }
 
@@ -141,9 +143,9 @@ class NotificationsController extends AbstractController
     /**
      * This method updates Notifications object on database.
      *
-     * @param  $notificationsId
      * @return mixed|null
-     * @throws \NextDeveloper\Commons\Exceptions\CannotCreateModelException
+     *
+     * @throws CannotCreateModelException
      */
     public function destroy($notificationsId)
     {
@@ -154,4 +156,17 @@ class NotificationsController extends AbstractController
 
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
 
+    /**
+     * Marks all unread notifications of the current user as read.
+     *
+     * @return mixed
+     */
+    public function markAllRead()
+    {
+        return $this->withArray(
+            [
+                'marked' => NotificationsService::markAllAsRead(),
+            ]
+        );
+    }
 }

@@ -270,6 +270,9 @@ Route::prefix('communication')->group(
                 Route::post('/', 'Notifications\NotificationsController@store');
                 Route::post('/{communication_notifications}/do/{action}', 'Notifications\NotificationsController@doAction');
 
+                //  This must stay above the wildcard patch, otherwise it is treated as a uuid
+                Route::patch('/mark-all-read', 'Notifications\NotificationsController@markAllRead');
+
                 Route::patch('/{communication_notifications}', 'Notifications\NotificationsController@update');
                 Route::delete('/{communication_notifications}', 'Notifications\NotificationsController@destroy');
             }

@@ -37,9 +37,9 @@ class CommunicationSupportRole extends AbstractRole implements IAuthorizationRol
         $builder->where('iam_account_id', UserHelper::currentAccount()->id);
     }
 
-    public function checkPrivileges(Users $users = null)
+    public function checkPrivileges(?Users $users = null)
     {
-        //return UserHelper::hasRole(self::NAME, $users);
+        // return UserHelper::hasRole(self::NAME, $users);
     }
 
     public function getModule()
@@ -47,7 +47,7 @@ class CommunicationSupportRole extends AbstractRole implements IAuthorizationRol
         return 'communication';
     }
 
-    public function allowedOperations() :array
+    public function allowedOperations(): array
     {
         return [
             // System definitions — read only (admin manages these)
@@ -93,8 +93,9 @@ class CommunicationSupportRole extends AbstractRole implements IAuthorizationRol
             // Audit/events — read only (system-generated)
             'communication_message_events:read',
 
-            // Notifications — support can create and read (e.g. sending alerts)
+            // Notifications — support can create and read (e.g. sending alerts), and mark their own as read
             'communication_notifications:read',
+            'communication_notifications:update',
             'communication_notifications:create',
 
             // Personal objects — read only (member manages their own)
@@ -121,11 +122,11 @@ class CommunicationSupportRole extends AbstractRole implements IAuthorizationRol
 
     public function canBeApplied($column)
     {
-        if(self::DB_PREFIX === '*') {
+        if (self::DB_PREFIX === '*') {
             return true;
         }
 
-        if(Str::startsWith($column, self::DB_PREFIX)) {
+        if (Str::startsWith($column, self::DB_PREFIX)) {
             return true;
         }
 

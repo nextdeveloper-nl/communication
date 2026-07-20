@@ -36,6 +36,7 @@ class CommunicationMemberRole extends AbstractRole implements IAuthorizationRole
         // Only has iam_user_id
         if ($table === 'communication_user_preferences') {
             $builder->where('iam_user_id', UserHelper::me()->id);
+
             return;
         }
 
@@ -51,6 +52,7 @@ class CommunicationMemberRole extends AbstractRole implements IAuthorizationRole
             'communication_unsubscribes',
         ])) {
             $builder->where('iam_account_id', UserHelper::currentAccount()->id);
+
             return;
         }
 
@@ -58,13 +60,13 @@ class CommunicationMemberRole extends AbstractRole implements IAuthorizationRole
         // (communication_available_channels, communication_notifications, communication_remindables)
         $builder->where([
             'iam_account_id' => UserHelper::currentAccount()->id,
-            'iam_user_id'    => UserHelper::me()->id,
+            'iam_user_id' => UserHelper::me()->id,
         ]);
     }
 
-    public function checkPrivileges(Users $users = null)
+    public function checkPrivileges(?Users $users = null)
     {
-        //return UserHelper::hasRole(self::NAME, $users);
+        // return UserHelper::hasRole(self::NAME, $users);
     }
 
     public function getModule()
@@ -72,7 +74,7 @@ class CommunicationMemberRole extends AbstractRole implements IAuthorizationRole
         return 'communication';
     }
 
-    public function allowedOperations() :array
+    public function allowedOperations(): array
     {
         return [
             // System definitions — read only
@@ -123,8 +125,9 @@ class CommunicationMemberRole extends AbstractRole implements IAuthorizationRole
             // Audit/events — read only
             'communication_message_events:read',
 
-            // Notifications — read only (system-generated for the member)
+            // Notifications — system-generated, member can only mark their own as read
             'communication_notifications:read',
+            'communication_notifications:update',
 
             // Personal objects — full CRUD (member owns these)
             'communication_remindables:read',
@@ -159,11 +162,11 @@ class CommunicationMemberRole extends AbstractRole implements IAuthorizationRole
 
     public function canBeApplied($column)
     {
-        if(self::DB_PREFIX === '*') {
+        if (self::DB_PREFIX === '*') {
             return true;
         }
 
-        if(Str::startsWith($column, self::DB_PREFIX)) {
+        if (Str::startsWith($column, self::DB_PREFIX)) {
             return true;
         }
 
