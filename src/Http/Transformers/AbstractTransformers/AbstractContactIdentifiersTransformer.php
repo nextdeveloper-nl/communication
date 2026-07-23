@@ -55,7 +55,7 @@ class AbstractContactIdentifiersTransformer extends AbstractTransformer
     public function transform(ContactIdentifiers $model)
     {
                                                 $communicationContactId = \NextDeveloper\Communication\Database\Models\Contacts::where('id', $model->communication_contact_id)->first();
-                        
+
         return $this->buildPayload(
             [
             'id'  =>  $model->uuid,

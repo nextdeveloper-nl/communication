@@ -26,7 +26,7 @@ class ChannelsCreatedEvent extends Events
      */
     protected $timestamp = null;
 
-    public function __construct(Channels $model = null)
+    public function __construct(?Channels $model = null)
     {
         $this->_model = $model;
     }

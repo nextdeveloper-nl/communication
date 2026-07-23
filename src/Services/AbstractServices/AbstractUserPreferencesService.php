@@ -25,7 +25,7 @@ use NextDeveloper\Commons\Exceptions\NotAllowedException;
  */
 class AbstractUserPreferencesService
 {
-    public static function get(UserPreferencesQueryFilter $filter = null, array $params = []) : Collection|LengthAwarePaginator
+    public static function get(?UserPreferencesQueryFilter $filter = null, array $params = []) : Collection|LengthAwarePaginator
     {
         $enablePaginate = array_key_exists('paginate', $params);
 
@@ -190,11 +190,11 @@ class AbstractUserPreferencesService
                 $data['iam_user_id']
             );
         }
-                    
+
         if(!array_key_exists('iam_user_id', $data)) {
             $data['iam_user_id']    = UserHelper::me()->id;
         }
-            
+
         try {
             $model = UserPreferences::create($data);
         } catch(\Exception $e) {
@@ -246,7 +246,7 @@ class AbstractUserPreferencesService
                 $data['iam_user_id']
             );
         }
-    
+
         try {
             $isUpdated = $model->update($data);
             $model = $model->fresh();

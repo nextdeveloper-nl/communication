@@ -17,13 +17,13 @@ class NotificationsQueryFilter extends AbstractQueryFilter
      * @var Builder
      */
     protected $builder;
-    
+
     public function severity($value)
     {
         return $this->builder->where('severity', 'ilike', '%' . $value . '%');
     }
 
-        
+
     public function objectType($value)
     {
         return $this->builder->where('object_type', 'ilike', '%' . $value . '%');
@@ -34,13 +34,13 @@ class NotificationsQueryFilter extends AbstractQueryFilter
     {
         return $this->objectType($value);
     }
-        
+
     public function data($value)
     {
         return $this->builder->where('data', 'ilike', '%' . $value . '%');
     }
 
-    
+
     public function readAtStart($date)
     {
         return $this->builder->where('read_at', '>=', $date);
@@ -138,7 +138,7 @@ class NotificationsQueryFilter extends AbstractQueryFilter
         }
     }
 
-    
+
     public function iamAccountId($value)
     {
             $iamAccount = \NextDeveloper\IAM\Database\Models\Accounts::where('uuid', $value)->first();
@@ -148,7 +148,7 @@ class NotificationsQueryFilter extends AbstractQueryFilter
         }
     }
 
-    
+
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
 
 

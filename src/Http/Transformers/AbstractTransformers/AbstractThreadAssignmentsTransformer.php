@@ -57,7 +57,7 @@ class AbstractThreadAssignmentsTransformer extends AbstractTransformer
                                                 $communicationThreadId = \NextDeveloper\Communication\Database\Models\Threads::where('id', $model->communication_thread_id)->first();
                                                             $assignedToUserId = \NextDeveloper\IAM\Database\Models\Users::where('id', $model->assigned_to_user_id)->first();
                                                             $assignedByUserId = \NextDeveloper\IAM\Database\Models\Users::where('id', $model->assigned_by_user_id)->first();
-                        
+
         return $this->buildPayload(
             [
             'id'  =>  $model->uuid,

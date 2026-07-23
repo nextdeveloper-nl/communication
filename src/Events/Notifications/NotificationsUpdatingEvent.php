@@ -24,7 +24,7 @@ class NotificationsUpdatingEvent
      */
     protected $timestamp = null;
 
-    public function __construct(Notifications $model = null)
+    public function __construct(?Notifications $model = null)
     {
         $this->_model = $model;
     }

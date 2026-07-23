@@ -60,7 +60,7 @@ class AbstractMessagesTransformer extends AbstractTransformer
                                                             $sentByBotId = \NextDeveloper\Communication\Database\Models\Bots::where('id', $model->sent_by_bot_id)->first();
                                                             $iamAccountId = \NextDeveloper\IAM\Database\Models\Accounts::where('id', $model->iam_account_id)->first();
                                                             $communicationChannelId = \NextDeveloper\Communication\Database\Models\Channels::where('id', $model->communication_channel_id)->first();
-                        
+
         return $this->buildPayload(
             [
             'id'  =>  $model->uuid,

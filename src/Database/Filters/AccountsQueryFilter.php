@@ -17,13 +17,13 @@ class AccountsQueryFilter extends AbstractQueryFilter
      * @var Builder
      */
     protected $builder;
-    
+
     public function plan($value)
     {
         return $this->builder->where('plan', 'ilike', '%' . $value . '%');
     }
 
-        
+
     public function suspensionReason($value)
     {
         return $this->builder->where('suspension_reason', 'ilike', '%' . $value . '%');
@@ -34,7 +34,7 @@ class AccountsQueryFilter extends AbstractQueryFilter
     {
         return $this->suspensionReason($value);
     }
-    
+
     public function maxContacts($value)
     {
         $operator = substr($value, 0, 1);
@@ -53,7 +53,7 @@ class AccountsQueryFilter extends AbstractQueryFilter
     {
         return $this->maxContacts($value);
     }
-    
+
     public function maxEmailsPerMonth($value)
     {
         $operator = substr($value, 0, 1);
@@ -72,7 +72,7 @@ class AccountsQueryFilter extends AbstractQueryFilter
     {
         return $this->maxEmailsPerMonth($value);
     }
-    
+
     public function maxSmsPerMonth($value)
     {
         $operator = substr($value, 0, 1);
@@ -91,7 +91,7 @@ class AccountsQueryFilter extends AbstractQueryFilter
     {
         return $this->maxSmsPerMonth($value);
     }
-    
+
     public function maxChannels($value)
     {
         $operator = substr($value, 0, 1);
@@ -110,7 +110,7 @@ class AccountsQueryFilter extends AbstractQueryFilter
     {
         return $this->maxChannels($value);
     }
-    
+
     public function emailsSentThisPeriod($value)
     {
         $operator = substr($value, 0, 1);
@@ -129,7 +129,7 @@ class AccountsQueryFilter extends AbstractQueryFilter
     {
         return $this->emailsSentThisPeriod($value);
     }
-    
+
     public function smsSentThisPeriod($value)
     {
         $operator = substr($value, 0, 1);
@@ -148,7 +148,7 @@ class AccountsQueryFilter extends AbstractQueryFilter
     {
         return $this->smsSentThisPeriod($value);
     }
-    
+
     public function isSuspended($value)
     {
         return $this->builder->where('is_suspended', $value);
@@ -159,7 +159,7 @@ class AccountsQueryFilter extends AbstractQueryFilter
     {
         return $this->isSuspended($value);
     }
-     
+
     public function isAiBotsEnabled($value)
     {
         return $this->builder->where('is_ai_bots_enabled', $value);
@@ -170,7 +170,7 @@ class AccountsQueryFilter extends AbstractQueryFilter
     {
         return $this->isAiBotsEnabled($value);
     }
-     
+
     public function isDedicatedIpEnabled($value)
     {
         return $this->builder->where('is_dedicated_ip_enabled', $value);
@@ -181,7 +181,7 @@ class AccountsQueryFilter extends AbstractQueryFilter
     {
         return $this->isDedicatedIpEnabled($value);
     }
-     
+
     public function currentPeriodStartStart($date)
     {
         return $this->builder->where('current_period_start', '>=', $date);
@@ -301,7 +301,7 @@ class AccountsQueryFilter extends AbstractQueryFilter
         }
     }
 
-    
+
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
 
 

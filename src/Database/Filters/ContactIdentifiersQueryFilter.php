@@ -17,7 +17,7 @@ class ContactIdentifiersQueryFilter extends AbstractQueryFilter
      * @var Builder
      */
     protected $builder;
-    
+
     public function channelType($value)
     {
         return $this->builder->where('channel_type', 'ilike', '%' . $value . '%');
@@ -28,13 +28,13 @@ class ContactIdentifiersQueryFilter extends AbstractQueryFilter
     {
         return $this->channelType($value);
     }
-        
+
     public function identifier($value)
     {
         return $this->builder->where('identifier', 'ilike', '%' . $value . '%');
     }
 
-        
+
     public function suppressedReason($value)
     {
         return $this->builder->where('suppressed_reason', 'ilike', '%' . $value . '%');
@@ -45,7 +45,7 @@ class ContactIdentifiersQueryFilter extends AbstractQueryFilter
     {
         return $this->suppressedReason($value);
     }
-    
+
     public function isPrimary($value)
     {
         return $this->builder->where('is_primary', $value);
@@ -56,7 +56,7 @@ class ContactIdentifiersQueryFilter extends AbstractQueryFilter
     {
         return $this->isPrimary($value);
     }
-     
+
     public function isSuppressed($value)
     {
         return $this->builder->where('is_suppressed', $value);
@@ -67,7 +67,7 @@ class ContactIdentifiersQueryFilter extends AbstractQueryFilter
     {
         return $this->isSuppressed($value);
     }
-     
+
     public function suppressedAtStart($date)
     {
         return $this->builder->where('suppressed_at', '>=', $date);
@@ -170,7 +170,7 @@ class ContactIdentifiersQueryFilter extends AbstractQueryFilter
     {
         return $this->communicationContact($value);
     }
-    
+
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
 
 

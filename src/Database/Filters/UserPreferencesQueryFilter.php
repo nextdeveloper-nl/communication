@@ -28,7 +28,7 @@ class UserPreferencesQueryFilter extends AbstractQueryFilter
     {
         return $this->isSystemEmailOptout($value);
     }
-     
+
     public function isPhoneOptout($value)
     {
         return $this->builder->where('is_phone_optout', $value);
@@ -39,7 +39,7 @@ class UserPreferencesQueryFilter extends AbstractQueryFilter
     {
         return $this->isPhoneOptout($value);
     }
-     
+
     public function isMarketingEmailOptout($value)
     {
         return $this->builder->where('is_marketing_email_optout', $value);
@@ -50,7 +50,7 @@ class UserPreferencesQueryFilter extends AbstractQueryFilter
     {
         return $this->isMarketingEmailOptout($value);
     }
-     
+
     public function createdAtStart($date)
     {
         return $this->builder->where('created_at', '>=', $date);
@@ -126,7 +126,7 @@ class UserPreferencesQueryFilter extends AbstractQueryFilter
         }
     }
 
-    
+
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
 
 

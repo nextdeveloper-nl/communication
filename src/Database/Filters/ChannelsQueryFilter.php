@@ -17,19 +17,19 @@ class ChannelsQueryFilter extends AbstractQueryFilter
      * @var Builder
      */
     protected $builder;
-    
+
     public function name($value)
     {
         return $this->builder->where('name', 'ilike', '%' . $value . '%');
     }
 
-        
+
     public function type($value)
     {
         return $this->builder->where('type', 'ilike', '%' . $value . '%');
     }
 
-    
+
     public function priority($value)
     {
         $operator = substr($value, 0, 1);
@@ -43,7 +43,7 @@ class ChannelsQueryFilter extends AbstractQueryFilter
         return $this->builder->where('priority', $operator, $value);
     }
 
-    
+
     public function isActive($value)
     {
         return $this->builder->where('is_active', $value);
@@ -54,7 +54,7 @@ class ChannelsQueryFilter extends AbstractQueryFilter
     {
         return $this->isActive($value);
     }
-     
+
     public function createdAtStart($date)
     {
         return $this->builder->where('created_at', '>=', $date);
@@ -130,7 +130,7 @@ class ChannelsQueryFilter extends AbstractQueryFilter
         }
     }
 
-    
+
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
 
 
