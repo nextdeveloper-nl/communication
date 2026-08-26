@@ -163,7 +163,9 @@ class Channels extends Model
 
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
 
-
+    // One Channel row represents a connected Facebook Page; it carries both
+    // Messenger conversations and Lead Ads submissions for that Page.
+    const TYPE_FACEBOOK = 'facebook';
 
 
 }

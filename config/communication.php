@@ -51,5 +51,12 @@ return [
             'webhook_url'   =>  env('MATTERMOST_WEBHOOK_URL'),
             'class'         =>  \NextDeveloper\Communication\Services\CrossPlatformNotification\Mattermost::class,
         ],
+        'facebook'  =>  [
+            // App-level secret, used to verify X-Hub-Signature-256 on every inbound webhook call.
+            'app_secret'    =>  env('FACEBOOK_APP_SECRET'),
+            // Arbitrary shared secret we choose; Meta echoes it back during the webhook
+            // subscription handshake so we can confirm the callback URL is ours.
+            'verify_token'  =>  env('FACEBOOK_WEBHOOK_VERIFY_TOKEN'),
+        ],
     ],
 ];

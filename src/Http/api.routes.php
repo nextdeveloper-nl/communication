@@ -333,6 +333,12 @@ Route::prefix('communication')->group(
             function () {
                 Route::post('/{communication_channels}/code/send', 'Channels\ChannelsController@sendCode');
                 Route::post('/{communication_channels}/code/verify', 'Channels\ChannelsController@verifyCode');
+
+                // Self-service Facebook Page connect: customer supplies their own
+                // Page ID + Page Access Token (obtained via Meta Business Suite),
+                // we validate it, subscribe the Page to our webhook, and create the Channel.
+                Route::post('/facebook/connect', 'Channels\ChannelsController@connectFacebook');
+                Route::post('/{communication_channels}/facebook/disconnect', 'Channels\ChannelsController@disconnectFacebook');
             }
         );
 

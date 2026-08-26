@@ -411,6 +411,7 @@ class MessagesService extends AbstractMessagesService
             'google_workspace' => \NextDeveloper\Communication\Channels\Gmail::class,
             'mattermost'       => \NextDeveloper\Communication\Channels\Mattermost::class,
             'sms'              => \NextDeveloper\Communication\Channels\Sms::class,
+            Channels::TYPE_FACEBOOK => \NextDeveloper\Communication\Channels\FacebookMessenger::class,
         ];
 
         return $map[$type] ?? null;
