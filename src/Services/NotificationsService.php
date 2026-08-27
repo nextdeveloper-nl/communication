@@ -3,7 +3,9 @@
 namespace NextDeveloper\Communication\Services;
 
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Cache;
 use InvalidArgumentException;
+use NextDeveloper\Commons\Common\Cache\CacheHelper;
 use NextDeveloper\Commons\Database\GlobalScopes\LimitScope;
 use NextDeveloper\Communication\Database\Models\Notifications;
 use NextDeveloper\Communication\Services\AbstractServices\AbstractNotificationsService;
@@ -49,12 +51,38 @@ class NotificationsService extends AbstractNotificationsService
      * this mass update, which would silently leave everything past the first page unread.
      * AuthorizationScope is kept — it supplies the iam_account_id/iam_user_id predicates
      * that keep this update to the caller's own rows.
+     *
+     * NotificationsTransformer caches each transformed notification under
+     * `Notifications:{uuid}:Transformed` with no TTL, and CleanCache only evicts it from
+     * model events. A mass update fires no events, so the rows were marked read in the
+     * database while the list endpoint kept serving the cached `read_at: null` payload —
+     * the client saw nothing change. Collect the uuids first and evict their keys by hand.
      */
     public static function markAllAsRead(): int
     {
-        return Notifications::withoutGlobalScope(LimitScope::class)
+        $unread = Notifications::withoutGlobalScope(LimitScope::class)
             ->whereNull('read_at')
-            ->update(['read_at' => now()]);
+            ->pluck('uuid', 'id');
+
+        if ($unread->isEmpty()) {
+            return 0;
+        }
+
+        $marked = 0;
+
+        //  Chunked so an account sitting on a huge unread pile cannot blow the
+        //  database's bound-parameter limit with a single whereIn.
+        foreach ($unread->keys()->chunk(1000) as $ids) {
+            $marked += Notifications::withoutGlobalScope(LimitScope::class)
+                ->whereIn('id', $ids)
+                ->update(['read_at' => now()]);
+        }
+
+        foreach ($unread as $uuid) {
+            Cache::forget(CacheHelper::getKey('Notifications', $uuid, 'Transformed'));
+        }
+
+        return $marked;
     }
 
     /**
