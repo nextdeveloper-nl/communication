@@ -72,6 +72,17 @@ class MessagesService extends AbstractMessagesService
 
         $message = parent::create($data);
 
+        // AbstractMessagesService::create() treats every "*_id" field as a foreign
+        // key and runs it through DatabaseHelper::uuidToId(), which returns null for
+        // any plain (non-UUID) string. external_message_id is not a relation — it's
+        // an opaque external id (Facebook mid, Chatwoot message id, ...) — so a
+        // plain string value gets silently wiped. Restore it here from the original
+        // $data, which parent::create() received by value and could not mutate.
+        if (!empty($data['external_message_id']) && $message->external_message_id !== $data['external_message_id']) {
+            $message->external_message_id = $data['external_message_id'];
+            $message->save();
+        }
+
         if ($message->communication_thread_id) {
             $thread = Threads::find($message->communication_thread_id);
             if ($thread) {

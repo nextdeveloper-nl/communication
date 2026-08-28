@@ -167,5 +167,9 @@ class Channels extends Model
     // Messenger conversations and Lead Ads submissions for that Page.
     const TYPE_FACEBOOK = 'facebook';
 
+    // One Channel row represents a connected Chatwoot inbox (API channel type).
+    // Chatwoot support tickets are proxied through leo4 and stored as ordinary
+    // Threads/Messages here, same as Facebook, instead of a dedicated schema.
+    const TYPE_CHATWOOT = 'chatwoot';
 
 }
