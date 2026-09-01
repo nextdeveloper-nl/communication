@@ -202,17 +202,7 @@ class MessagesService extends AbstractMessagesService
         }
 
         // Resolve handler class: prefer AvailableChannels DB record, fall back to built-in map.
-        $class = null;
-
-        $available = ChannelHelper::getAvailableChannelByType($channel->type);
-
-        if ($available) {
-            $class = ChannelHelper::getChannelClass($available);
-        }
-
-        if (!$class) {
-            $class = self::builtInChannelClass($channel->type);
-        }
+        $class = ChannelHelper::getChannelClassForType($channel->type);
 
         if (!$class) {
             self::markAsFailed($message->uuid, 'Channel handler class not found for type: ' . $channel->type);
@@ -391,18 +381,6 @@ class MessagesService extends AbstractMessagesService
      * Maps known channel types to their built-in handler classes.
      * Used as a fallback when no AvailableChannels DB record exists for the type.
      */
-    private static function builtInChannelClass(string $type): ?string
-    {
-        $map = [
-            'smtp'             => \NextDeveloper\Communication\Channels\Smtp::class,
-            'gmail'            => \NextDeveloper\Communication\Channels\Gmail::class,
-            'google_workspace' => \NextDeveloper\Communication\Channels\Gmail::class,
-            'mattermost'       => \NextDeveloper\Communication\Channels\Mattermost::class,
-            'sms'              => \NextDeveloper\Communication\Channels\Sms::class,
-        ];
-
-        return $map[$type] ?? null;
-    }
 
     /**
      * Resolves the delivery channel for a message using the three-level fallback.
