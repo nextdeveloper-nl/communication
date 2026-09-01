@@ -56,6 +56,41 @@ class ChannelHelper
     }
 
     /**
+     * Handler classes for channel types that are not registered in the
+     * AvailableChannels table.
+     *
+     * @var array<string, class-string>
+     */
+    private const BUILT_IN_CLASSES = [
+        'smtp'             => \NextDeveloper\Communication\Channels\Smtp::class,
+        'mailgun'          => \NextDeveloper\Communication\Channels\Mailgun::class,
+        'gmail'            => \NextDeveloper\Communication\Channels\Gmail::class,
+        'google_workspace' => \NextDeveloper\Communication\Channels\Gmail::class,
+        'email'            => \NextDeveloper\Communication\Channels\Smtp::class,
+        'mattermost'       => \NextDeveloper\Communication\Channels\Mattermost::class,
+        'sms'              => \NextDeveloper\Communication\Channels\Sms::class,
+    ];
+
+    /**
+     * Resolves the delivery handler for a channel type.
+     *
+     * A database-registered AvailableChannels row wins, so an operator can point
+     * a type at a different class without a deploy; otherwise the built-in map
+     * applies. This is the single place that answers "what sends this type", used
+     * both when dispatching the queue and when sending a one-off test.
+     */
+    public static function getChannelClassForType(string $type): ?string
+    {
+        $available = AvailableChannels::where('name', $type)->first();
+
+        if ($available && ($class = self::getChannelClass($available))) {
+            return $class;
+        }
+
+        return self::BUILT_IN_CLASSES[$type] ?? null;
+    }
+
+    /**
      * Returns the highest-priority active channel for an account by type.
      * Use this to pick the sending transport when dispatching messages.
      */
