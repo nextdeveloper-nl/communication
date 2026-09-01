@@ -10,6 +10,7 @@ use NextDeveloper\Communication\Database\Filters\ChannelsQueryFilter;
 use NextDeveloper\Communication\Database\Models\Channels;
 use NextDeveloper\Communication\Services\ChannelsService;
 use NextDeveloper\Communication\Http\Requests\Channels\ChannelsCreateRequest;
+use NextDeveloper\Communication\Http\Requests\Channels\FacebookConnectRequest;
 use NextDeveloper\Commons\Http\Traits\Tags as TagsTrait;use NextDeveloper\Commons\Http\Traits\Addresses as AddressesTrait;
 class ChannelsController extends AbstractController
 {
@@ -154,4 +155,25 @@ class ChannelsController extends AbstractController
 
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
 
+    /**
+     * Self-service Facebook Page connect: validates the customer-supplied
+     * page_id/page_access_token, subscribes the Page to our webhook, and
+     * creates the Channel for the current tenant.
+     */
+    public function connectFacebook(FacebookConnectRequest $request)
+    {
+        $model = ChannelsService::connectFacebookPage($request->validated());
+
+        return ResponsableFactory::makeResponse($this, $model);
+    }
+
+    /**
+     * Unsubscribes the connected Page from our webhook and removes the Channel.
+     */
+    public function disconnectFacebook($ref)
+    {
+        ChannelsService::disconnectFacebookPage($ref);
+
+        return $this->noContent();
+    }
 }

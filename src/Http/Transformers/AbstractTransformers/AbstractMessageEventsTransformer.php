@@ -55,7 +55,7 @@ class AbstractMessageEventsTransformer extends AbstractTransformer
     public function transform(MessageEvents $model)
     {
                                                 $communicationMessageId = \NextDeveloper\Communication\Database\Models\Messages::where('id', $model->communication_message_id)->first();
-                        
+
         return $this->buildPayload(
             [
             'id'  =>  $model->uuid,

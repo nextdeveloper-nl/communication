@@ -17,7 +17,7 @@ class MessagesQueryFilter extends AbstractQueryFilter
      * @var Builder
      */
     protected $builder;
-    
+
     public function contentType($value)
     {
         return $this->builder->where('content_type', 'ilike', '%' . $value . '%');
@@ -28,13 +28,13 @@ class MessagesQueryFilter extends AbstractQueryFilter
     {
         return $this->contentType($value);
     }
-        
+
     public function body($value)
     {
         return $this->builder->where('body', 'ilike', '%' . $value . '%');
     }
 
-        
+
     public function externalMessageId($value)
     {
         return $this->builder->where('external_message_id', 'ilike', '%' . $value . '%');
@@ -45,13 +45,13 @@ class MessagesQueryFilter extends AbstractQueryFilter
     {
         return $this->externalMessageId($value);
     }
-        
+
     public function status($value)
     {
         return $this->builder->where('status', 'ilike', '%' . $value . '%');
     }
 
-        
+
     public function failureReason($value)
     {
         return $this->builder->where('failure_reason', 'ilike', '%' . $value . '%');
@@ -62,13 +62,13 @@ class MessagesQueryFilter extends AbstractQueryFilter
     {
         return $this->failureReason($value);
     }
-        
+
     public function recipient($value)
     {
         return $this->builder->where('recipient', 'ilike', '%' . $value . '%');
     }
 
-    
+
     public function direction($value)
     {
         $operator = substr($value, 0, 1);
@@ -82,7 +82,7 @@ class MessagesQueryFilter extends AbstractQueryFilter
         return $this->builder->where('direction', $operator, $value);
     }
 
-    
+
     public function isInternal($value)
     {
         return $this->builder->where('is_internal', $value);
@@ -93,7 +93,7 @@ class MessagesQueryFilter extends AbstractQueryFilter
     {
         return $this->isInternal($value);
     }
-     
+
     public function deliverAtStart($date)
     {
         return $this->builder->where('deliver_at', '>=', $date);
@@ -262,7 +262,7 @@ class MessagesQueryFilter extends AbstractQueryFilter
     {
         return $this->communicationThread($value);
     }
-    
+
     public function crmCampaignId($value)
     {
             $crmCampaign = \NextDeveloper\CRM\Database\Models\Campaigns::where('uuid', $value)->first();
@@ -277,7 +277,7 @@ class MessagesQueryFilter extends AbstractQueryFilter
     {
         return $this->crmCampaign($value);
     }
-    
+
     public function sentByUserId($value)
     {
             $sentByUser = \NextDeveloper\IAM\Database\Models\Users::where('uuid', $value)->first();
@@ -292,7 +292,7 @@ class MessagesQueryFilter extends AbstractQueryFilter
     {
         return $this->sentByUser($value);
     }
-    
+
     public function sentByBotId($value)
     {
             $sentByBot = \NextDeveloper\Communication\Database\Models\Bots::where('uuid', $value)->first();
@@ -307,7 +307,7 @@ class MessagesQueryFilter extends AbstractQueryFilter
     {
         return $this->sentByBot($value);
     }
-    
+
     public function iamAccountId($value)
     {
             $iamAccount = \NextDeveloper\IAM\Database\Models\Accounts::where('uuid', $value)->first();
@@ -317,7 +317,7 @@ class MessagesQueryFilter extends AbstractQueryFilter
         }
     }
 
-    
+
     public function communicationChannelId($value)
     {
             $communicationChannel = \NextDeveloper\Communication\Database\Models\Channels::where('uuid', $value)->first();
@@ -332,7 +332,7 @@ class MessagesQueryFilter extends AbstractQueryFilter
     {
         return $this->communicationChannel($value);
     }
-    
+
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
 
 

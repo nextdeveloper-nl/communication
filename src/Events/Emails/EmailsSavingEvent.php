@@ -24,7 +24,7 @@ class EmailsSavingEvent
      */
     protected $timestamp = null;
 
-    public function __construct(Emails $model = null)
+    public function __construct(?Emails $model = null)
     {
         $this->_model = $model;
     }

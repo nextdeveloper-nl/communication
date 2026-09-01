@@ -25,7 +25,7 @@ use NextDeveloper\Commons\Exceptions\NotAllowedException;
  */
 class AbstractContactIdentifiersService
 {
-    public static function get(ContactIdentifiersQueryFilter $filter = null, array $params = []) : Collection|LengthAwarePaginator
+    public static function get(?ContactIdentifiersQueryFilter $filter = null, array $params = []) : Collection|LengthAwarePaginator
     {
         $enablePaginate = array_key_exists('paginate', $params);
 
@@ -190,7 +190,7 @@ class AbstractContactIdentifiersService
                 $data['communication_contact_id']
             );
         }
-                        
+
         try {
             $model = ContactIdentifiers::create($data);
         } catch(\Exception $e) {
@@ -242,7 +242,7 @@ class AbstractContactIdentifiersService
                 $data['communication_contact_id']
             );
         }
-    
+
         try {
             $isUpdated = $model->update($data);
             $model = $model->fresh();

@@ -17,7 +17,7 @@ class MessageEventsQueryFilter extends AbstractQueryFilter
      * @var Builder
      */
     protected $builder;
-    
+
     public function eventType($value)
     {
         return $this->builder->where('event_type', 'ilike', '%' . $value . '%');
@@ -28,7 +28,7 @@ class MessageEventsQueryFilter extends AbstractQueryFilter
     {
         return $this->eventType($value);
     }
-    
+
     public function occurredAtStart($date)
     {
         return $this->builder->where('occurred_at', '>=', $date);
@@ -87,7 +87,7 @@ class MessageEventsQueryFilter extends AbstractQueryFilter
     {
         return $this->communicationMessage($value);
     }
-    
+
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
 
 

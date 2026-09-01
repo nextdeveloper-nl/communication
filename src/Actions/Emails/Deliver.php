@@ -23,7 +23,7 @@ class Deliver extends AbstractAction
      * @param Emails|null $email
      * @throws NotAllowedException
      */
-    public function __construct(Emails $email = null)
+    public function __construct(?Emails $email = null)
     {
         $this->model = $email;
         return parent::__construct();

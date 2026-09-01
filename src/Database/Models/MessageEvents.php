@@ -135,7 +135,7 @@ class MessageEvents extends Model
     {
         return $this->belongsTo(\NextDeveloper\Communication\Database\Models\Messages::class);
     }
-    
+
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
 
 

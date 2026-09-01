@@ -162,22 +162,22 @@ class Threads extends Model
     {
         return $this->belongsTo(\NextDeveloper\Communication\Database\Models\Channels::class);
     }
-    
+
     public function contacts() : \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(\NextDeveloper\Communication\Database\Models\Contacts::class);
     }
-    
+
     public function bots() : \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(\NextDeveloper\Communication\Database\Models\Bots::class);
     }
-    
+
     public function accounts() : \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(\NextDeveloper\IAM\Database\Models\Accounts::class);
     }
-    
+
     public function threadAssignments() : \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(\NextDeveloper\Communication\Database\Models\ThreadAssignments::class);

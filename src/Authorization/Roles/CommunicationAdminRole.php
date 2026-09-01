@@ -24,7 +24,7 @@ class CommunicationAdminRole extends AbstractRole implements IAuthorizationRole
         //  Returns everything about communications
     }
 
-    public function checkPrivileges(Users $users = null)
+    public function checkPrivileges(?Users $users = null)
     {
         //return UserHelper::hasRole(self::NAME, $users);
     }

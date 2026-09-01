@@ -17,37 +17,37 @@ class SmtpServersQueryFilter extends AbstractQueryFilter
      * @var Builder
      */
     protected $builder;
-    
+
     public function name($value)
     {
         return $this->builder->where('name', 'ilike', '%' . $value . '%');
     }
 
-        
+
     public function host($value)
     {
         return $this->builder->where('host', 'ilike', '%' . $value . '%');
     }
 
-        
+
     public function encryption($value)
     {
         return $this->builder->where('encryption', 'ilike', '%' . $value . '%');
     }
 
-        
+
     public function username($value)
     {
         return $this->builder->where('username', 'ilike', '%' . $value . '%');
     }
 
-        
+
     public function password($value)
     {
         return $this->builder->where('password', 'ilike', '%' . $value . '%');
     }
 
-        
+
     public function fromEmail($value)
     {
         return $this->builder->where('from_email', 'ilike', '%' . $value . '%');
@@ -58,7 +58,7 @@ class SmtpServersQueryFilter extends AbstractQueryFilter
     {
         return $this->fromEmail($value);
     }
-        
+
     public function fromName($value)
     {
         return $this->builder->where('from_name', 'ilike', '%' . $value . '%');
@@ -69,7 +69,7 @@ class SmtpServersQueryFilter extends AbstractQueryFilter
     {
         return $this->fromName($value);
     }
-        
+
     public function replyTo($value)
     {
         return $this->builder->where('reply_to', 'ilike', '%' . $value . '%');
@@ -80,7 +80,7 @@ class SmtpServersQueryFilter extends AbstractQueryFilter
     {
         return $this->replyTo($value);
     }
-        
+
     public function lastCheckStatus($value)
     {
         return $this->builder->where('last_check_status', 'ilike', '%' . $value . '%');
@@ -91,7 +91,7 @@ class SmtpServersQueryFilter extends AbstractQueryFilter
     {
         return $this->lastCheckStatus($value);
     }
-        
+
     public function lastCheckMessage($value)
     {
         return $this->builder->where('last_check_message', 'ilike', '%' . $value . '%');
@@ -102,7 +102,7 @@ class SmtpServersQueryFilter extends AbstractQueryFilter
     {
         return $this->lastCheckMessage($value);
     }
-    
+
     public function port($value)
     {
         $operator = substr($value, 0, 1);
@@ -116,7 +116,7 @@ class SmtpServersQueryFilter extends AbstractQueryFilter
         return $this->builder->where('port', $operator, $value);
     }
 
-    
+
     public function isVerified($value)
     {
         return $this->builder->where('is_verified', $value);
@@ -127,7 +127,7 @@ class SmtpServersQueryFilter extends AbstractQueryFilter
     {
         return $this->isVerified($value);
     }
-     
+
     public function verifiedAtStart($date)
     {
         return $this->builder->where('verified_at', '>=', $date);
@@ -252,7 +252,7 @@ class SmtpServersQueryFilter extends AbstractQueryFilter
     {
         return $this->communicationChannel($value);
     }
-    
+
     public function iamAccountId($value)
     {
             $iamAccount = \NextDeveloper\IAM\Database\Models\Accounts::where('uuid', $value)->first();
@@ -262,7 +262,7 @@ class SmtpServersQueryFilter extends AbstractQueryFilter
         }
     }
 
-    
+
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
 
 

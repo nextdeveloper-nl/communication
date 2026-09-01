@@ -17,19 +17,19 @@ class ThreadsQueryFilter extends AbstractQueryFilter
      * @var Builder
      */
     protected $builder;
-    
+
     public function subject($value)
     {
         return $this->builder->where('subject', 'ilike', '%' . $value . '%');
     }
 
-        
+
     public function status($value)
     {
         return $this->builder->where('status', 'ilike', '%' . $value . '%');
     }
 
-    
+
     public function assignedAtStart($date)
     {
         return $this->builder->where('assigned_at', '>=', $date);
@@ -176,7 +176,7 @@ class ThreadsQueryFilter extends AbstractQueryFilter
     {
         return $this->communicationChannel($value);
     }
-    
+
     public function communicationContactId($value)
     {
             $communicationContact = \NextDeveloper\Communication\Database\Models\Contacts::where('uuid', $value)->first();
@@ -191,7 +191,7 @@ class ThreadsQueryFilter extends AbstractQueryFilter
     {
         return $this->communicationContact($value);
     }
-    
+
     public function communicationBotId($value)
     {
             $communicationBot = \NextDeveloper\Communication\Database\Models\Bots::where('uuid', $value)->first();
@@ -206,7 +206,7 @@ class ThreadsQueryFilter extends AbstractQueryFilter
     {
         return $this->communicationBot($value);
     }
-    
+
     public function assignedToUserId($value)
     {
             $assignedToUser = \NextDeveloper\IAM\Database\Models\Users::where('uuid', $value)->first();
@@ -221,7 +221,7 @@ class ThreadsQueryFilter extends AbstractQueryFilter
     {
         return $this->assignedToUser($value);
     }
-    
+
     public function iamAccountId($value)
     {
             $iamAccount = \NextDeveloper\IAM\Database\Models\Accounts::where('uuid', $value)->first();
@@ -231,7 +231,7 @@ class ThreadsQueryFilter extends AbstractQueryFilter
         }
     }
 
-    
+
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
 
 

@@ -24,7 +24,7 @@ class RemindablesUpdatedEvent
      */
     protected $timestamp = null;
 
-    public function __construct(Remindables $model = null)
+    public function __construct(?Remindables $model = null)
     {
         $this->_model = $model;
     }

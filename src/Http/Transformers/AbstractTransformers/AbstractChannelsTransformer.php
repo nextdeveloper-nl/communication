@@ -55,7 +55,7 @@ class AbstractChannelsTransformer extends AbstractTransformer
     public function transform(Channels $model)
     {
                                                 $iamAccountId = \NextDeveloper\IAM\Database\Models\Accounts::where('id', $model->iam_account_id)->first();
-                        
+
         return $this->buildPayload(
             [
             'id'  =>  $model->uuid,

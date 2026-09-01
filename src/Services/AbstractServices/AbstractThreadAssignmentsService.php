@@ -25,7 +25,7 @@ use NextDeveloper\Commons\Exceptions\NotAllowedException;
  */
 class AbstractThreadAssignmentsService
 {
-    public static function get(ThreadAssignmentsQueryFilter $filter = null, array $params = []) : Collection|LengthAwarePaginator
+    public static function get(?ThreadAssignmentsQueryFilter $filter = null, array $params = []) : Collection|LengthAwarePaginator
     {
         $enablePaginate = array_key_exists('paginate', $params);
 
@@ -202,7 +202,7 @@ class AbstractThreadAssignmentsService
                 $data['assigned_by_user_id']
             );
         }
-                        
+
         try {
             $model = ThreadAssignments::create($data);
         } catch(\Exception $e) {
@@ -266,7 +266,7 @@ class AbstractThreadAssignmentsService
                 $data['assigned_by_user_id']
             );
         }
-    
+
         try {
             $isUpdated = $model->update($data);
             $model = $model->fresh();

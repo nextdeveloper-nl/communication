@@ -17,7 +17,7 @@ class RemindablesQueryFilter extends AbstractQueryFilter
      * @var Builder
      */
     protected $builder;
-    
+
     public function objectType($value)
     {
         return $this->builder->where('object_type', 'ilike', '%' . $value . '%');
@@ -28,13 +28,13 @@ class RemindablesQueryFilter extends AbstractQueryFilter
     {
         return $this->objectType($value);
     }
-        
+
     public function note($value)
     {
         return $this->builder->where('note', 'ilike', '%' . $value . '%');
     }
 
-    
+
     public function isReminded($value)
     {
         return $this->builder->where('is_reminded', $value);
@@ -45,7 +45,7 @@ class RemindablesQueryFilter extends AbstractQueryFilter
     {
         return $this->isReminded($value);
     }
-     
+
     public function isAcknowledged($value)
     {
         return $this->builder->where('is_acknowledged', $value);
@@ -56,7 +56,7 @@ class RemindablesQueryFilter extends AbstractQueryFilter
     {
         return $this->isAcknowledged($value);
     }
-     
+
     public function isCancelled($value)
     {
         return $this->builder->where('is_cancelled', $value);
@@ -67,7 +67,7 @@ class RemindablesQueryFilter extends AbstractQueryFilter
     {
         return $this->isCancelled($value);
     }
-     
+
     public function remindDatetimeStart($date)
     {
         return $this->builder->where('remind_datetime', '>=', $date);
@@ -187,7 +187,7 @@ class RemindablesQueryFilter extends AbstractQueryFilter
         }
     }
 
-    
+
     public function iamAccountId($value)
     {
             $iamAccount = \NextDeveloper\IAM\Database\Models\Accounts::where('uuid', $value)->first();
@@ -197,7 +197,7 @@ class RemindablesQueryFilter extends AbstractQueryFilter
         }
     }
 
-    
+
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
 
 

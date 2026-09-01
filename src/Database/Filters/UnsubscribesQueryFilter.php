@@ -17,7 +17,7 @@ class UnsubscribesQueryFilter extends AbstractQueryFilter
      * @var Builder
      */
     protected $builder;
-    
+
     public function channelType($value)
     {
         return $this->builder->where('channel_type', 'ilike', '%' . $value . '%');
@@ -28,25 +28,25 @@ class UnsubscribesQueryFilter extends AbstractQueryFilter
     {
         return $this->channelType($value);
     }
-        
+
     public function identifier($value)
     {
         return $this->builder->where('identifier', 'ilike', '%' . $value . '%');
     }
 
-        
+
     public function reason($value)
     {
         return $this->builder->where('reason', 'ilike', '%' . $value . '%');
     }
 
-        
+
     public function source($value)
     {
         return $this->builder->where('source', 'ilike', '%' . $value . '%');
     }
 
-    
+
     public function createdAtStart($date)
     {
         return $this->builder->where('created_at', '>=', $date);
@@ -83,7 +83,7 @@ class UnsubscribesQueryFilter extends AbstractQueryFilter
     {
         return $this->communicationContact($value);
     }
-    
+
     public function iamAccountId($value)
     {
             $iamAccount = \NextDeveloper\IAM\Database\Models\Accounts::where('uuid', $value)->first();
@@ -93,7 +93,7 @@ class UnsubscribesQueryFilter extends AbstractQueryFilter
         }
     }
 
-    
+
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
 
 

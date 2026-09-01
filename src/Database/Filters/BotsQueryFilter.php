@@ -17,19 +17,19 @@ class BotsQueryFilter extends AbstractQueryFilter
      * @var Builder
      */
     protected $builder;
-    
+
     public function name($value)
     {
         return $this->builder->where('name', 'ilike', '%' . $value . '%');
     }
 
-        
+
     public function description($value)
     {
         return $this->builder->where('description', 'ilike', '%' . $value . '%');
     }
 
-    
+
     public function isActive($value)
     {
         return $this->builder->where('is_active', $value);
@@ -40,7 +40,7 @@ class BotsQueryFilter extends AbstractQueryFilter
     {
         return $this->isActive($value);
     }
-     
+
     public function createdAtStart($date)
     {
         return $this->builder->where('created_at', '>=', $date);
@@ -116,7 +116,7 @@ class BotsQueryFilter extends AbstractQueryFilter
         }
     }
 
-    
+
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
 
 

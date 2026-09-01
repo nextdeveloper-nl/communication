@@ -37,7 +37,7 @@ class ContactsQueryFilter extends AbstractQueryFilter
      * @var Builder
      */
     protected $builder;
-    
+
     public function fullName($value)
     {
         return $this->builder->where('full_name', 'ilike', '%' . $value . '%');
@@ -48,13 +48,13 @@ class ContactsQueryFilter extends AbstractQueryFilter
     {
         return $this->fullName($value);
     }
-        
+
     public function notes($value)
     {
         return $this->builder->where('notes', 'ilike', '%' . $value . '%');
     }
 
-    
+
     public function createdAtStart($date)
     {
         return $this->builder->where('created_at', '>=', $date);
@@ -130,7 +130,7 @@ class ContactsQueryFilter extends AbstractQueryFilter
         }
     }
 
-    
+
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
 
 

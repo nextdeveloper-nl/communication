@@ -24,7 +24,7 @@ class UserPreferencesRestoredEvent
      */
     protected $timestamp = null;
 
-    public function __construct(UserPreferences $model = null)
+    public function __construct(?UserPreferences $model = null)
     {
         $this->_model = $model;
     }

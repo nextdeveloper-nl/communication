@@ -54,7 +54,7 @@ class ThreadAssignmentsQueryFilter extends AbstractQueryFilter
     {
         return $this->communicationThread($value);
     }
-    
+
     public function assignedToUserId($value)
     {
             $assignedToUser = \NextDeveloper\IAM\Database\Models\Users::where('uuid', $value)->first();
@@ -69,7 +69,7 @@ class ThreadAssignmentsQueryFilter extends AbstractQueryFilter
     {
         return $this->assignedToUser($value);
     }
-    
+
     public function assignedByUserId($value)
     {
             $assignedByUser = \NextDeveloper\IAM\Database\Models\Users::where('uuid', $value)->first();
@@ -84,7 +84,7 @@ class ThreadAssignmentsQueryFilter extends AbstractQueryFilter
     {
         return $this->assignedByUser($value);
     }
-    
+
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
 
 

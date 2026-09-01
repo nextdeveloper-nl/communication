@@ -9,6 +9,7 @@ use NextDeveloper\Commons\Database\Models\ExternalServices;
 use NextDeveloper\Communication\Database\Models\Channels;
 use NextDeveloper\Communication\Database\Models\Messages;
 use NextDeveloper\Communication\Database\Models\Threads;
+use NextDeveloper\Communication\Exceptions\TokenRefreshedException;
 use NextDeveloper\Communication\Helpers\ChannelHelper;
 use NextDeveloper\Communication\Services\AbstractServices\AbstractMessagesService;
 use NextDeveloper\IAM\Database\Models\Users;
@@ -70,6 +71,17 @@ class MessagesService extends AbstractMessagesService
         }
 
         $message = parent::create($data);
+
+        // AbstractMessagesService::create() treats every "*_id" field as a foreign
+        // key and runs it through DatabaseHelper::uuidToId(), which returns null for
+        // any plain (non-UUID) string. external_message_id is not a relation — it's
+        // an opaque external id (Facebook mid, Chatwoot message id, ...) — so a
+        // plain string value gets silently wiped. Restore it here from the original
+        // $data, which parent::create() received by value and could not mutate.
+        if (!empty($data['external_message_id']) && $message->external_message_id !== $data['external_message_id']) {
+            $message->external_message_id = $data['external_message_id'];
+            $message->save();
+        }
 
         if ($message->communication_thread_id) {
             $thread = Threads::find($message->communication_thread_id);
@@ -243,6 +255,17 @@ class MessagesService extends AbstractMessagesService
             ]);
 
             self::markAsDelivered($message->uuid);
+        } catch (\NextDeveloper\Communication\Exceptions\TokenRefreshedException $e) {
+            // Token was refreshed and saved — re-queue so the next delivery cycle retries with the new token.
+            self::update($message->uuid, [
+                'status'     => 'queued',
+                'deliver_at' => now(),
+            ]);
+
+            Log::info('[MessagesService::deliver] Token refreshed — message re-queued', [
+                'message_id' => $message->id,
+                'channel_id' => $channel->id,
+            ]);
         } catch (\Throwable $e) {
             Log::error('[MessagesService::deliver] Delivery failed', [
                 'message_id' => $message->id,
@@ -381,6 +404,20 @@ class MessagesService extends AbstractMessagesService
      * Maps known channel types to their built-in handler classes.
      * Used as a fallback when no AvailableChannels DB record exists for the type.
      */
+
+    private static function builtInChannelClass(string $type): ?string
+    {
+        $map = [
+            'smtp'             => \NextDeveloper\Communication\Channels\Smtp::class,
+            'gmail'            => \NextDeveloper\Communication\Channels\Gmail::class,
+            'google_workspace' => \NextDeveloper\Communication\Channels\Gmail::class,
+            'mattermost'       => \NextDeveloper\Communication\Channels\Mattermost::class,
+            'sms'              => \NextDeveloper\Communication\Channels\Sms::class,
+            Channels::TYPE_FACEBOOK => \NextDeveloper\Communication\Channels\FacebookMessenger::class,
+        ];
+
+        return $map[$type] ?? null;
+    }
 
     /**
      * Resolves the delivery channel for a message using the three-level fallback.

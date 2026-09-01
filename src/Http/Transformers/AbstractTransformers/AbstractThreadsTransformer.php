@@ -59,7 +59,7 @@ class AbstractThreadsTransformer extends AbstractTransformer
                                                             $communicationBotId = \NextDeveloper\Communication\Database\Models\Bots::where('id', $model->communication_bot_id)->first();
                                                             $assignedToUserId = \NextDeveloper\IAM\Database\Models\Users::where('id', $model->assigned_to_user_id)->first();
                                                             $iamAccountId = \NextDeveloper\IAM\Database\Models\Accounts::where('id', $model->iam_account_id)->first();
-                        
+
         return $this->buildPayload(
             [
             'id'  =>  $model->uuid,

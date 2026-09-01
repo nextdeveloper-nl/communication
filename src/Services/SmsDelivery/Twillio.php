@@ -22,7 +22,7 @@ class Twillio
      * @return array Response from Twilio API
      * @throws Exception If the message fails to send
      */
-    public static function send(string $sms, string $to, string $from = null)
+    public static function send(string $sms, string $to, ?string $from = null)
     {
         $accountSid = config('communication.services.twilio.sid');
         $authToken = config('communication.services.twilio.token');

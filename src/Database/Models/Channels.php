@@ -150,7 +150,7 @@ class Channels extends Model
     {
         return $this->belongsTo(\NextDeveloper\IAM\Database\Models\Accounts::class);
     }
-    
+
     public function smtpServers() : \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(\NextDeveloper\Communication\Database\Models\SmtpServers::class);
@@ -163,7 +163,13 @@ class Channels extends Model
 
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
 
+    // One Channel row represents a connected Facebook Page; it carries both
+    // Messenger conversations and Lead Ads submissions for that Page.
+    const TYPE_FACEBOOK = 'facebook';
 
-
+    // One Channel row represents a connected Chatwoot inbox (API channel type).
+    // Chatwoot support tickets are proxied through leo4 and stored as ordinary
+    // Threads/Messages here, same as Facebook, instead of a dedicated schema.
+    const TYPE_CHATWOOT = 'chatwoot';
 
 }
