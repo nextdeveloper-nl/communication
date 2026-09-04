@@ -30,6 +30,7 @@ use NextDeveloper\Commons\Database\Traits\RunAsAdministrator;
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  * @property \Carbon\Carbon $deleted_at
+ * @property  $metadata
  */
 class ContactIdentifiers extends Model
 {
@@ -54,6 +55,7 @@ class ContactIdentifiers extends Model
             'is_suppressed',
             'suppressed_at',
             'suppressed_reason',
+            'metadata',
     ];
 
     /**
@@ -87,6 +89,7 @@ class ContactIdentifiers extends Model
     'created_at' => 'datetime',
     'updated_at' => 'datetime',
     'deleted_at' => 'datetime',
+    'metadata' => 'array',
     ];
 
     /**

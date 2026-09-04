@@ -66,6 +66,8 @@ class AbstractContactsTransformer extends AbstractTransformer
             'created_at'  =>  $model->created_at,
             'updated_at'  =>  $model->updated_at,
             'deleted_at'  =>  $model->deleted_at,
+            'object_id'  =>  $model->object_id,
+            'object_type'  =>  $model->object_type,
             ]
         );
     }

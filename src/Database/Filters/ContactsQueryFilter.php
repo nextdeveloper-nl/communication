@@ -131,6 +131,11 @@ class ContactsQueryFilter extends AbstractQueryFilter
     }
 
 
+    public function objectType($value)
+    {
+        return $this->builder->where('object_type', 'like', '%' . $value . '%');
+    }
+
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
 
 
