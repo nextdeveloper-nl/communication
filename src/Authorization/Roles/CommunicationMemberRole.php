@@ -56,8 +56,22 @@ class CommunicationMemberRole extends AbstractRole implements IAuthorizationRole
             return;
         }
 
+        //  Registry of the channel classes the deployment can send with. Rows are
+        //  normally registered without an owner, so filtering on ownership hid every
+        //  one of them and a member with read permission got an empty list. Rows that
+        //  do carry an account stay private to it. The support role already treats
+        //  this table as a system definition.
+        if ($table === 'communication_available_channels') {
+            $builder->where(function (Builder $query) {
+                $query->whereNull('iam_account_id')
+                    ->orWhere('iam_account_id', UserHelper::currentAccount()->id);
+            });
+
+            return;
+        }
+
         // Has both iam_account_id and iam_user_id
-        // (communication_available_channels, communication_notifications, communication_remindables)
+        // (communication_notifications, communication_remindables)
         $builder->where([
             'iam_account_id' => UserHelper::currentAccount()->id,
             'iam_user_id' => UserHelper::me()->id,

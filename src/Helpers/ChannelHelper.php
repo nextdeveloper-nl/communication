@@ -8,6 +8,7 @@ use NextDeveloper\Communication\Database\Models\AvailableChannels;
 use NextDeveloper\Communication\Database\Models\Channels;
 use NextDeveloper\Communication\Database\Models\Threads;
 use NextDeveloper\Communication\Services\MessagesService;
+use NextDeveloper\IAM\Database\Scopes\AuthorizationScope;
 
 class ChannelHelper
 {
@@ -28,10 +29,18 @@ class ChannelHelper
     /**
      * Returns the AvailableChannels definition matching a channel's type.
      * Used to resolve the delivery class for a channel.
+     *
+     * The authorization scope is dropped on purpose: these rows describe which class
+     * delivers a channel type, so they belong to the deployment and are registered
+     * without an owning account. Scoped, they are only ever visible when there is no
+     * authenticated user, which makes the lookup depend on whether the caller happens
+     * to be a request or a queue worker.
      */
     public static function getAvailableChannelByType(string $type): ?AvailableChannels
     {
-        $available = AvailableChannels::where('name', $type)->first();
+        $available = AvailableChannels::withoutGlobalScope(AuthorizationScope::class)
+            ->where('name', $type)
+            ->first();
 
         if (!$available) {
             Log::error(__METHOD__ . ": No AvailableChannels entry found for type '{$type}'");
@@ -81,7 +90,11 @@ class ChannelHelper
      */
     public static function getChannelClassForType(string $type): ?string
     {
-        $available = AvailableChannels::where('name', $type)->first();
+        //  Registry rows carry no owning account, so the authorization scope would hide
+        //  them from every request; see getAvailableChannelByType().
+        $available = AvailableChannels::withoutGlobalScope(AuthorizationScope::class)
+            ->where('name', $type)
+            ->first();
 
         if ($available && ($class = self::getChannelClass($available))) {
             return $class;
