@@ -27,6 +27,8 @@ use NextDeveloper\Commons\Database\Traits\RunAsAdministrator;
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  * @property \Carbon\Carbon $deleted_at
+ * @property integer $object_id
+ * @property string $object_type
  */
 class Contacts extends Model
 {
@@ -48,6 +50,8 @@ class Contacts extends Model
             'notes',
             'tags',
             'iam_account_id',
+            'object_id',
+            'object_type',
     ];
 
     /**
@@ -77,6 +81,8 @@ class Contacts extends Model
     'created_at' => 'datetime',
     'updated_at' => 'datetime',
     'deleted_at' => 'datetime',
+    'object_id' => 'integer',
+    'object_type' => 'string',
     ];
 
     /**
