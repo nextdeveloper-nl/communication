@@ -111,7 +111,7 @@ class Gmail implements ChannelAbstract
                 $newToken = $this->client->fetchAccessTokenWithRefreshToken($credentials['refresh_token']);
 
                 if (isset($newToken['error'])) {
-                    throw new Exception('Token refresh failed: ' . ($newToken['error_description'] ?? $newToken['error']));
+                    throw new Exception('Token refresh failed: ' . self::describeTokenError($newToken));
                 }
 
                 // Preserve refresh_token (Google omits it from refresh responses)
@@ -176,6 +176,45 @@ class Gmail implements ChannelAbstract
         $this->service->users_messages->send('me', $gmailMessage);
     }
 
+    /**
+     * Turns Google's token-endpoint error into something actionable.
+     *
+     * Google puts the machine-readable cause in `error` (invalid_grant,
+     * unauthorized_client, …) and a bare HTTP reason phrase in
+     * `error_description` — literally "Bad Request" or "Unauthorized". Reporting
+     * the description alone, as this used to, threw away the only part that says
+     * what is actually wrong.
+     *
+     * @param  array<string, mixed>  $response
+     */
+    private static function describeTokenError(array $response): string
+    {
+        $code = (string) ($response['error'] ?? 'unknown_error');
+        $description = trim((string) ($response['error_description'] ?? ''));
+
+        $hint = match ($code) {
+            'invalid_grant' => 'the refresh token is no longer valid: revoked, expired, the account '
+                .'password changed, or it was issued by a different OAuth client. '
+                .'Reconnect the account to mint a new one.',
+            'unauthorized_client' => 'the refresh token was issued to a different OAuth client than the one '
+                .'configured now (services.google.client_id). Reconnect the account, or restore the '
+                .'client credentials that issued it.',
+            'invalid_client' => 'the configured client_id / client_secret are wrong or belong to a deleted '
+                .'OAuth client. Check services.google.',
+            'invalid_scope' => 'the granted scopes no longer cover Gmail sending. Reconnect the account and '
+                .'accept the mail scopes.',
+            'invalid_request' => 'the refresh request was malformed — usually a missing or truncated refresh token.',
+            default => null,
+        };
+
+        // The description only earns its place when it is not the HTTP reason phrase.
+        $isReasonPhrase = in_array($description, ['Bad Request', 'Unauthorized', 'Forbidden', ''], true);
+
+        return $code
+            .($isReasonPhrase ? '' : ' ('.$description.')')
+            .($hint ? ' — '.$hint : '');
+    }
+
     private function refreshAndPersistToken(): void
     {
         $credentials = $this->channel->credentials ?? [];
@@ -186,7 +225,7 @@ class Gmail implements ChannelAbstract
         $newToken = $this->client->fetchAccessTokenWithRefreshToken($credentials['refresh_token']);
 
         if (isset($newToken['error'])) {
-            throw new Exception('Token refresh failed: ' . ($newToken['error_description'] ?? $newToken['error']));
+            throw new Exception('Token refresh failed: ' . self::describeTokenError($newToken));
         }
 
         $updatedCredentials = array_merge($credentials, $newToken);
