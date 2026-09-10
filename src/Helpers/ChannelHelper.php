@@ -75,7 +75,6 @@ class ChannelHelper
         'mailgun'          => \NextDeveloper\Communication\Channels\Mailgun::class,
         'gmail'            => \NextDeveloper\Communication\Channels\Gmail::class,
         'google_workspace' => \NextDeveloper\Communication\Channels\Gmail::class,
-        'email'            => \NextDeveloper\Communication\Channels\Smtp::class,
         'mattermost'       => \NextDeveloper\Communication\Channels\Mattermost::class,
         'sms'              => \NextDeveloper\Communication\Channels\Sms::class,
     ];
@@ -101,6 +100,50 @@ class ChannelHelper
         }
 
         return self::BUILT_IN_CLASSES[$type] ?? null;
+    }
+
+    /**
+     * Resolves the delivery handler for a specific channel.
+     *
+     * Prefer this over getChannelClassForType(): `email` is a generic bucket
+     * rather than a transport. The Google connect flow stores Workspace
+     * channels under it (OAuth tokens, no SMTP host), and hand-configured SMTP
+     * servers use it too, so the type alone cannot say what sends the message —
+     * picking wrongly throws "Missing required SMTP configuration fields" on a
+     * perfectly good Gmail channel. What the channel actually stores decides.
+     */
+    public static function getChannelClassForChannel(Channels $channel): ?string
+    {
+        $type = (string) $channel->type;
+
+        if ($type !== 'email') {
+            return self::getChannelClassForType($type);
+        }
+
+        $configuration = self::decodeJsonColumn($channel->configuration);
+        $credentials = self::decodeJsonColumn($channel->credentials);
+
+        return match (true) {
+            ! empty($credentials['access_token']) => \NextDeveloper\Communication\Channels\Gmail::class,
+            ! empty($configuration['domain']) && ! empty($credentials['api_key']) => \NextDeveloper\Communication\Channels\Mailgun::class,
+            ! empty($configuration['host']) => \NextDeveloper\Communication\Channels\Smtp::class,
+            default => null,
+        };
+    }
+
+    /**
+     * Channel JSON columns come back as arrays, but rows written as text can
+     * still arrive double-encoded.
+     *
+     * @return array<string, mixed>
+     */
+    private static function decodeJsonColumn(mixed $value): array
+    {
+        if (is_string($value)) {
+            return json_decode($value, true) ?? [];
+        }
+
+        return (array) ($value ?? []);
     }
 
     /**
