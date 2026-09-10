@@ -214,7 +214,7 @@ class MessagesService extends AbstractMessagesService
         }
 
         // Resolve handler class: prefer AvailableChannels DB record, fall back to built-in map.
-        $class = ChannelHelper::getChannelClassForType($channel->type);
+        $class = ChannelHelper::getChannelClassForChannel($channel);
 
         if (!$class) {
             self::markAsFailed($message->uuid, 'Channel handler class not found for type: ' . $channel->type);
