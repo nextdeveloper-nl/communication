@@ -130,7 +130,9 @@ class Communicate
             'communication_channel_id' => $channel->id,
             'crm_campaign_id'          => null,
             'direction'                => 1, // outbound
-            'content_type'             => 'text/html',
+            // communication_messages_content_type_check only allows
+            // text/html/image/file/audio/video — not MIME types.
+            'content_type'             => 'html',
             'body'                     => $body,
             'status'                   => 'queued',
             'sent_by_user_id'          => $this->user->id,

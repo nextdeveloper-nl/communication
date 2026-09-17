@@ -137,7 +137,9 @@ class MessagesService extends AbstractMessagesService
         $message = self::create([
             'communication_channel_id' => $channel->id,
             'direction'                => 1,
-            'content_type'             => 'text/html',
+            // communication_messages_content_type_check only allows
+            // text/html/image/file/audio/video — not MIME types.
+            'content_type'             => 'html',
             'body'                     => $data['body'],
             'recipient'                => $data['recipient'],
             'status'                   => 'queued',
