@@ -14,9 +14,9 @@ class NotificationsUpdateRequest extends AbstractFormRequest
     {
         return [
             'severity' => 'string',
-        'object_id' => 'nullable',
-        'object_type' => 'nullable|string',
-        'data' => 'nullable|string',
+        'object_id' => 'nullable|uuid|required_with:object_type',
+        'object_type' => 'nullable|string|required_with:object_id',
+        'data' => 'nullable',
         'read_at' => 'nullable|date',
         ];
     }

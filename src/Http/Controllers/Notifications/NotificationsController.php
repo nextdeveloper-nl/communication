@@ -157,6 +157,22 @@ class NotificationsController extends AbstractController
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
 
     /**
+     * The number of unread notifications of the current user, for the inbox badge.
+     *
+     * @return mixed
+     */
+    public function unreadCount()
+    {
+        return $this->withArray(
+            [
+                'data' => [
+                    'unread' => NotificationsService::unreadCount(),
+                ],
+            ]
+        );
+    }
+
+    /**
      * Marks all unread notifications of the current user as read.
      *
      * @return mixed

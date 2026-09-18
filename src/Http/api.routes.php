@@ -258,6 +258,8 @@ Route::prefix('communication')->group(
             function () {
                 Route::get('/', 'Notifications\NotificationsController@index');
                 Route::get('/actions', 'Notifications\NotificationsController@getActions');
+                //  Above the wildcard GETs, otherwise it is treated as a uuid
+                Route::get('/unread-count', 'Notifications\NotificationsController@unreadCount');
 
                 Route::get('{communication_notifications}/tags ', 'Notifications\NotificationsController@tags');
                 Route::post('{communication_notifications}/tags ', 'Notifications\NotificationsController@saveTags');

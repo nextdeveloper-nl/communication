@@ -13,10 +13,11 @@ class NotificationsCreateRequest extends AbstractFormRequest
     public function rules()
     {
         return [
-            'severity' => 'string',
-        'object_id' => 'required',
+            'severity' => 'string|in:info,warning,error',
+        'object_id' => 'required|uuid',
         'object_type' => 'required|string',
-        'data' => 'required|string',
+        'data' => 'required',
+        'iam_user_id' => 'nullable|uuid',
         'read_at' => 'nullable|date',
         ];
     }
