@@ -2,8 +2,8 @@
 
 namespace NextDeveloper\Communication\Http\Transformers;
 
-use Illuminate\Support\Facades\Cache;
 use NextDeveloper\Commons\Common\Cache\CacheHelper;
+use NextDeveloper\Commons\Helpers\ObjectHelper;
 use NextDeveloper\Communication\Database\Models\Notifications;
 use NextDeveloper\Commons\Http\Transformers\AbstractTransformer;
 use NextDeveloper\Communication\Http\Transformers\AbstractTransformers\AbstractNotificationsTransformer;
@@ -23,21 +23,17 @@ class NotificationsTransformer extends AbstractNotificationsTransformer
      */
     public function transform(Notifications $model)
     {
-        $transformed = Cache::get(
-            CacheHelper::getKey('Notifications', $model->uuid, 'Transformed')
+        return CacheHelper::rememberTransformed(
+            'Notifications',
+            $model->uuid,
+            function () use ($model) {
+                $transformed = parent::transform($model);
+
+                //  The record the notification is about, by its uuid rather than the internal id.
+                $transformed['object_id'] = ObjectHelper::getObjectUuid($model->object_type, $model->object_id);
+
+                return $transformed;
+            }
         );
-
-        if($transformed) {
-            return $transformed;
-        }
-
-        $transformed = parent::transform($model);
-
-        Cache::set(
-            CacheHelper::getKey('Notifications', $model->uuid, 'Transformed'),
-            $transformed
-        );
-
-        return $transformed;
     }
 }

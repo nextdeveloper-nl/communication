@@ -3,12 +3,19 @@
 namespace NextDeveloper\Communication\Services;
 
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 use InvalidArgumentException;
 use NextDeveloper\Commons\Common\Cache\CacheHelper;
+use NextDeveloper\Commons\Common\Enums\GenericErrorCodes;
 use NextDeveloper\Commons\Database\GlobalScopes\LimitScope;
+use NextDeveloper\Commons\Helpers\ObjectHelper;
 use NextDeveloper\Communication\Database\Models\Notifications;
 use NextDeveloper\Communication\Services\AbstractServices\AbstractNotificationsService;
+use NextDeveloper\IAM\Database\Models\Users;
+use NextDeveloper\IAM\Database\Scopes\AuthorizationScope;
+use NextDeveloper\IAM\Helpers\UserHelper;
 
 /**
  * This class is responsible from managing the data for Notifications
@@ -33,7 +40,83 @@ class NotificationsService extends AbstractNotificationsService
             );
         }
 
-        return parent::create($data);
+        return parent::create(self::normalize($data));
+    }
+
+    public static function update($id, array $data)
+    {
+        return parent::update($id, self::normalize($data));
+    }
+
+    /**
+     * Unread notifications of the caller, whatever their role may otherwise see.
+     */
+    public static function unreadCount(): int
+    {
+        return Notifications::withoutGlobalScope(LimitScope::class)
+            ->where('iam_user_id', UserHelper::me()->id)
+            ->whereNull('read_at')
+            ->count();
+    }
+
+    /**
+     * Turns the API's form into the columns: the record the notification is about arrives as
+     * object_type (the model class, or its public Vendor\Package\Model form) and uuid and is
+     * stored as class and internal id; the recipient arrives as a user uuid; data may be sent as
+     * a JSON object and is stored as its text.
+     *
+     * Integer ids from internal callers are stored as given.
+     *
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    private static function normalize(array $data): array
+    {
+        if (array_key_exists('data', $data) && is_array($data['data'])) {
+            $data['data'] = json_encode($data['data'], JSON_UNESCAPED_UNICODE);
+        }
+
+        if (isset($data['iam_user_id']) && is_string($data['iam_user_id'])) {
+            $recipient = Users::withoutGlobalScope(AuthorizationScope::class)
+                ->where('uuid', $data['iam_user_id'])
+                ->value('id');
+
+            if (! $recipient) {
+                self::refuse('iam_user_id', 'iam_user_id must be the id of an existing user.');
+            }
+
+            $data['iam_user_id'] = $recipient;
+        }
+
+        if (isset($data['object_id']) && ! is_int($data['object_id'])) {
+            $class = ObjectHelper::getModelClass($data['object_type'] ?? null);
+
+            if (! $class) {
+                self::refuse('object_type', 'object_type must name a model, for example NextDeveloper\\Fixlean\\StationCards.');
+            }
+
+            $objectId = Str::isUuid((string) $data['object_id'])
+                ? $class::withoutGlobalScopes()->where('uuid', $data['object_id'])->value('id')
+                : null;
+
+            if (! $objectId) {
+                self::refuse('object_id', 'object_id must be the id of an existing record.');
+            }
+
+            $data['object_type'] = $class;
+            $data['object_id'] = $objectId;
+        }
+
+        return $data;
+    }
+
+    private static function refuse(string $field, string $message): never
+    {
+        throw new HttpResponseException(response()->json([
+            'message' => 'Validation failed. Please fix the values you are providing and try again.',
+            'code' => GenericErrorCodes::VALIDATION_FAILED,
+            'errors' => [$field => [$message]],
+        ], 422));
     }
 
     /**
