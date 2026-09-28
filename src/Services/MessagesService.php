@@ -186,6 +186,19 @@ class MessagesService extends AbstractMessagesService
      */
     public static function deliver(Messages $message): void
     {
+        // Callers create the message as 'queued' and then deliver it inline, while
+        // nextdeveloper:deliver-messages picks up every due 'queued' message each
+        // minute. Both could send the same message when the cron ran during the
+        // inline send. Claim the message atomically first; whoever loses the claim
+        // (or finds it already delivered) does nothing.
+        if (!self::claimForDelivery($message)) {
+            Log::info('[MessagesService::deliver] Message already claimed or no longer due — skipping', [
+                'message_id' => $message->id,
+            ]);
+
+            return;
+        }
+
         $channel = self::resolveChannel($message);
 
         if (!$channel) {
@@ -277,6 +290,36 @@ class MessagesService extends AbstractMessagesService
 
             self::markAsFailed($message->uuid, $e->getMessage());
         }
+    }
+
+    /**
+     * How long a claimed message is hidden from other delivery runs. If the process
+     * that claimed it dies mid-send, the message becomes due again after this.
+     */
+    private const DELIVERY_LEASE_MINUTES = 10;
+
+    /**
+     * Atomically claims a queued, due message for delivery by pushing its
+     * deliver_at forward by a short lease. Uses a single conditional UPDATE so it is
+     * safe across processes and containers (no cache lock, no new status value).
+     *
+     * Once claimed, getDueForDelivery() no longer returns the message and a second
+     * claim fails. Every outcome of deliver() then overwrites the lease: delivered,
+     * failed, re-queued with deliver_at = now() (token refresh) or rescheduled
+     * (Gmail daily cap).
+     */
+    private static function claimForDelivery(Messages $message): bool
+    {
+        $claimed = Messages::withoutGlobalScopes()
+            ->where('id', $message->id)
+            ->where('status', 'queued')
+            ->where(function ($query) {
+                $query->whereNull('deliver_at')
+                      ->orWhere('deliver_at', '<=', now());
+            })
+            ->update(['deliver_at' => now()->addMinutes(self::DELIVERY_LEASE_MINUTES)]);
+
+        return $claimed === 1;
     }
 
     /**
