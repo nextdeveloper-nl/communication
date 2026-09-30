@@ -6,6 +6,7 @@ use Illuminate\Console\Scheduling\Schedule;
 use NextDeveloper\Commons\AbstractServiceProvider;
 use NextDeveloper\Communication\Jobs\DeliverAllEmails;
 use NextDeveloper\Communication\Console\Commands\DeliverMessagesCommand;
+use NextDeveloper\Communication\Console\Commands\DispatchDueRemindersCommand;
 use NextDeveloper\Communication\Console\Commands\EmailsDeliveryCommand;
 use NextDeveloper\Communication\Console\Commands\FetchMailgunEventCommand;
 /**
@@ -117,6 +118,7 @@ class CommunicationServiceProvider extends AbstractServiceProvider
             $this->commands(
                 [
                     DeliverMessagesCommand::class,
+                    DispatchDueRemindersCommand::class,
                     EmailsDeliveryCommand::class,
                     FetchMailgunEventCommand::class,
                 ]
@@ -157,6 +159,12 @@ class CommunicationServiceProvider extends AbstractServiceProvider
 
             $schedule->command('nextdeveloper:fetch-mailgun-events')
                 ->daily();
+
+            // Send due reminders (communication_remindables). withoutOverlapping: a slow run
+            // must not start a second one; the per-reminder claim guards against doubles anyway.
+            $schedule->command('communication:dispatch-due-reminders')
+                ->everyMinute()
+                ->withoutOverlapping();
         });
     }
 }

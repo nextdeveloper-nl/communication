@@ -33,11 +33,29 @@ class RemindablesTransformer extends AbstractRemindablesTransformer
 
         $transformed = parent::transform($model);
 
+        // object_id is stored as the record's internal integer id; the API exposes ids as
+        // uuids, so swap it for the record's uuid (null if the record no longer exists).
+        $transformed['object_id'] = $this->objectUuid($model);
+
         Cache::set(
             CacheHelper::getKey('Remindables', $model->uuid, 'Transformed'),
             $transformed
         );
 
         return $transformed;
+    }
+
+    /**
+     * Resolves the uuid of the record the reminder is about.
+     */
+    private function objectUuid(Remindables $model): ?string
+    {
+        $class = $model->object_type ? '\\'.ltrim($model->object_type, '\\') : null;
+
+        if (! $class || ! class_exists($class) || ! $model->object_id) {
+            return null;
+        }
+
+        return $class::withoutGlobalScopes()->where('id', $model->object_id)->value('uuid');
     }
 }
