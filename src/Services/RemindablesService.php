@@ -6,11 +6,13 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use NextDeveloper\Commons\Common\Cache\CacheHelper;
 use NextDeveloper\Commons\Common\Enums\GenericErrorCodes;
 use NextDeveloper\Commons\Helpers\ObjectHelper;
 use NextDeveloper\Communication\Database\Models\Remindables;
+use NextDeveloper\Events\Services\Events;
 use NextDeveloper\Communication\Services\AbstractServices\AbstractRemindablesService;
 
 /**
@@ -124,7 +126,8 @@ class RemindablesService extends AbstractRemindablesService
      * is never sent twice even if two dispatcher runs overlap.
      *
      * A query-builder update fires no model events, so the cached transformer payload
-     * is evicted by hand.
+     * is evicted by hand and the updated event is fired by hand, so NATS clients (the
+     * panel's reminder widget) see the reminder turn to is_reminded = true.
      */
     public static function claimForSending(Remindables $remindable): bool
     {
@@ -135,6 +138,10 @@ class RemindablesService extends AbstractRemindablesService
             ->update(['is_reminded' => true, 'updated_at' => now()]);
 
         Cache::forget(CacheHelper::getKey('Remindables', $remindable->uuid, 'Transformed'));
+
+        if ($claimed === 1) {
+            self::fireUpdated($remindable->id);
+        }
 
         return $claimed === 1;
     }
@@ -152,6 +159,27 @@ class RemindablesService extends AbstractRemindablesService
 
         if ($uuid) {
             Cache::forget(CacheHelper::getKey('Remindables', $uuid, 'Transformed'));
+            self::fireUpdated($remindableId);
+        }
+    }
+
+    /**
+     * Fires the updated event for a reminder changed by a query-builder update, which
+     * does not go through the observer. Never lets an event failure break sending.
+     */
+    private static function fireUpdated(int $remindableId): void
+    {
+        try {
+            $model = Remindables::withoutGlobalScopes()->where('id', $remindableId)->first();
+
+            if ($model) {
+                Events::fire('updated:NextDeveloper\\Communication\\Remindables', $model);
+            }
+        } catch (\Throwable $e) {
+            Log::warning('[RemindablesService] Could not fire the updated event', [
+                'remindable_id' => $remindableId,
+                'error'         => $e->getMessage(),
+            ]);
         }
     }
 
