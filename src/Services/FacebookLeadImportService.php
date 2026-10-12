@@ -8,6 +8,8 @@ use NextDeveloper\Communication\Database\Models\Channels;
 use NextDeveloper\CRM\Database\Models\Importers;
 use NextDeveloper\CRM\Jobs\Importers\ImportLeadJob;
 use NextDeveloper\CRM\Services\ImportersService;
+use NextDeveloper\IAM\Database\Models\Accounts as IamAccounts;
+use NextDeveloper\IAM\Database\Models\Users as IamUsers;
 
 /**
  * Facebook Lead Ads adapter for the generic CRM lead importer.
@@ -31,12 +33,73 @@ class FacebookLeadImportService
      */
     public static function importerForChannel(Channels $channel): ?Importers
     {
-        return Importers::withoutGlobalScopes()
+        $importer = Importers::withoutGlobalScopes()
             ->where('source_type', self::SOURCE_TYPE)
             ->where('status', 'active')
             ->where('object_type', Channels::class)
             ->where('object_id', $channel->id)
             ->first();
+
+        // No hand-made importer: fall back to a code-defined one for this Page (config crm.static_importers)
+        return $importer ?? self::ensureStaticImporter($channel);
+    }
+
+    /**
+     * Creates (once) the crm_importers row for a code-defined importer that matches this channel's Page.
+     * The row belongs to the channel's account and that account's owner, so the import runs as the customer.
+     * Later edits of the row (status, config) win over the code definition.
+     */
+    public static function ensureStaticImporter(Channels $channel): ?Importers
+    {
+        $pageId = data_get($channel->configuration, 'page_id');
+
+        foreach (config('crm.static_importers', []) as $definition) {
+            if (($definition['source_type'] ?? null) !== self::SOURCE_TYPE || ($definition['page_id'] ?? null) !== $pageId) {
+                continue;
+            }
+
+            // Paused/disabled copies of the row count as "exists": they are not recreated
+            $existing = Importers::withoutGlobalScopes()
+                ->where('object_type', Channels::class)
+                ->where('object_id', $channel->id)
+                ->where('name', $definition['name'])
+                ->first();
+
+            if ($existing) {
+                return $existing->status === 'active' ? $existing : null;
+            }
+
+            $account = IamAccounts::withoutGlobalScopes()->find($channel->iam_account_id);
+
+            if (!$account) {
+                return null;
+            }
+
+            return ImportersService::create([
+                'name'           => $definition['name'],
+                'source_type'    => self::SOURCE_TYPE,
+                'status'         => 'active',
+                'config'         => $definition['config'] ?? [],
+                'object_type'    => Channels::class,
+                'object_id'      => $channel->id,
+                'iam_account_id' => $account->uuid,
+                'iam_user_id'    => IamUsers::withoutGlobalScopes()->find($account->iam_user_id)?->uuid,
+            ]);
+        }
+
+        return null;
+    }
+
+    /**
+     * Makes sure every code-defined importer has its row, for already connected Pages (used by the sync command).
+     */
+    public static function ensureStaticImporters(): void
+    {
+        Channels::withoutGlobalScopes()
+            ->where('type', Channels::TYPE_FACEBOOK)
+            ->where('is_active', true)
+            ->get()
+            ->each(fn (Channels $channel) => self::ensureStaticImporter($channel));
     }
 
     /**

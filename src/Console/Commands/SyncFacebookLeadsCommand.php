@@ -18,6 +18,9 @@ class SyncFacebookLeadsCommand extends Command
 
     public function handle(): int
     {
+        // Code-defined importers get their rows before we look for importers to sync
+        FacebookLeadImportService::ensureStaticImporters();
+
         $importers = Importers::withoutGlobalScopes()
             ->where('source_type', FacebookLeadImportService::SOURCE_TYPE)
             ->where('status', 'active')
