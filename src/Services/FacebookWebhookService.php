@@ -146,6 +146,10 @@ class FacebookWebhookService
                         'field_data' => $fieldData,
                     ],
                 ]);
+
+                // Hand the lead to the generic CRM lead importer (account, user, opportunity, flow item).
+                // Only does something when the page has an active, mapped importer.
+                FacebookLeadImportService::dispatchFromWebhook($channel, $formId, $fieldData);
             });
         }
     }

@@ -9,6 +9,7 @@ use NextDeveloper\Communication\Console\Commands\DeliverMessagesCommand;
 use NextDeveloper\Communication\Console\Commands\DispatchDueRemindersCommand;
 use NextDeveloper\Communication\Console\Commands\EmailsDeliveryCommand;
 use NextDeveloper\Communication\Console\Commands\FetchMailgunEventCommand;
+use NextDeveloper\Communication\Console\Commands\SyncFacebookLeadsCommand;
 /**
  * Class CommunicationServiceProvider
  *
@@ -121,6 +122,7 @@ class CommunicationServiceProvider extends AbstractServiceProvider
                     DispatchDueRemindersCommand::class,
                     EmailsDeliveryCommand::class,
                     FetchMailgunEventCommand::class,
+                    SyncFacebookLeadsCommand::class,
                 ]
             );
         }
