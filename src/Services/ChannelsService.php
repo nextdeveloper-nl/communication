@@ -156,8 +156,9 @@ class ChannelsService extends AbstractChannelsService
      */
     public static function connectFacebookPage(array $data): Channels
     {
-        $pageId = $data['page_id'];
-        $accessToken = $data['page_access_token'];
+        // Trim: tokens pasted from a terminal or JSON often carry a trailing space or newline that Meta rejects
+        $pageId = trim($data['page_id']);
+        $accessToken = trim($data['page_access_token']);
 
         $pageInfo = self::verifyFacebookPageToken($pageId, $accessToken);
 
@@ -216,9 +217,19 @@ class ChannelsService extends AbstractChannelsService
         );
 
         if (!$response->successful() || $response->json('id') != $pageId) {
+            // Meta's own error (code and message) is what tells the user why; surface it and log it
+            $metaError = $response->json('error.message') ?? ('returned id ' . var_export($response->json('id'), true));
+
+            Log::warning('[ChannelsService::verifyFacebookPageToken] Page token check failed', [
+                'page_id' => $pageId,
+                'status'  => $response->status(),
+                'body'    => $response->body(),
+            ]);
+
             throw new NotAllowedException(
                 'Could not verify this Page Access Token against Page ' . $pageId
                 . '. Make sure the token was generated for this exact Page and has not expired.'
+                . ' Meta said (HTTP ' . $response->status() . '): ' . $metaError
             );
         }
 
