@@ -57,6 +57,8 @@ return [
             // Arbitrary shared secret we choose; Meta echoes it back during the webhook
             // subscription handshake so we can confirm the callback URL is ours.
             'verify_token'  =>  env('FACEBOOK_WEBHOOK_VERIFY_TOKEN'),
+            // Page webhook fields to subscribe on connect. 'messages' (Messenger) needs the pages_messaging permission.
+            'subscribed_fields' => env('FACEBOOK_SUBSCRIBED_FIELDS', 'leadgen'),
         ],
     ],
 ];

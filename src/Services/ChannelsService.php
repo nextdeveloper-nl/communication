@@ -246,7 +246,9 @@ class ChannelsService extends AbstractChannelsService
         $response = Http::post(
             sprintf('https://graph.facebook.com/v19.0/%s/subscribed_apps', $pageId),
             [
-                'subscribed_fields' => 'messages,leadgen',
+                // Only leadgen by default: subscribing to 'messages' needs the pages_messaging permission, which Meta
+                // refuses (#200) for apps without it. Add messages via config communication.services.facebook.subscribed_fields.
+                'subscribed_fields' => config('communication.services.facebook.subscribed_fields', 'leadgen'),
                 'access_token'      => $accessToken,
             ]
         );
