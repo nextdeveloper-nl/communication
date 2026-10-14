@@ -10,6 +10,7 @@ use NextDeveloper\CRM\Jobs\Importers\ImportLeadJob;
 use NextDeveloper\CRM\Services\ImportersService;
 use NextDeveloper\IAM\Database\Models\Accounts as IamAccounts;
 use NextDeveloper\IAM\Database\Models\Users as IamUsers;
+use NextDeveloper\IAM\Helpers\UserHelper;
 
 /**
  * Facebook Lead Ads adapter for the generic CRM lead importer.
@@ -75,7 +76,9 @@ class FacebookLeadImportService
                 return null;
             }
 
-            return ImportersService::create([
+            // The sync command runs without a user, and the importers observer denies saves then. This is a system
+            // created row for the channel's own account, so the role check is bypassed for this one create.
+            return UserHelper::withRolesCheckBypassed(fn () => ImportersService::create([
                 'name'           => $definition['name'],
                 'source_type'    => self::SOURCE_TYPE,
                 'status'         => 'active',
@@ -84,7 +87,7 @@ class FacebookLeadImportService
                 'object_id'      => $channel->id,
                 'iam_account_id' => $account->uuid,
                 'iam_user_id'    => IamUsers::withoutGlobalScopes()->find($account->iam_user_id)?->uuid,
-            ]);
+            ]));
         }
 
         return null;
