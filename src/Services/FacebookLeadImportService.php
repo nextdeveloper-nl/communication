@@ -76,9 +76,7 @@ class FacebookLeadImportService
                 return null;
             }
 
-            // The sync command runs without a user, and the importers observer denies saves then. This is a system
-            // created row for the channel's own account, so the role check is bypassed for this one create.
-            return UserHelper::withRolesCheckBypassed(fn () => ImportersService::create([
+            $create = fn () => ImportersService::create([
                 'name'           => $definition['name'],
                 'source_type'    => self::SOURCE_TYPE,
                 'status'         => 'active',
@@ -87,7 +85,15 @@ class FacebookLeadImportService
                 'object_id'      => $channel->id,
                 'iam_account_id' => $account->uuid,
                 'iam_user_id'    => IamUsers::withoutGlobalScopes()->find($account->iam_user_id)?->uuid,
-            ]));
+            ]);
+
+            // The service resolves the account/user uuids through the authorization scope and the importers observer checks
+            // the role, and the sync command (cron) has no user, so both come back empty there. Without a user: run as
+            // admin. With one (the webhook already runs as admin): only bypass the role check, never nest runAsAdmin,
+            // because that overwrites the saved identity it restores afterwards.
+            return UserHelper::me()
+                ? UserHelper::withRolesCheckBypassed($create)
+                : UserHelper::runAsAdmin($create);
         }
 
         return null;
