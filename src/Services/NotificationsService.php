@@ -132,8 +132,9 @@ class NotificationsService extends AbstractNotificationsService
      *
      * LimitScope is dropped because it appends a `limit` clause to any builder, including
      * this mass update, which would silently leave everything past the first page unread.
-     * AuthorizationScope is kept — it supplies the iam_account_id/iam_user_id predicates
-     * that keep this update to the caller's own rows.
+     * The caller's own rows are selected explicitly, as unreadCount() does: AuthorizationScope
+     * does not narrow to the caller for administrator roles, so a platform or communication
+     * admin marked every user's notifications read.
      *
      * NotificationsTransformer caches each transformed notification under
      * `Notifications:{uuid}:Transformed` with no TTL, and CleanCache only evicts it from
@@ -144,6 +145,7 @@ class NotificationsService extends AbstractNotificationsService
     public static function markAllAsRead(): int
     {
         $unread = Notifications::withoutGlobalScope(LimitScope::class)
+            ->where('iam_user_id', UserHelper::me()->id)
             ->whereNull('read_at')
             ->pluck('uuid', 'id');
 
