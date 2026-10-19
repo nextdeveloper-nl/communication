@@ -137,7 +137,7 @@ class FacebookLeadImportService
         $token = $channel ? data_get($channel->credentials, 'page_access_token') : null;
 
         if (!$channel || !$token) {
-            ImportersService::update($importer->uuid, ['last_error' => 'Channel or page access token missing.']);
+            self::updateImporter($importer, ['last_error' => 'Channel or page access token missing.']);
             return 0;
         }
 
@@ -163,7 +163,7 @@ class FacebookLeadImportService
                         'form_id'     => $formId,
                         'status'      => $response->status(),
                     ]);
-                    ImportersService::update($importer->uuid, ['last_error' => 'Graph API ' . $response->status() . ' on form ' . $formId]);
+                    self::updateImporter($importer, ['last_error' => 'Graph API ' . $response->status() . ' on form ' . $formId]);
                     // Do not move the cursor past a form we could not read
                     return $queued;
                 }
@@ -188,13 +188,25 @@ class FacebookLeadImportService
             }
         }
 
-        ImportersService::update($importer->uuid, [
+        self::updateImporter($importer, [
             'cursor'         => (string) $highWatermark,
             'last_synced_at' => now(),
             'last_error'     => null,
         ]);
 
         return $queued;
+    }
+
+    /**
+     * Updates an importer row from a context that may have no user (sync command / cron).
+     * ImportersService::update() looks the row up through AuthorizationScope, which hides it when nobody is logged in
+     * ("We cannot find the related object to update"), so without a user the update runs as admin.
+     */
+    private static function updateImporter(Importers $importer, array $data)
+    {
+        $update = fn () => ImportersService::update($importer->uuid, $data);
+
+        return UserHelper::me() ? $update() : UserHelper::runAsAdmin($update);
     }
 
     /**
