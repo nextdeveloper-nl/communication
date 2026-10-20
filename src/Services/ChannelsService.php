@@ -92,28 +92,22 @@ class ChannelsService extends AbstractChannelsService
                 }
             }
 
-            // The takeover marker is security state kept by the service only (see releaseStaleChannels):
-            //  - a generic update can neither set, change nor remove it (it is carried over as it was), otherwise an owner
-            //    could keep wiping it to restart the grace period for ever;
-            //  - new credentials void it, because it was set for the old, revoked token; a later revocation of the new
-            //    token must start a fresh grace period instead of inheriting an expired one.
-            if ($channel && in_array($type, self::WEBHOOK_ROUTED_TYPES, true)) {
+            // The takeover marker is security state kept by the service only (see releaseStaleChannels). A generic update
+            // can neither set, change nor remove it, whatever else it changes (credentials included: any value would
+            // do, so accepting "new credentials" as a reason to clear it would let an owner wipe it with junk and restart
+            // the grace period for ever). It is carried over as it was. It is cleared only by flows that verified a
+            // working token against Meta: the Facebook reconnect, or a claimant's attempt that finds the channel live.
+            if ($channel && in_array($type, self::WEBHOOK_ROUTED_TYPES, true) && array_key_exists('configuration', $data)) {
+                $configuration = is_string($data['configuration']) ? (json_decode($data['configuration'], true) ?? []) : (array) $data['configuration'];
                 $marker = data_get($channel->configuration, self::TAKEOVER_MARKER);
-                $credentialsChanged = array_key_exists('credentials', $data);
 
-                if (array_key_exists('configuration', $data) || ($marker && $credentialsChanged)) {
-                    $configuration = array_key_exists('configuration', $data)
-                        ? (is_string($data['configuration']) ? (json_decode($data['configuration'], true) ?? []) : (array) $data['configuration'])
-                        : (array) $channel->configuration;
+                unset($configuration[self::TAKEOVER_MARKER]);
 
-                    unset($configuration[self::TAKEOVER_MARKER]);
-
-                    if ($marker && !$credentialsChanged) {
-                        $configuration[self::TAKEOVER_MARKER] = $marker;
-                    }
-
-                    $data['configuration'] = $configuration;
+                if ($marker) {
+                    $configuration[self::TAKEOVER_MARKER] = $marker;
                 }
+
+                $data['configuration'] = $configuration;
             }
         }
 
