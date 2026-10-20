@@ -359,20 +359,56 @@ class FacebookLeadImportService
     }
 
     /**
+     * Field keys (after normalizeFieldKey) accepted for each contact attribute. Facebook sends standard fields as
+     * email/full_name/phone_number, but forms in other languages or with custom questions arrive under their label
+     * (e.g. Turkish "e-posta_adresi", "adı"), so the aliases cover those too.
+     */
+    private const FIELD_ALIASES = [
+        'email'     => ['email', 'e_mail', 'email_address', 'e_posta', 'e_posta_adresi', 'eposta', 'eposta_adresi', 'mail', 'mail_adresi'],
+        'phone'     => ['phone_number', 'phone', 'telefon', 'telefon_numarasi', 'telefon_no', 'cep_telefonu', 'cep_telefon_numarasi', 'gsm', 'mobile'],
+        'full_name' => ['full_name', 'name', 'ad_soyad', 'adi_soyadi', 'ad_soyadi', 'isim_soyisim', 'isim', 'tam_ad'],
+        'first_name' => ['first_name', 'ad', 'adi'],
+        'last_name' => ['last_name', 'soyad', 'soyadi', 'soyisim'],
+    ];
+
+    /**
+     * Lowercases, transliterates Turkish letters and turns every non-alphanumeric run into "_" so that
+     * "E-posta Adresi", "e-posta_adresi" and "E_POSTA_ADRESI" compare equal.
+     */
+    private static function normalizeFieldKey(string $key): string
+    {
+        $key = strtr($key, ['İ' => 'i', 'I' => 'i', 'ı' => 'i', 'Ş' => 's', 'ş' => 's', 'Ç' => 'c', 'ç' => 'c',
+            'Ğ' => 'g', 'ğ' => 'g', 'Ö' => 'o', 'ö' => 'o', 'Ü' => 'u', 'ü' => 'u']);
+
+        return trim(preg_replace('/[^a-z0-9]+/', '_', mb_strtolower($key)), '_');
+    }
+
+    /**
      * Facebook field_data -> normalized lead understood by LeadImporterService.
      */
     public static function normalize(array $fieldData, ?string $formId): array
     {
-        $name = $fieldData['full_name'] ?? trim(($fieldData['first_name'] ?? '') . ' ' . ($fieldData['last_name'] ?? ''));
+        $picked = [];
+        $used = [];
 
-        // Anything that is not a standard contact field is kept as the lead's extra answers
-        $standard = ['full_name', 'first_name', 'last_name', 'email', 'phone_number'];
+        // First alias hit per attribute wins; the keys that were used are not repeated in the extra answers
+        foreach (self::FIELD_ALIASES as $attribute => $aliases) {
+            foreach ($fieldData as $key => $value) {
+                if (in_array(self::normalizeFieldKey((string) $key), $aliases, true) && filled($value)) {
+                    $picked[$attribute] = is_array($value) ? implode(', ', $value) : trim((string) $value);
+                    $used[] = $key;
+                    break;
+                }
+            }
+        }
+
+        $name = $picked['full_name'] ?? trim(($picked['first_name'] ?? '') . ' ' . ($picked['last_name'] ?? ''));
 
         return [
             'name'   => $name ?: null,
-            'email'  => $fieldData['email'] ?? null,
-            'phone'  => $fieldData['phone_number'] ?? null,
-            'fields' => array_diff_key($fieldData, array_flip($standard)),
+            'email'  => $picked['email'] ?? null,
+            'phone'  => $picked['phone'] ?? null,
+            'fields' => array_diff_key($fieldData, array_flip($used)),
             'source' => self::SOURCE_TYPE,
             'form'   => $formId,
         ];
