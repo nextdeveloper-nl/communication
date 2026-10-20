@@ -224,9 +224,30 @@ class ChannelsService extends AbstractChannelsService
         // Reject a pipeline the caller cannot see before anything is created or subscribed
         FacebookLeadImportService::assertPipelineAccessible($data['flow_pipeline_id'] ?? null);
 
+        // A Page routes its inbound events to exactly one channel. Checked across all tenants (without the scope): a Page
+        // already connected by another account cannot be connected again, and the same account reconnecting only
+        // refreshes the token of its existing channel instead of creating a second one.
+        $existing = Channels::withoutGlobalScope(AuthorizationScope::class)
+            ->where('type', Channels::TYPE_FACEBOOK)
+            ->get()
+            ->filter(fn (Channels $channel) => (string) data_get($channel->configuration, 'page_id') === $pageId)
+            ->values();
+
+        if ($existing->contains(fn (Channels $channel) => (int) $channel->iam_account_id !== (int) UserHelper::currentAccount()->id)) {
+            throw new NotAllowedException('This Facebook Page is already connected to an account.');
+        }
+
         $pageInfo = self::verifyFacebookPageToken($pageId, $accessToken);
 
         self::subscribeFacebookPageToWebhook($pageId, $accessToken);
+
+        if ($ownChannel = $existing->first()) {
+            // Reconnect by the owner: new token on the existing channel (routing keys unchanged), no duplicate channel
+            return self::asVerifiedConnect(fn () => self::update($ownChannel->uuid, [
+                'credentials' => ['page_access_token' => $accessToken],
+                'is_active'   => true,
+            ]));
+        }
 
         $channel = self::asVerifiedConnect(fn () => self::create([
             'name'           => $data['name'] ?? ('Facebook: ' . ($pageInfo['name'] ?? $pageId)),

@@ -213,11 +213,25 @@ class FacebookWebhookService
             return null;
         }
 
-        return Channels::withoutGlobalScope(AuthorizationScope::class)
+        $matches = Channels::withoutGlobalScope(AuthorizationScope::class)
             ->where('type', Channels::TYPE_FACEBOOK)
             ->where('is_active', true)
             ->get()
-            ->first(fn (Channels $channel) => data_get($channel->configuration, 'page_id') === $pageId);
+            ->filter(fn (Channels $channel) => data_get($channel->configuration, 'page_id') === $pageId)
+            ->values();
+
+        // Fail closed: a Page must belong to exactly one channel. Several matches mean ambiguous ownership, and routing to
+        // either could hand one tenant's leads/messages to another.
+        if ($matches->count() > 1) {
+            Log::error('[FacebookWebhookService] Several Channels claim the same Page, event dropped', [
+                'page_id'     => $pageId,
+                'channel_ids' => $matches->pluck('id')->all(),
+            ]);
+
+            return null;
+        }
+
+        return $matches->first();
     }
 
     /**
