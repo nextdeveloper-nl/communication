@@ -124,7 +124,7 @@ class WhatsAppWebhookService
 
             ThreadsService::update($thread->uuid, ['last_message_at' => now()]);
 
-            // One CRM opportunity per message (no-op when the number has no active importer). Queued, and a failure
+            // One CRM opportunity per session, opened by the first message of it (no-op otherwise, or without an active importer). Queued, and a failure
             // there must never lose the stored message.
             try {
                 WhatsAppOpportunityService::dispatchForMessage($channel, $contact, $stored, $from, $body);

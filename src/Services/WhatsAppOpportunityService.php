@@ -17,14 +17,20 @@ use NextDeveloper\IAM\Helpers\UserHelper;
  * the Communication Channel (same shape as the Facebook one), created when the number is connected and a Flow pipeline
  * is given. Without that row (or while it is not active) messages are stored but no opportunity is created.
  *
- * One opportunity per message: dedupe_window_hours is 0 and every lead carries the message's uuid as external_id, which makes
- * its idempotency hash unique. The opportunity description starts with a markdown link to the message,
+ * One opportunity per SESSION, not per message. A session is a run of the customer's messages in a thread with no gap
+ * longer than SESSION_GAP_HOURS (24h, Meta's customer service window) between two of them; the first message of a session
+ * creates the opportunity, the following ones create nothing. Each lead carries its message's uuid as external_id (unique
+ * idempotency hash) and dedupe_window_hours is 0, because the session rule decides, not the importer's window.
+ * The opportunity description starts with a markdown link to that first message,
  *   [CommunicationMessageId:<message uuid>](Communication message)
- * so a UI widget can later turn it into a link to the conversation.
+ * so a UI widget can later turn it into a link to the conversation (the thread holds the rest of the session).
  */
 class WhatsAppOpportunityService
 {
     public const SOURCE_TYPE = 'whatsapp';
+
+    // A new session starts when the customer's previous message in the thread is older than this
+    public const SESSION_GAP_HOURS = 24;
 
     /**
      * Creates the lead importer for a freshly connected number. Needs a Flow pipeline (the importer cannot place the
@@ -55,7 +61,7 @@ class WhatsAppOpportunityService
             'tags'                 => array_values(array_filter((array) ($options['tags'] ?? []), 'is_string')) ?: null,
         ], fn ($v) => $v !== null && $v !== '');
 
-        // Every message is its own opportunity, so no duplicate window
+        // Sessions are decided by WhatsAppOpportunityService::startsNewSession(), so no duplicate window of the importer
         $config['dedupe_window_hours'] = 0;
 
         return UserHelper::withRolesCheckBypassed(fn () => ImportersService::create([
@@ -71,10 +77,32 @@ class WhatsAppOpportunityService
     }
 
     /**
-     * Queues the opportunity for one stored inbound message. No-op when the channel has no active importer.
+     * True when this message opens a session: the customer sent no earlier message in the thread, or the previous one is
+     * older than SESSION_GAP_HOURS. Only the lowest-id message of a run can come out true, so a quick burst of messages
+     * creates one opportunity.
+     */
+    private static function startsNewSession(Messages $message): bool
+    {
+        $previous = Messages::withoutGlobalScopes()
+            ->where('communication_thread_id', $message->communication_thread_id)
+            ->where('direction', Messages::DIRECTION_INBOUND)
+            ->where('id', '<', $message->id)
+            ->orderByDesc('id')
+            ->first();
+
+        return !$previous || $previous->created_at->lt($message->created_at->copy()->subHours(self::SESSION_GAP_HOURS));
+    }
+
+    /**
+     * Queues the opportunity when a stored inbound message opens a new session. No-op for the other messages of a session
+     * and when the channel has no active importer.
      */
     public static function dispatchForMessage(Channels $channel, Contacts $contact, Messages $message, string $waId, string $body): void
     {
+        if (!self::startsNewSession($message)) {
+            return;
+        }
+
         $importer = Importers::withoutGlobalScopes()
             ->where('source_type', self::SOURCE_TYPE)
             ->where('status', 'active')
