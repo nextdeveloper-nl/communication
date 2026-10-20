@@ -17,6 +17,9 @@ class FacebookConnectRequest extends AbstractFormRequest
             'flow_stage_name'      => 'nullable|string',
             'opportunity_type'     => 'nullable|string',
             'default_country_code' => 'nullable|string',
+            // Tags put on every opportunity and CRM account imported from this Page
+            'tags'                 => 'nullable|array',
+            'tags.*'               => 'string|max:100',
         ];
     }
 }

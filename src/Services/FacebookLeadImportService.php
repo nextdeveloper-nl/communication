@@ -238,6 +238,8 @@ class FacebookLeadImportService
             'flow_stage_name'      => $options['flow_stage_name'] ?? null,
             'opportunity_type'     => $options['opportunity_type'] ?? 'sales',
             'default_country_code' => $options['default_country_code'] ?? null,
+            // Tags for the imported opportunities/accounts (see LeadImporterService)
+            'tags'                 => array_values(array_filter((array) ($options['tags'] ?? []), 'is_string')) ?: null,
         ], fn ($v) => $v !== null && $v !== '');
 
         $config['dedupe_window_hours'] = 24;
