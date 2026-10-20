@@ -102,7 +102,7 @@ class WhatsAppWebhookService
                 default  => '[' . $type . ']',
             };
 
-            MessagesService::create([
+            $stored = MessagesService::create([
                 'communication_thread_id'  => $thread->id,
                 'communication_channel_id' => $channel->id,
                 'direction'                => Messages::DIRECTION_INBOUND,
@@ -123,6 +123,14 @@ class WhatsAppWebhookService
             ]);
 
             ThreadsService::update($thread->uuid, ['last_message_at' => now()]);
+
+            // One CRM opportunity per message (no-op when the number has no active importer). Queued, and a failure
+            // there must never lose the stored message.
+            try {
+                WhatsAppOpportunityService::dispatchForMessage($channel, $contact, $stored, $from, $body);
+            } catch (\Throwable $e) {
+                Log::warning('[WhatsAppWebhookService] Opportunity dispatch failed', ['channel_id' => $channel->id, 'error' => get_class($e)]);
+            }
 
             self::notifyAccountOwner($channel, $thread, $contact, $body);
         });

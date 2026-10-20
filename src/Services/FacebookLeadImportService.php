@@ -275,8 +275,8 @@ class FacebookLeadImportService
      */
     public static function pauseImportersForChannel(Channels $channel): void
     {
-        Importers::where('source_type', self::SOURCE_TYPE)
-            ->where('object_type', Channels::class)
+        // Every importer of the channel, whatever its source (a Facebook Page's lead forms, a WhatsApp number's messages)
+        Importers::where('object_type', Channels::class)
             ->where('object_id', $channel->id)
             ->get()
             ->each(fn (Importers $importer) => ImportersService::update($importer->uuid, ['status' => 'paused']));

@@ -424,6 +424,9 @@ class ChannelsService extends AbstractChannelsService
         $wabaId = trim($data['waba_id']);
         $accessToken = trim($data['access_token']);
 
+        // Reject a pipeline the caller cannot see before anything is created or subscribed
+        FacebookLeadImportService::assertPipelineAccessible($data['flow_pipeline_id'] ?? null);
+
         // Verify the token FIRST: only a caller who proves control of the number may learn whether it is already connected.
         $numberInfo = self::verifyWhatsAppNumber($phoneNumberId, $accessToken);
 
@@ -462,7 +465,7 @@ class ChannelsService extends AbstractChannelsService
             $configuration = (array) $ownChannel->configuration;
             unset($configuration[self::TAKEOVER_MARKER]);
 
-            return self::asVerifiedConnect(fn () => self::update($ownChannel->uuid, [
+            $refreshed = self::asVerifiedConnect(fn () => self::update($ownChannel->uuid, [
                 'configuration' => array_merge($configuration, [
                     'waba_id'              => $wabaId,
                     'display_phone_number' => $numberInfo['display_phone_number'] ?? null,
@@ -471,9 +474,11 @@ class ChannelsService extends AbstractChannelsService
                 'credentials'   => ['access_token' => $accessToken],
                 'is_active'     => true,
             ]));
+
+            return self::createWhatsAppImporter($refreshed, $data);
         }
 
-        return self::asVerifiedConnect(fn () => self::create([
+        $channel = self::asVerifiedConnect(fn () => self::create([
             'name'           => $data['name'] ?? ('WhatsApp: ' . ($numberInfo['display_phone_number'] ?? $phoneNumberId)),
             'type'           => Channels::TYPE_WHATSAPP,
             'configuration'  => [
@@ -486,6 +491,28 @@ class ChannelsService extends AbstractChannelsService
             'is_active'      => true,
             'iam_account_id' => UserHelper::currentAccount()->id,
         ]));
+
+        return self::createWhatsAppImporter($channel, $data);
+    }
+
+    /**
+     * Creates the importer that turns this number's inbound messages into CRM opportunities (needs flow_pipeline_id in
+     * the connect request, otherwise there is none). A failure here must not undo the connection (receiving messages
+     * still works); it is logged and the importer can be created later.
+     */
+    private static function createWhatsAppImporter(Channels $channel, array $data): Channels
+    {
+        try {
+            WhatsAppOpportunityService::createImporterForChannel($channel, $data);
+        } catch (Exception $e) {
+            Log::error('[ChannelsService::connectWhatsAppNumber] Importer creation failed', [
+                'channel_id' => $channel->id,
+                // Class only: HTTP exception messages can contain the request URL with the access token
+                'error'      => get_class($e),
+            ]);
+        }
+
+        return $channel;
     }
 
     /**
