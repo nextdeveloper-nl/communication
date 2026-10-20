@@ -224,6 +224,10 @@ class ChannelsService extends AbstractChannelsService
         // Reject a pipeline the caller cannot see before anything is created or subscribed
         FacebookLeadImportService::assertPipelineAccessible($data['flow_pipeline_id'] ?? null);
 
+        // Verify the token FIRST: only a caller who proves control of the Page may learn whether it is already connected
+        // (otherwise the "already connected" answer would let anyone probe which Pages other tenants use).
+        $pageInfo = self::verifyFacebookPageToken($pageId, $accessToken);
+
         // A Page routes its inbound events to exactly one channel. Checked across all tenants (without the scope): a Page
         // already connected by another account cannot be connected again, and the same account reconnecting only
         // refreshes the token of its existing channel instead of creating a second one.
@@ -236,8 +240,6 @@ class ChannelsService extends AbstractChannelsService
         if ($existing->contains(fn (Channels $channel) => (int) $channel->iam_account_id !== (int) UserHelper::currentAccount()->id)) {
             throw new NotAllowedException('This Facebook Page is already connected to an account.');
         }
-
-        $pageInfo = self::verifyFacebookPageToken($pageId, $accessToken);
 
         self::subscribeFacebookPageToWebhook($pageId, $accessToken);
 
@@ -382,6 +384,9 @@ class ChannelsService extends AbstractChannelsService
         $wabaId = trim($data['waba_id']);
         $accessToken = trim($data['access_token']);
 
+        // Verify the token FIRST: only a caller who proves control of the number may learn whether it is already connected.
+        $numberInfo = self::verifyWhatsAppNumber($phoneNumberId, $accessToken);
+
         // A number can be connected once; checked across all tenants (without the scope) so nobody can take over
         // inbound routing of a number that another account already connected.
         $taken = Channels::withoutGlobalScope(AuthorizationScope::class)
@@ -392,8 +397,6 @@ class ChannelsService extends AbstractChannelsService
         if ($taken) {
             throw new NotAllowedException('This WhatsApp number is already connected to an account.');
         }
-
-        $numberInfo = self::verifyWhatsAppNumber($phoneNumberId, $accessToken);
 
         self::subscribeWhatsAppAccount($wabaId, $accessToken);
 
