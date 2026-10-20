@@ -255,9 +255,14 @@ class ChannelsService extends AbstractChannelsService
 
         if ($ownChannel = $existing->first()) {
             // Reconnect by the owner: new token on the existing channel (routing keys unchanged), no duplicate channel
+            // (a pending takeover marker from an earlier revocation is void once the owner restores the connection)
+            $configuration = (array) $ownChannel->configuration;
+            unset($configuration['takeover_pending_since']);
+
             return self::asVerifiedConnect(fn () => self::update($ownChannel->uuid, [
-                'credentials' => ['page_access_token' => $accessToken],
-                'is_active'   => true,
+                'configuration' => $configuration,
+                'credentials'   => ['page_access_token' => $accessToken],
+                'is_active'     => true,
             ]));
         }
 
@@ -544,14 +549,24 @@ class ChannelsService extends AbstractChannelsService
             return false;
         }
 
+        // Code 100 only with subcode 33: "the object does not exist or this token has no access to it" (the object was
+        // deleted or moved to another account). A bare 100 is just a malformed request, which says nothing.
         return $response->clientError()
-            && in_array((int) $response->json('error.code'), self::REVOKED_TOKEN_ERROR_CODES, true);
+            && (in_array((int) $response->json('error.code'), self::REVOKED_TOKEN_ERROR_CODES, true)
+                || ((int) $response->json('error.code') === 100 && (int) $response->json('error.error_subcode') === 33));
     }
 
+    // How long the owner of a revoked channel has to restore it before a verified claimant can take the object over
+    private const TAKEOVER_GRACE_HOURS = 24;
+
     /**
-     * For channels that hold the external object the caller has just proven control of: a channel not PROVEN revoked
-     * blocks the connect (one message for every case, so nothing else leaks), a proven-revoked one is disconnected
-     * automatically. The liveness check runs whatever the channel's is_active flag says.
+     * For channels that hold the external object the caller has just proven control of:
+     *  - not PROVEN revoked: blocks the connect (one message, so nothing else leaks);
+     *  - proven revoked: the first attempt starts a grace period (marker in the channel's configuration) and notifies
+     *    the owning account, the connect is refused for now; once the grace period is over and the channel is still
+     *    revoked, it is disconnected automatically and the connect goes ahead. If the owner restores the token in the
+     *    meantime the channel is live again, the marker is cleared and the connect stays blocked.
+     * The liveness check runs whatever the channel's is_active flag says.
      * Disconnecting = importers paused and the channel soft-deleted (its threads and messages stay), so routing no
      * longer sees it and the object can be connected again. Runs as admin because the stale channel belongs to another
      * account that the caller cannot see.
@@ -559,11 +574,36 @@ class ChannelsService extends AbstractChannelsService
     private static function releaseStaleChannels($channels, callable $isRevoked, string $blockedMessage): void
     {
         foreach ($channels as $stale) {
+            $pendingSince = data_get($stale->configuration, 'takeover_pending_since');
+
             if (!$isRevoked($stale)) {
+                if ($pendingSince) {
+                    // The owner restored the connection: the pending takeover is void
+                    self::setTakeoverMarker($stale, null);
+                }
+
                 throw new NotAllowedException($blockedMessage);
             }
 
-            Log::warning('[ChannelsService] Disconnecting a stale channel taken over by a verified connect', [
+            $label = $stale->type === Channels::TYPE_WHATSAPP ? 'WhatsApp number' : 'Facebook Page';
+            $graceEnds = $pendingSince ? \Carbon\Carbon::parse($pendingSince)->addHours(self::TAKEOVER_GRACE_HOURS) : null;
+
+            if (!$graceEnds || $graceEnds->isFuture()) {
+                if (!$graceEnds) {
+                    self::setTakeoverMarker($stale, now()->toIso8601String());
+                    $graceEnds = now()->addHours(self::TAKEOVER_GRACE_HOURS);
+
+                    self::notifyChannelOwner($stale, 'The connection of your ' . $label . ' "' . $stale->name . '" is no longer valid '
+                        . '(its access token was revoked or expired) and another account is trying to connect the same ' . $label
+                        . '. Reconnect it with a valid token before ' . $graceEnds->toDateTimeString() . ' or it will be released.');
+                }
+
+                throw new NotAllowedException('The existing connection of this ' . $label . ' is no longer valid and is waiting for its owner'
+                    . ' to restore it. If it is not restored it is released automatically; connect again after '
+                    . $graceEnds->toDateTimeString() . '.');
+            }
+
+            Log::warning('[ChannelsService] Disconnecting a revoked channel after its grace period', [
                 'stale_channel_id' => $stale->id,
                 'type'             => $stale->type,
             ]);
@@ -572,6 +612,58 @@ class ChannelsService extends AbstractChannelsService
                 FacebookLeadImportService::pauseImportersForChannel($stale);
                 self::delete($stale->uuid);
             });
+
+            self::notifyChannelOwner($stale, 'Your ' . $label . ' "' . $stale->name . '" was disconnected because its access token stayed invalid and another account connected it.');
+        }
+    }
+
+    /**
+     * Sets or clears (null) the takeover marker in another account's channel configuration. The routing keys are
+     * untouched. Runs as admin because the channel belongs to another account.
+     */
+    private static function setTakeoverMarker(Channels $channel, ?string $since): void
+    {
+        UserHelper::runAsAdmin(function () use ($channel, $since) {
+            $configuration = (array) $channel->configuration;
+
+            if ($since) {
+                $configuration['takeover_pending_since'] = $since;
+            } else {
+                unset($configuration['takeover_pending_since']);
+            }
+
+            self::asVerifiedConnect(fn () => self::update($channel->uuid, ['configuration' => $configuration]));
+        });
+    }
+
+    /**
+     * In-app notification to the owner of the account the channel belongs to. Best-effort: a notification failure must
+     * not break the connect or the takeover.
+     */
+    private static function notifyChannelOwner(Channels $channel, string $message): void
+    {
+        try {
+            $ownerId = \NextDeveloper\IAM\Database\Models\Accounts::withoutGlobalScopes()
+                ->where('id', $channel->iam_account_id)
+                ->value('iam_user_id');
+
+            if (!$ownerId) {
+                return;
+            }
+
+            UserHelper::runAsAdmin(fn () => NotificationsService::create([
+                'severity'       => 'warning',
+                'data'           => json_encode(['message' => $message]),
+                'object_id'      => $channel->id,
+                'object_type'    => Channels::class,
+                'iam_user_id'    => $ownerId,
+                'iam_account_id' => $channel->iam_account_id,
+            ]));
+        } catch (\Throwable $e) {
+            Log::warning('[ChannelsService::notifyChannelOwner] Notification failed', [
+                'channel_id' => $channel->id,
+                'error'      => get_class($e),
+            ]);
         }
     }
 
