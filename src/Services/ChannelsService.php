@@ -436,8 +436,14 @@ class ChannelsService extends AbstractChannelsService
             ->get()
             ->filter(fn (Channels $channel) => (string) data_get($channel->configuration, 'phone_number_id') === $phoneNumberId);
 
+        // The caller's own channel for this number is not a stranger's: they just proved control with the new token, so it is
+        // refreshed in place at once (no grace period, a pending takeover marker is void because the token was verified).
+        $currentAccountId = (int) UserHelper::currentAccount()->id;
+        $own = $holders->filter(fn (Channels $holder) => (int) $holder->iam_account_id === $currentAccountId)->values();
+        $others = $holders->reject(fn (Channels $holder) => (int) $holder->iam_account_id === $currentAccountId)->values();
+
         self::releaseStaleChannels(
-            $holders,
+            $others,
             fn (Channels $holder) => self::tokenExplicitlyRevoked(
                 sprintf('https://graph.facebook.com/%s/%s', \NextDeveloper\Communication\Channels\WhatsAppCloud::GRAPH_API_VERSION, $phoneNumberId),
                 data_get($holder->credentials, 'access_token')
@@ -446,6 +452,26 @@ class ChannelsService extends AbstractChannelsService
         );
 
         self::subscribeWhatsAppAccount($wabaId, $accessToken);
+
+        if ($ownChannel = $own->first()) {
+            // Duplicates of the caller's own channel for the same number are dropped, one channel per number
+            foreach ($own->slice(1) as $duplicate) {
+                self::delete($duplicate->uuid);
+            }
+
+            $configuration = (array) $ownChannel->configuration;
+            unset($configuration[self::TAKEOVER_MARKER]);
+
+            return self::asVerifiedConnect(fn () => self::update($ownChannel->uuid, [
+                'configuration' => array_merge($configuration, [
+                    'waba_id'              => $wabaId,
+                    'display_phone_number' => $numberInfo['display_phone_number'] ?? null,
+                    'verified_name'        => $numberInfo['verified_name'] ?? null,
+                ]),
+                'credentials'   => ['access_token' => $accessToken],
+                'is_active'     => true,
+            ]));
+        }
 
         return self::asVerifiedConnect(fn () => self::create([
             'name'           => $data['name'] ?? ('WhatsApp: ' . ($numberInfo['display_phone_number'] ?? $phoneNumberId)),
