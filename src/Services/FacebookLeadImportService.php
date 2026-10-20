@@ -4,10 +4,12 @@ namespace NextDeveloper\Communication\Services;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use NextDeveloper\Commons\Exceptions\NotAllowedException;
 use NextDeveloper\Communication\Database\Models\Channels;
 use NextDeveloper\CRM\Database\Models\Importers;
 use NextDeveloper\CRM\Jobs\Importers\ImportLeadJob;
 use NextDeveloper\CRM\Services\ImportersService;
+use NextDeveloper\Flow\Database\Models\Pipelines;
 use NextDeveloper\IAM\Database\Models\Accounts as IamAccounts;
 use NextDeveloper\IAM\Database\Models\Users as IamUsers;
 use NextDeveloper\IAM\Helpers\UserHelper;
@@ -136,7 +138,8 @@ class FacebookLeadImportService
         $channel = Channels::withoutGlobalScopes()->find($importer->object_id);
         $token = $channel ? data_get($channel->credentials, 'page_access_token') : null;
 
-        if (!$channel || !$token) {
+        // A disconnected (soft-deleted) or deactivated channel must not keep pulling leads with its old token
+        if (!$channel || $channel->trashed() || !$channel->is_active || !$token) {
             self::updateImporter($importer, ['last_error' => 'Channel or page access token missing.']);
             return 0;
         }
@@ -251,6 +254,30 @@ class FacebookLeadImportService
             'iam_account_id' => UserHelper::currentAccount()->uuid,
             'iam_user_id'    => UserHelper::me()->uuid,
         ]));
+    }
+
+    /**
+     * A customer-supplied flow_pipeline_id must be a pipeline the current user can see. LeadImporterService resolves
+     * pipelines without scopes (code-defined importers point at our own pipelines), so the check has to happen here,
+     * through the normal AuthorizationScope, before the id is stored in the importer config.
+     */
+    public static function assertPipelineAccessible(?string $pipelineUuid): void
+    {
+        if ($pipelineUuid && !Pipelines::where('uuid', $pipelineUuid)->exists()) {
+            throw new NotAllowedException('The given flow_pipeline_id was not found or you do not have access to it.');
+        }
+    }
+
+    /**
+     * Pauses the importers linked to a channel (used when the Page is disconnected) so they stop pulling leads.
+     */
+    public static function pauseImportersForChannel(Channels $channel): void
+    {
+        Importers::where('source_type', self::SOURCE_TYPE)
+            ->where('object_type', Channels::class)
+            ->where('object_id', $channel->id)
+            ->get()
+            ->each(fn (Importers $importer) => ImportersService::update($importer->uuid, ['status' => 'paused']));
     }
 
     /**

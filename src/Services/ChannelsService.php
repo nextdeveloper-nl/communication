@@ -160,6 +160,9 @@ class ChannelsService extends AbstractChannelsService
         $pageId = trim($data['page_id']);
         $accessToken = trim($data['page_access_token']);
 
+        // Reject a pipeline the caller cannot see before anything is created or subscribed
+        FacebookLeadImportService::assertPipelineAccessible($data['flow_pipeline_id'] ?? null);
+
         $pageInfo = self::verifyFacebookPageToken($pageId, $accessToken);
 
         self::subscribeFacebookPageToWebhook($pageId, $accessToken);
@@ -180,7 +183,8 @@ class ChannelsService extends AbstractChannelsService
         } catch (Exception $e) {
             Log::error('[ChannelsService::connectFacebookPage] Importer creation failed', [
                 'channel_id' => $channel->id,
-                'error'      => $e->getMessage(),
+                // Class only: HTTP exception messages can contain the request URL with the access token
+                'error'      => get_class($e),
             ]);
         }
 
@@ -207,10 +211,14 @@ class ChannelsService extends AbstractChannelsService
             } catch (Exception $e) {
                 Log::warning('[ChannelsService::disconnectFacebookPage] Graph API unsubscribe failed', [
                     'channel_id' => $channel->id,
-                    'error'      => $e->getMessage(),
+                    // Class only: HTTP exception messages can contain the request URL with the access token
+                    'error'      => get_class($e),
                 ]);
             }
         }
+
+        // Stop the Page's lead importers from pulling with the removed channel
+        FacebookLeadImportService::pauseImportersForChannel($channel);
 
         self::delete($ref);
     }
