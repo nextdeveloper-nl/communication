@@ -123,7 +123,55 @@ class WhatsAppWebhookService
             ]);
 
             ThreadsService::update($thread->uuid, ['last_message_at' => now()]);
+
+            self::notifyAccountOwner($channel, $thread, $contact, $body);
         });
+    }
+
+    /**
+     * In-app notification to the owner of the channel's account that a customer wrote. One unread notification per
+     * thread at most: while the owner has not read the previous one for this thread, further messages in the same
+     * conversation do not add more (a chatty customer must not flood the notification list).
+     * Best-effort: a failure here must never lose the message that was just stored.
+     */
+    private static function notifyAccountOwner(Channels $channel, Threads $thread, Contacts $contact, string $body): void
+    {
+        try {
+            $ownerId = \NextDeveloper\IAM\Database\Models\Accounts::withoutGlobalScopes()
+                ->where('id', $channel->iam_account_id)
+                ->value('iam_user_id');
+
+            if (!$ownerId) {
+                return;
+            }
+
+            $alreadyUnread = \NextDeveloper\Communication\Database\Models\Notifications::withoutGlobalScopes()
+                ->where('iam_user_id', $ownerId)
+                ->where('object_type', Threads::class)
+                ->where('object_id', $thread->id)
+                ->whereNull('read_at')
+                ->exists();
+
+            if ($alreadyUnread) {
+                return;
+            }
+
+            NotificationsService::create([
+                'severity'       => 'info',
+                'data'           => json_encode([
+                    'message'   => 'New WhatsApp message from ' . $contact->full_name . ': ' . mb_substr($body, 0, 100),
+                    'thread_id' => $thread->uuid,
+                    'channel'   => $channel->name,
+                ]),
+                'object_id'      => $thread->id,
+                'object_type'    => Threads::class,
+                'iam_user_id'    => $ownerId,
+                'iam_account_id' => $channel->iam_account_id,
+            ]);
+        } catch (\Throwable $e) {
+            // Class only: nothing from the message may end up in the log
+            Log::warning('[WhatsAppWebhookService] Notification failed', ['channel_id' => $channel->id, 'error' => get_class($e)]);
+        }
     }
 
     /**

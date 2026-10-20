@@ -43,6 +43,13 @@ class ChannelsService extends AbstractChannelsService
     // Configuration keys that decide where inbound events are routed
     private const ROUTING_KEYS = ['phone_number_id', 'waba_id', 'page_id'];
 
+    // Configuration key holding the start of a takeover grace period; written only by the service
+    private const TAKEOVER_MARKER = 'takeover_pending_since';
+
+    // A marker older than this is not trusted (the token may have been restored and revoked again since): the grace
+    // period starts anew instead of the takeover going through at once
+    private const TAKEOVER_MARKER_MAX_AGE_DAYS = 7;
+
     // True only while a verified connect flow is creating its Channel
     private static bool $trustedConnect = false;
 
@@ -82,6 +89,30 @@ class ChannelsService extends AbstractChannelsService
                     if (data_get($new, $key) !== data_get($channel->configuration, $key)) {
                         throw new NotAllowedException('The ' . $key . ' of a connected channel cannot be changed. Disconnect and connect again.');
                     }
+                }
+            }
+
+            // The takeover marker is security state kept by the service only (see releaseStaleChannels):
+            //  - a generic update can neither set, change nor remove it (it is carried over as it was), otherwise an owner
+            //    could keep wiping it to restart the grace period for ever;
+            //  - new credentials void it, because it was set for the old, revoked token; a later revocation of the new
+            //    token must start a fresh grace period instead of inheriting an expired one.
+            if ($channel && in_array($type, self::WEBHOOK_ROUTED_TYPES, true)) {
+                $marker = data_get($channel->configuration, self::TAKEOVER_MARKER);
+                $credentialsChanged = array_key_exists('credentials', $data);
+
+                if (array_key_exists('configuration', $data) || ($marker && $credentialsChanged)) {
+                    $configuration = array_key_exists('configuration', $data)
+                        ? (is_string($data['configuration']) ? (json_decode($data['configuration'], true) ?? []) : (array) $data['configuration'])
+                        : (array) $channel->configuration;
+
+                    unset($configuration[self::TAKEOVER_MARKER]);
+
+                    if ($marker && !$credentialsChanged) {
+                        $configuration[self::TAKEOVER_MARKER] = $marker;
+                    }
+
+                    $data['configuration'] = $configuration;
                 }
             }
         }
@@ -257,7 +288,7 @@ class ChannelsService extends AbstractChannelsService
             // Reconnect by the owner: new token on the existing channel (routing keys unchanged), no duplicate channel
             // (a pending takeover marker from an earlier revocation is void once the owner restores the connection)
             $configuration = (array) $ownChannel->configuration;
-            unset($configuration['takeover_pending_since']);
+            unset($configuration[self::TAKEOVER_MARKER]);
 
             return self::asVerifiedConnect(fn () => self::update($ownChannel->uuid, [
                 'configuration' => $configuration,
@@ -574,7 +605,22 @@ class ChannelsService extends AbstractChannelsService
     private static function releaseStaleChannels($channels, callable $isRevoked, string $blockedMessage): void
     {
         foreach ($channels as $stale) {
-            $pendingSince = data_get($stale->configuration, 'takeover_pending_since');
+            $pendingSince = data_get($stale->configuration, self::TAKEOVER_MARKER);
+
+            // A marker that cannot be parsed, lies in the future or is too old is not trusted: it counts as no marker, so
+            // a fresh grace period starts. It can never shorten or extend the real one.
+            $markerTime = null;
+            if ($pendingSince) {
+                try {
+                    $markerTime = \Carbon\Carbon::parse($pendingSince);
+                } catch (\Throwable $e) {
+                    $markerTime = null;
+                }
+
+                if ($markerTime && ($markerTime->isFuture() || $markerTime->lt(now()->subDays(self::TAKEOVER_MARKER_MAX_AGE_DAYS)))) {
+                    $markerTime = null;
+                }
+            }
 
             if (!$isRevoked($stale)) {
                 if ($pendingSince) {
@@ -586,7 +632,7 @@ class ChannelsService extends AbstractChannelsService
             }
 
             $label = $stale->type === Channels::TYPE_WHATSAPP ? 'WhatsApp number' : 'Facebook Page';
-            $graceEnds = $pendingSince ? \Carbon\Carbon::parse($pendingSince)->addHours(self::TAKEOVER_GRACE_HOURS) : null;
+            $graceEnds = $markerTime ? $markerTime->copy()->addHours(self::TAKEOVER_GRACE_HOURS) : null;
 
             if (!$graceEnds || $graceEnds->isFuture()) {
                 if (!$graceEnds) {
@@ -627,9 +673,9 @@ class ChannelsService extends AbstractChannelsService
             $configuration = (array) $channel->configuration;
 
             if ($since) {
-                $configuration['takeover_pending_since'] = $since;
+                $configuration[self::TAKEOVER_MARKER] = $since;
             } else {
-                unset($configuration['takeover_pending_since']);
+                unset($configuration[self::TAKEOVER_MARKER]);
             }
 
             self::asVerifiedConnect(fn () => self::update($channel->uuid, ['configuration' => $configuration]));
