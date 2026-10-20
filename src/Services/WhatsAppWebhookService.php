@@ -34,7 +34,7 @@ class WhatsAppWebhookService
 
             $value = $change['value'] ?? [];
             $phoneNumberId = data_get($value, 'metadata.phone_number_id');
-            $channel = self::resolveChannel($phoneNumberId);
+            $channel = self::resolveChannel($phoneNumberId, $entry['id'] ?? null);
 
             if (!$channel) {
                 Log::warning('[WhatsAppWebhookService] No Channel found for phone number', ['phone_number_id' => $phoneNumberId]);
@@ -130,17 +130,45 @@ class WhatsAppWebhookService
      * The connected, active Channel that owns this WhatsApp number. Runs without AuthorizationScope since a webhook
      * has no user/tenant context - the Channel's own iam_account_id supplies it.
      */
-    private static function resolveChannel(?string $phoneNumberId): ?Channels
+    private static function resolveChannel(?string $phoneNumberId, ?string $wabaId): ?Channels
     {
         if (!$phoneNumberId) {
             return null;
         }
 
-        return Channels::withoutGlobalScope(AuthorizationScope::class)
+        $matches = Channels::withoutGlobalScope(AuthorizationScope::class)
             ->where('type', Channels::TYPE_WHATSAPP)
             ->where('is_active', true)
             ->get()
-            ->first(fn (Channels $channel) => (string) data_get($channel->configuration, 'phone_number_id') === $phoneNumberId);
+            ->filter(fn (Channels $channel) => (string) data_get($channel->configuration, 'phone_number_id') === $phoneNumberId)
+            ->values();
+
+        // Fail closed: a number must belong to exactly one channel. More than one match means ambiguous ownership, and
+        // routing to either could deliver one tenant's customer messages to another.
+        if ($matches->count() !== 1) {
+            if ($matches->count() > 1) {
+                Log::error('[WhatsAppWebhookService] Several Channels claim the same phone number, event dropped', [
+                    'phone_number_id' => $phoneNumberId,
+                    'channel_ids'     => $matches->pluck('id')->all(),
+                ]);
+            }
+
+            return null;
+        }
+
+        $channel = $matches->first();
+
+        // The event must also come from the WhatsApp Business Account the channel was verified against
+        if ($wabaId && data_get($channel->configuration, 'waba_id') && (string) data_get($channel->configuration, 'waba_id') !== $wabaId) {
+            Log::warning('[WhatsAppWebhookService] WABA id does not match the Channel, event dropped', [
+                'phone_number_id' => $phoneNumberId,
+                'channel_id'      => $channel->id,
+            ]);
+
+            return null;
+        }
+
+        return $channel;
     }
 
     private static function resolveOpenThread(Channels $channel, Contacts $contact): Threads

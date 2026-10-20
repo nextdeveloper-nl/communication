@@ -32,8 +32,69 @@ class ChannelsService extends AbstractChannelsService
     private const VERIFICATION_CODE_MAX = 999999;
     private const CHANNEL_MODEL_TYPE = 'NextDeveloper\Communication\Database\Models\Channels';
 
+    /**
+     * Channel types whose inbound events are routed to a Channel by an external id in its configuration
+     * (WhatsApp: phone_number_id, Facebook: page_id). Such a channel may only come from the verified connect flows;
+     * if the generic create/update accepted it, a tenant could claim another tenant's number or Page without proving
+     * ownership and receive that tenant's inbound messages.
+     */
+    private const WEBHOOK_ROUTED_TYPES = [Channels::TYPE_WHATSAPP, Channels::TYPE_FACEBOOK];
+
+    // Configuration keys that decide where inbound events are routed
+    private const ROUTING_KEYS = ['phone_number_id', 'waba_id', 'page_id'];
+
+    // True only while a verified connect flow is creating its Channel
+    private static bool $trustedConnect = false;
+
+    /**
+     * Runs the callback as a verified connect flow (the token was checked against the external account first).
+     */
+    private static function asVerifiedConnect(callable $callback)
+    {
+        $previous = self::$trustedConnect;
+        self::$trustedConnect = true;
+
+        try {
+            return $callback();
+        } finally {
+            self::$trustedConnect = $previous;
+        }
+    }
+
+    /**
+     * Generic updates may not change a webhook-routed channel's type or its routing keys.
+     */
+    public static function update($id, array $data)
+    {
+        if (!self::$trustedConnect) {
+            $channel = Channels::where('uuid', $id)->first();
+            $type = $data['type'] ?? $channel?->type;
+
+            if (isset($data['type']) && $channel && $data['type'] !== $channel->type
+                && (in_array($data['type'], self::WEBHOOK_ROUTED_TYPES, true) || in_array($channel->type, self::WEBHOOK_ROUTED_TYPES, true))) {
+                throw new NotAllowedException('The type of this channel cannot be changed.');
+            }
+
+            if ($channel && in_array($type, self::WEBHOOK_ROUTED_TYPES, true) && array_key_exists('configuration', $data)) {
+                $new = is_string($data['configuration']) ? (json_decode($data['configuration'], true) ?? []) : (array) $data['configuration'];
+
+                foreach (self::ROUTING_KEYS as $key) {
+                    if (data_get($new, $key) !== data_get($channel->configuration, $key)) {
+                        throw new NotAllowedException('The ' . $key . ' of a connected channel cannot be changed. Disconnect and connect again.');
+                    }
+                }
+            }
+        }
+
+        return parent::update($id, $data);
+    }
+
     public static function create(array $data): Channels
     {
+        if (!self::$trustedConnect && in_array($data['type'] ?? null, self::WEBHOOK_ROUTED_TYPES, true)) {
+            throw new NotAllowedException('This channel type can only be created through its connect endpoint.');
+        }
+
         foreach (['configuration', 'credentials'] as $field) {
             if (isset($data[$field]) && is_string($data[$field])) {
                 $decoded = json_decode($data[$field], true);
@@ -167,14 +228,14 @@ class ChannelsService extends AbstractChannelsService
 
         self::subscribeFacebookPageToWebhook($pageId, $accessToken);
 
-        $channel = self::create([
+        $channel = self::asVerifiedConnect(fn () => self::create([
             'name'           => $data['name'] ?? ('Facebook: ' . ($pageInfo['name'] ?? $pageId)),
             'type'           => Channels::TYPE_FACEBOOK,
             'configuration'  => ['page_id' => $pageId, 'page_name' => $pageInfo['name'] ?? null],
             'credentials'    => ['page_access_token' => $accessToken],
             'is_active'      => true,
             'iam_account_id' => UserHelper::currentAccount()->id,
-        ]);
+        ]));
 
         // Create the lead importer for this Page so its leads are imported right away. A failure here must not undo the
         // connection (messages/webhook still work); it is logged and the importer can be created later.
@@ -315,7 +376,7 @@ class ChannelsService extends AbstractChannelsService
 
         self::subscribeWhatsAppAccount($wabaId, $accessToken);
 
-        return self::create([
+        return self::asVerifiedConnect(fn () => self::create([
             'name'           => $data['name'] ?? ('WhatsApp: ' . ($numberInfo['display_phone_number'] ?? $phoneNumberId)),
             'type'           => Channels::TYPE_WHATSAPP,
             'configuration'  => [
@@ -327,7 +388,7 @@ class ChannelsService extends AbstractChannelsService
             'credentials'    => ['access_token' => $accessToken],
             'is_active'      => true,
             'iam_account_id' => UserHelper::currentAccount()->id,
-        ]);
+        ]));
     }
 
     /**
