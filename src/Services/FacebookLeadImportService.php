@@ -141,6 +141,9 @@ class FacebookLeadImportService
             return 0;
         }
 
+        // Pick up lead forms created on the Page since the last run
+        self::mapNewForms($importer, $token);
+
         $since = (int) ($importer->cursor ?: 0);
         $highWatermark = $since;
         $queued = 0;
@@ -198,6 +201,122 @@ class FacebookLeadImportService
         ]);
 
         return $queued;
+    }
+
+    /**
+     * Creates the lead importer for a freshly connected Page (self-service connect), so leads start flowing without
+     * anyone editing config. Maps every lead form the Page has, and keeps mapping new ones on each sync (auto_forms).
+     * Flow settings (flow_pipeline_id, flow_stage_name, opportunity_type, default_country_code) are optional; without a
+     * pipeline the lead is still imported, just not placed in a Flow pipeline.
+     * Runs as the connecting user/account and only bypasses the role check, since connecting a Page is already authorized.
+     */
+    public static function createImporterForChannel(Channels $channel, array $options = []): ?Importers
+    {
+        $existing = Importers::withoutGlobalScopes()
+            ->where('source_type', self::SOURCE_TYPE)
+            ->where('object_type', Channels::class)
+            ->where('object_id', $channel->id)
+            ->first();
+
+        if ($existing) {
+            return $existing;
+        }
+
+        $token = data_get($channel->credentials, 'page_access_token');
+        $pageId = data_get($channel->configuration, 'page_id');
+
+        $forms = [];
+        foreach (self::fetchPageFormIds($pageId, $token) as $formId) {
+            $forms[$formId] = [];
+        }
+
+        $config = array_filter([
+            'flow_pipeline_id'     => $options['flow_pipeline_id'] ?? null,
+            'flow_stage_name'      => $options['flow_stage_name'] ?? null,
+            'opportunity_type'     => $options['opportunity_type'] ?? 'sales',
+            'default_country_code' => $options['default_country_code'] ?? null,
+        ], fn ($v) => $v !== null && $v !== '');
+
+        $config['dedupe_window_hours'] = 24;
+        $config['auto_forms'] = true;
+        $config['forms'] = $forms;
+
+        return UserHelper::withRolesCheckBypassed(fn () => ImportersService::create([
+            'name'           => 'Facebook: ' . (data_get($channel->configuration, 'page_name') ?: $pageId),
+            'source_type'    => self::SOURCE_TYPE,
+            'status'         => 'active',
+            'config'         => $config,
+            'object_type'    => Channels::class,
+            'object_id'      => $channel->id,
+            'iam_account_id' => UserHelper::currentAccount()->uuid,
+            'iam_user_id'    => UserHelper::me()->uuid,
+        ]));
+    }
+
+    /**
+     * Ids of the lead forms of a Page (all statuses except deleted ones, which Graph does not return).
+     *
+     * @return string[]
+     */
+    private static function fetchPageFormIds(?string $pageId, ?string $token): array
+    {
+        if (!$pageId || !$token) {
+            return [];
+        }
+
+        $ids = [];
+        $url = sprintf('https://graph.facebook.com/%s/%s/leadgen_forms', self::GRAPH_API_VERSION, $pageId);
+        $params = ['access_token' => $token, 'fields' => 'id', 'limit' => 100];
+
+        while ($url) {
+            $response = Http::get($url, $params);
+
+            if (!$response->successful()) {
+                Log::warning('[FacebookLeadImportService] Could not list lead forms', [
+                    'page_id'     => $pageId,
+                    'status'      => $response->status(),
+                    'graph_error' => $response->json('error') ?? mb_substr($response->body(), 0, 500),
+                ]);
+                break;
+            }
+
+            foreach ($response->json('data', []) as $row) {
+                $ids[] = (string) $row['id'];
+            }
+
+            $url = $response->json('paging.next');
+            $params = [];
+        }
+
+        return $ids;
+    }
+
+    /**
+     * Adds forms created on the Page after the importer was set up (only for importers with config.auto_forms).
+     * Existing form entries (and their per-form overrides) are never touched.
+     */
+    private static function mapNewForms(Importers $importer, string $token): void
+    {
+        $config = $importer->config ?? [];
+
+        if (empty($config['auto_forms'])) {
+            return;
+        }
+
+        $channel = Channels::withoutGlobalScopes()->find($importer->object_id);
+        $found = self::fetchPageFormIds(data_get($channel?->configuration, 'page_id'), $token);
+        $missing = array_diff($found, array_map('strval', array_keys($config['forms'] ?? [])));
+
+        if (!$missing) {
+            return;
+        }
+
+        foreach ($missing as $formId) {
+            $config['forms'][$formId] = [];
+        }
+
+        self::updateImporter($importer, ['config' => $config]);
+        $importer->config = $config;
     }
 
     /**

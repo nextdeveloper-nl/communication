@@ -164,7 +164,7 @@ class ChannelsService extends AbstractChannelsService
 
         self::subscribeFacebookPageToWebhook($pageId, $accessToken);
 
-        return self::create([
+        $channel = self::create([
             'name'           => $data['name'] ?? ('Facebook: ' . ($pageInfo['name'] ?? $pageId)),
             'type'           => Channels::TYPE_FACEBOOK,
             'configuration'  => ['page_id' => $pageId, 'page_name' => $pageInfo['name'] ?? null],
@@ -172,6 +172,19 @@ class ChannelsService extends AbstractChannelsService
             'is_active'      => true,
             'iam_account_id' => UserHelper::currentAccount()->id,
         ]);
+
+        // Create the lead importer for this Page so its leads are imported right away. A failure here must not undo the
+        // connection (messages/webhook still work); it is logged and the importer can be created later.
+        try {
+            FacebookLeadImportService::createImporterForChannel($channel, $data);
+        } catch (Exception $e) {
+            Log::error('[ChannelsService::connectFacebookPage] Importer creation failed', [
+                'channel_id' => $channel->id,
+                'error'      => $e->getMessage(),
+            ]);
+        }
+
+        return $channel;
     }
 
     /**
