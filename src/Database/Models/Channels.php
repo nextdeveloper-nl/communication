@@ -185,4 +185,8 @@ class Channels extends Model
     // Threads/Messages here, same as Facebook, instead of a dedicated schema.
     const TYPE_CHATWOOT = 'chatwoot';
 
+    // One Channel row represents one WhatsApp Business phone number (Meta Cloud API). Multi-tenant: every tenant
+    // connects its own number, the number's phone_number_id (unique across Meta) routes inbound events to the owner.
+    const TYPE_WHATSAPP = 'whatsapp';
+
 }

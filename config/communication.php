@@ -60,5 +60,12 @@ return [
             // Page webhook fields to subscribe on connect. 'messages' (Messenger) needs the pages_messaging permission.
             'subscribed_fields' => env('FACEBOOK_SUBSCRIBED_FIELDS', 'leadgen'),
         ],
+        // WhatsApp Business (Cloud API) webhook. One URL for all tenants' numbers.
+        'whatsapp'  =>  [
+            // Meta App secret that signs the webhook (X-Hub-Signature-256); falls back to the Facebook app secret.
+            'app_secret'    =>  env('WHATSAPP_APP_SECRET'),
+            // Shared secret we choose; Meta echoes it back during the webhook verification handshake.
+            'verify_token'  =>  env('WHATSAPP_WEBHOOK_VERIFY_TOKEN'),
+        ],
     ],
 ];

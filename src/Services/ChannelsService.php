@@ -287,6 +287,137 @@ class ChannelsService extends AbstractChannelsService
         }
     }
 
+    /**
+     * Self-service WhatsApp Business number connect (Meta Cloud API), multi-tenant: every tenant connects its own number
+     * with its own token. We verify the token really reaches that number, make sure no other channel already owns the
+     * number (inbound events are routed by phone_number_id, so a number must belong to exactly one channel), subscribe
+     * our Meta App to the tenant's WhatsApp Business Account and create the Channel under the current account.
+     */
+    public static function connectWhatsAppNumber(array $data): Channels
+    {
+        // Trim: tokens pasted from a terminal or JSON often carry a trailing space or newline that Meta rejects
+        $phoneNumberId = trim($data['phone_number_id']);
+        $wabaId = trim($data['waba_id']);
+        $accessToken = trim($data['access_token']);
+
+        // A number can be connected once; checked across all tenants (without the scope) so nobody can take over
+        // inbound routing of a number that another account already connected.
+        $taken = Channels::withoutGlobalScope(AuthorizationScope::class)
+            ->where('type', Channels::TYPE_WHATSAPP)
+            ->get()
+            ->contains(fn (Channels $channel) => (string) data_get($channel->configuration, 'phone_number_id') === $phoneNumberId);
+
+        if ($taken) {
+            throw new NotAllowedException('This WhatsApp number is already connected to an account.');
+        }
+
+        $numberInfo = self::verifyWhatsAppNumber($phoneNumberId, $accessToken);
+
+        self::subscribeWhatsAppAccount($wabaId, $accessToken);
+
+        return self::create([
+            'name'           => $data['name'] ?? ('WhatsApp: ' . ($numberInfo['display_phone_number'] ?? $phoneNumberId)),
+            'type'           => Channels::TYPE_WHATSAPP,
+            'configuration'  => [
+                'phone_number_id'      => $phoneNumberId,
+                'waba_id'              => $wabaId,
+                'display_phone_number' => $numberInfo['display_phone_number'] ?? null,
+                'verified_name'        => $numberInfo['verified_name'] ?? null,
+            ],
+            'credentials'    => ['access_token' => $accessToken],
+            'is_active'      => true,
+            'iam_account_id' => UserHelper::currentAccount()->id,
+        ]);
+    }
+
+    /**
+     * Removes the channel. The app is unsubscribed from the WhatsApp Business Account only when no other WhatsApp
+     * channel of that account is left, because the subscription is per account, not per number. Best-effort on the
+     * Graph call: a token the customer already revoked fails, but the channel is removed anyway.
+     */
+    public static function disconnectWhatsAppNumber(string $ref): void
+    {
+        $channel = self::getByRef($ref);
+        $wabaId = data_get($channel->configuration, 'waba_id');
+        $accessToken = data_get($channel->credentials, 'access_token');
+
+        $othersOnSameAccount = Channels::withoutGlobalScope(AuthorizationScope::class)
+            ->where('type', Channels::TYPE_WHATSAPP)
+            ->where('id', '!=', $channel->id)
+            ->get()
+            ->contains(fn (Channels $other) => data_get($other->configuration, 'waba_id') === $wabaId);
+
+        if ($wabaId && $accessToken && !$othersOnSameAccount) {
+            try {
+                Http::withToken($accessToken)
+                    ->delete(sprintf('https://graph.facebook.com/%s/%s/subscribed_apps', \NextDeveloper\Communication\Channels\WhatsAppCloud::GRAPH_API_VERSION, $wabaId));
+            } catch (Exception $e) {
+                Log::warning('[ChannelsService::disconnectWhatsAppNumber] Graph API unsubscribe failed', [
+                    'channel_id' => $channel->id,
+                    // Class only: the exception message can contain request details
+                    'error'      => get_class($e),
+                ]);
+            }
+        }
+
+        self::delete($ref);
+    }
+
+    /**
+     * Confirms the token reaches the given number by asking the Graph API for it.
+     *
+     * @return array{id: string, display_phone_number?: string, verified_name?: string}
+     */
+    private static function verifyWhatsAppNumber(string $phoneNumberId, string $accessToken): array
+    {
+        $response = Http::withToken($accessToken)->get(
+            sprintf('https://graph.facebook.com/%s/%s', \NextDeveloper\Communication\Channels\WhatsAppCloud::GRAPH_API_VERSION, $phoneNumberId),
+            ['fields' => 'id,display_phone_number,verified_name']
+        );
+
+        if (!$response->successful() || $response->json('id') != $phoneNumberId) {
+            $metaError = $response->json('error.message') ?? ('returned id ' . var_export($response->json('id'), true));
+
+            Log::warning('[ChannelsService::verifyWhatsAppNumber] Number check failed', [
+                'phone_number_id' => $phoneNumberId,
+                'status'          => $response->status(),
+                'graph_error'     => $response->json('error') ?? mb_substr($response->body(), 0, 500),
+            ]);
+
+            throw new NotAllowedException(
+                'Could not verify this access token against WhatsApp number ' . $phoneNumberId
+                . '. Make sure the token belongs to the account that owns the number and has not expired.'
+                . ' Meta said (HTTP ' . $response->status() . '): ' . $metaError
+            );
+        }
+
+        return $response->json();
+    }
+
+    /**
+     * Subscribes our Meta App to the tenant's WhatsApp Business Account so Meta delivers its numbers' events to our
+     * webhook.
+     */
+    private static function subscribeWhatsAppAccount(string $wabaId, string $accessToken): void
+    {
+        $response = Http::withToken($accessToken)->post(
+            sprintf('https://graph.facebook.com/%s/%s/subscribed_apps', \NextDeveloper\Communication\Channels\WhatsAppCloud::GRAPH_API_VERSION, $wabaId)
+        );
+
+        if (!$response->successful()) {
+            Log::error('[ChannelsService::subscribeWhatsAppAccount] Subscription failed', [
+                'waba_id'     => $wabaId,
+                'status'      => $response->status(),
+                'graph_error' => $response->json('error') ?? mb_substr($response->body(), 0, 500),
+            ]);
+
+            throw new NotAllowedException(
+                'WhatsApp accepted the token but refused to subscribe this account to our webhook: '
+                . ($response->json('error.message') ?? $response->status())
+            );
+        }
+    }
+
     private static function getRequiredFields(array $platformConfig): array
     {
         return array_filter($platformConfig, function ($field) {

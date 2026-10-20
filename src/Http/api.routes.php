@@ -341,6 +341,10 @@ Route::prefix('communication')->group(
                 // we validate it, subscribe the Page to our webhook, and create the Channel.
                 Route::post('/facebook/connect', 'Channels\ChannelsController@connectFacebook');
                 Route::post('/{communication_channels}/facebook/disconnect', 'Channels\ChannelsController@disconnectFacebook');
+
+                // Self-service WhatsApp Business number connect (Meta Cloud API), one Channel per tenant number.
+                Route::post('/whatsapp/connect', 'Channels\ChannelsController@connectWhatsApp');
+                Route::post('/{communication_channels}/whatsapp/disconnect', 'Channels\ChannelsController@disconnectWhatsApp');
             }
         );
 

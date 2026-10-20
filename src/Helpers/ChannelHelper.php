@@ -77,6 +77,7 @@ class ChannelHelper
         'google_workspace' => \NextDeveloper\Communication\Channels\Gmail::class,
         'mattermost'       => \NextDeveloper\Communication\Channels\Mattermost::class,
         'sms'              => \NextDeveloper\Communication\Channels\Sms::class,
+        'whatsapp'         => \NextDeveloper\Communication\Channels\WhatsAppCloud::class,
     ];
 
     /**

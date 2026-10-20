@@ -29,12 +29,18 @@ class ContactsService extends AbstractContactsService
         string $fullName,
         int $accountId
     ): Contacts {
+        // The same identifier (e.g. a WhatsApp phone number) can be a contact of several tenants, so only a contact of
+        // THIS account is reused; matching on the identifier alone would hand one tenant another tenant's contact.
         $existing = ContactIdentifiers::where('identifier', $identifier)
             ->where('channel_type', $channelType)
-            ->first();
+            ->get()
+            ->first(fn (ContactIdentifiers $candidate) => Contacts::withoutGlobalScopes()
+                ->where('id', $candidate->communication_contact_id)
+                ->where('iam_account_id', $accountId)
+                ->exists());
 
         if ($existing) {
-            return Contacts::find($existing->communication_contact_id);
+            return Contacts::withoutGlobalScopes()->find($existing->communication_contact_id);
         }
 
         $contact = self::create([

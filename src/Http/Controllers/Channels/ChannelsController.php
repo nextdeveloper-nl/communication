@@ -11,6 +11,7 @@ use NextDeveloper\Communication\Database\Models\Channels;
 use NextDeveloper\Communication\Services\ChannelsService;
 use NextDeveloper\Communication\Http\Requests\Channels\ChannelsCreateRequest;
 use NextDeveloper\Communication\Http\Requests\Channels\FacebookConnectRequest;
+use NextDeveloper\Communication\Http\Requests\Channels\WhatsAppConnectRequest;
 use NextDeveloper\Commons\Http\Traits\Tags as TagsTrait;use NextDeveloper\Commons\Http\Traits\Addresses as AddressesTrait;
 class ChannelsController extends AbstractController
 {
@@ -173,6 +174,27 @@ class ChannelsController extends AbstractController
     public function disconnectFacebook($ref)
     {
         ChannelsService::disconnectFacebookPage($ref);
+
+        return $this->noContent();
+    }
+
+    /**
+     * Self-service WhatsApp Business number connect: validates the tenant's phone_number_id/waba_id/access_token,
+     * subscribes our app to their WhatsApp Business Account and creates the Channel for the current tenant.
+     */
+    public function connectWhatsApp(WhatsAppConnectRequest $request)
+    {
+        $model = ChannelsService::connectWhatsAppNumber($request->validated());
+
+        return ResponsableFactory::makeResponse($this, $model);
+    }
+
+    /**
+     * Removes the connected WhatsApp number's Channel (and the webhook subscription when it was the last number).
+     */
+    public function disconnectWhatsApp($ref)
+    {
+        ChannelsService::disconnectWhatsAppNumber($ref);
 
         return $this->noContent();
     }
