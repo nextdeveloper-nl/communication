@@ -162,8 +162,11 @@ class FacebookLeadImportService
                         'importer_id' => $importer->id,
                         'form_id'     => $formId,
                         'status'      => $response->status(),
+                        // Graph error details (code/subcode/message) so a 4xx can be diagnosed from the log
+                        'graph_error' => $response->json('error') ?? mb_substr($response->body(), 0, 500),
                     ]);
-                    self::updateImporter($importer, ['last_error' => 'Graph API ' . $response->status() . ' on form ' . $formId]);
+                    self::updateImporter($importer, ['last_error' => 'Graph API ' . $response->status() . ' on form ' . $formId . ': ' . mb_substr((string) ($response->json('error.message') ?? $response->body()), 0, 300)
+                        . ' (code ' . $response->json('error.code') . ', subcode ' . $response->json('error.error_subcode') . ')']);
                     // Do not move the cursor past a form we could not read
                     return $queued;
                 }
