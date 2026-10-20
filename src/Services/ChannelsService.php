@@ -237,9 +237,20 @@ class ChannelsService extends AbstractChannelsService
             ->filter(fn (Channels $channel) => (string) data_get($channel->configuration, 'page_id') === $pageId)
             ->values();
 
-        if ($existing->contains(fn (Channels $channel) => (int) $channel->iam_account_id !== (int) UserHelper::currentAccount()->id)) {
-            throw new NotAllowedException('This Facebook Page is already connected to an account.');
-        }
+        // Channels of OTHER accounts: a working one blocks the connect, one whose token no longer reaches the Page (former
+        // admin, revoked app) is disconnected automatically, because the caller just proved control of the Page.
+        $others = $existing->filter(fn (Channels $channel) => (int) $channel->iam_account_id !== (int) UserHelper::currentAccount()->id);
+        $existing = $existing->reject(fn (Channels $channel) => $others->contains('id', $channel->id))->values();
+
+        self::releaseStaleChannels(
+            $others,
+            fn (Channels $other) => self::tokenReaches(
+                sprintf('https://graph.facebook.com/%s/%s', self::FACEBOOK_GRAPH_VERSION, $pageId),
+                data_get($other->credentials, 'page_access_token'),
+                $pageId
+            ),
+            'This Facebook Page is already connected to an account.'
+        );
 
         self::subscribeFacebookPageToWebhook($pageId, $accessToken);
 
@@ -388,15 +399,23 @@ class ChannelsService extends AbstractChannelsService
         $numberInfo = self::verifyWhatsAppNumber($phoneNumberId, $accessToken);
 
         // A number can be connected once; checked across all tenants (without the scope) so nobody can take over
-        // inbound routing of a number that another account already connected.
-        $taken = Channels::withoutGlobalScope(AuthorizationScope::class)
+        // inbound routing of a number that still works for another account. A channel whose token no longer reaches the
+        // number (migrated away, token revoked) is stale and is disconnected automatically, since the caller just
+        // proved control of the number.
+        $holders = Channels::withoutGlobalScope(AuthorizationScope::class)
             ->where('type', Channels::TYPE_WHATSAPP)
             ->get()
-            ->contains(fn (Channels $channel) => (string) data_get($channel->configuration, 'phone_number_id') === $phoneNumberId);
+            ->filter(fn (Channels $channel) => (string) data_get($channel->configuration, 'phone_number_id') === $phoneNumberId);
 
-        if ($taken) {
-            throw new NotAllowedException('This WhatsApp number is already connected to an account.');
-        }
+        self::releaseStaleChannels(
+            $holders,
+            fn (Channels $holder) => self::tokenReaches(
+                sprintf('https://graph.facebook.com/%s/%s', \NextDeveloper\Communication\Channels\WhatsAppCloud::GRAPH_API_VERSION, $phoneNumberId),
+                data_get($holder->credentials, 'access_token'),
+                $phoneNumberId
+            ),
+            'This WhatsApp number is already connected to an account.'
+        );
 
         self::subscribeWhatsAppAccount($wabaId, $accessToken);
 
@@ -500,6 +519,53 @@ class ChannelsService extends AbstractChannelsService
                 'WhatsApp accepted the token but refused to subscribe this account to our webhook: '
                 . ($response->json('error.message') ?? $response->status())
             );
+        }
+    }
+
+    private const FACEBOOK_GRAPH_VERSION = 'v19.0';
+
+    /**
+     * True when the given token can still read the external object (Page / number) at $url, i.e. the channel holding it
+     * still works. Any failure counts as "no longer reaches".
+     */
+    private static function tokenReaches(string $url, ?string $token, string $expectedId): bool
+    {
+        if (!$token) {
+            return false;
+        }
+
+        try {
+            $response = Http::withToken($token)->get($url, ['fields' => 'id']);
+        } catch (Exception $e) {
+            return false;
+        }
+
+        return $response->successful() && (string) $response->json('id') === $expectedId;
+    }
+
+    /**
+     * For channels that hold the external object the caller has just proven control of: a working one blocks the
+     * connect (one message for every case, so nothing else leaks), a stale one is disconnected automatically.
+     * Disconnecting = importers paused and the channel soft-deleted (its threads and messages stay), so routing no
+     * longer sees it and the object can be connected again. Runs as admin because the stale channel belongs to another
+     * account that the caller cannot see.
+     */
+    private static function releaseStaleChannels($channels, callable $isLive, string $blockedMessage): void
+    {
+        foreach ($channels as $stale) {
+            if ($stale->is_active && $isLive($stale)) {
+                throw new NotAllowedException($blockedMessage);
+            }
+
+            Log::warning('[ChannelsService] Disconnecting a stale channel taken over by a verified connect', [
+                'stale_channel_id' => $stale->id,
+                'type'             => $stale->type,
+            ]);
+
+            UserHelper::runAsAdmin(function () use ($stale) {
+                FacebookLeadImportService::pauseImportersForChannel($stale);
+                self::delete($stale->uuid);
+            });
         }
     }
 
