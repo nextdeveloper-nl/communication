@@ -244,10 +244,9 @@ class ChannelsService extends AbstractChannelsService
 
         self::releaseStaleChannels(
             $others,
-            fn (Channels $other) => self::tokenReaches(
+            fn (Channels $other) => self::tokenExplicitlyRevoked(
                 sprintf('https://graph.facebook.com/%s/%s', self::FACEBOOK_GRAPH_VERSION, $pageId),
-                data_get($other->credentials, 'page_access_token'),
-                $pageId
+                data_get($other->credentials, 'page_access_token')
             ),
             'This Facebook Page is already connected to an account.'
         );
@@ -409,10 +408,9 @@ class ChannelsService extends AbstractChannelsService
 
         self::releaseStaleChannels(
             $holders,
-            fn (Channels $holder) => self::tokenReaches(
+            fn (Channels $holder) => self::tokenExplicitlyRevoked(
                 sprintf('https://graph.facebook.com/%s/%s', \NextDeveloper\Communication\Channels\WhatsAppCloud::GRAPH_API_VERSION, $phoneNumberId),
-                data_get($holder->credentials, 'access_token'),
-                $phoneNumberId
+                data_get($holder->credentials, 'access_token')
             ),
             'This WhatsApp number is already connected to an account.'
         );
@@ -524,14 +522,20 @@ class ChannelsService extends AbstractChannelsService
 
     private const FACEBOOK_GRAPH_VERSION = 'v19.0';
 
+    // Graph error codes that positively say a token can no longer be used for the object:
+    // 190 = invalid/expired/revoked access token, 10 and 200 = permission to the object was removed.
+    private const REVOKED_TOKEN_ERROR_CODES = [190, 10, 200];
+
     /**
-     * True when the given token can still read the external object (Page / number) at $url, i.e. the channel holding it
-     * still works. Any failure counts as "no longer reaches".
+     * True ONLY when Meta explicitly answers that the token is invalid or lost its permission for the object (or the
+     * channel has no token stored at all, so there is nothing that could work). Everything else (network errors,
+     * timeouts, 5xx, rate limits, an unexpected answer, a token that still works) is "not proven revoked": the existing
+     * channel is kept and the connect is refused. Never guess that another tenant's channel is dead.
      */
-    private static function tokenReaches(string $url, ?string $token, string $expectedId): bool
+    private static function tokenExplicitlyRevoked(string $url, ?string $token): bool
     {
         if (!$token) {
-            return false;
+            return true;
         }
 
         try {
@@ -540,20 +544,22 @@ class ChannelsService extends AbstractChannelsService
             return false;
         }
 
-        return $response->successful() && (string) $response->json('id') === $expectedId;
+        return $response->clientError()
+            && in_array((int) $response->json('error.code'), self::REVOKED_TOKEN_ERROR_CODES, true);
     }
 
     /**
-     * For channels that hold the external object the caller has just proven control of: a working one blocks the
-     * connect (one message for every case, so nothing else leaks), a stale one is disconnected automatically.
+     * For channels that hold the external object the caller has just proven control of: a channel not PROVEN revoked
+     * blocks the connect (one message for every case, so nothing else leaks), a proven-revoked one is disconnected
+     * automatically. The liveness check runs whatever the channel's is_active flag says.
      * Disconnecting = importers paused and the channel soft-deleted (its threads and messages stay), so routing no
      * longer sees it and the object can be connected again. Runs as admin because the stale channel belongs to another
      * account that the caller cannot see.
      */
-    private static function releaseStaleChannels($channels, callable $isLive, string $blockedMessage): void
+    private static function releaseStaleChannels($channels, callable $isRevoked, string $blockedMessage): void
     {
         foreach ($channels as $stale) {
-            if ($stale->is_active && $isLive($stale)) {
+            if (!$isRevoked($stale)) {
                 throw new NotAllowedException($blockedMessage);
             }
 
