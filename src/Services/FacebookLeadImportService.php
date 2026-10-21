@@ -31,6 +31,65 @@ class FacebookLeadImportService
 
     private const GRAPH_API_VERSION = 'v19.0';
 
+    // Lead fields asked from Graph, richest first. The ad, ad set and campaign names can need extra permissions on the
+    // token (ads_read); when Meta refuses a set, the next, smaller one is tried so a missing permission never stops imports.
+    private const LEAD_FIELD_SETS = [
+        'id,created_time,field_data,form_id,ad_id,ad_name,adset_id,adset_name,campaign_id,campaign_name,platform,is_organic',
+        'id,created_time,field_data,form_id,ad_id,platform,is_organic',
+        'id,created_time,field_data',
+    ];
+
+    /**
+     * GET on a Graph lead (or lead list) URL, asking for the richest field set the token is allowed to read.
+     * Falls back to smaller sets, and last to the call exactly as it was before ad fields were requested.
+     */
+    public static function getLeadWithFieldFallback(string $url, array $params)
+    {
+        $response = null;
+
+        foreach (self::LEAD_FIELD_SETS as $index => $fields) {
+            $response = Http::get($url, $params + ['fields' => $fields]);
+
+            if ($response->successful()) {
+                if ($index > 0) {
+                    Log::info('[FacebookLeadImportService] Ad fields not readable with this token, used a smaller field set', ['field_set' => $index]);
+                }
+
+                return $response;
+            }
+        }
+
+        // Same request as before this feature (no explicit fields): if even this fails, the caller reports the error
+        return Http::get($url, $params);
+    }
+
+    /**
+     * Where a lead came from, from a Graph lead object (and the webhook value as a fallback for the ids).
+     *
+     * @return array<string, string|bool>
+     */
+    public static function leadAttribution(array $lead, array $fallback = []): array
+    {
+        $keys = ['ad_id', 'ad_name', 'adset_id', 'adset_name', 'campaign_id', 'campaign_name', 'form_id', 'platform', 'is_organic'];
+        $attribution = [];
+
+        foreach ($keys as $key) {
+            $value = $lead[$key] ?? $fallback[$key] ?? null;
+
+            if (is_bool($value) || (is_scalar($value) && trim((string) $value) !== '')) {
+                $attribution[$key] = $value;
+            }
+        }
+
+        // Meta sends the platform as a short code; store the readable name
+        if (isset($attribution['platform']) && is_string($attribution['platform'])) {
+            $attribution['platform'] = ['fb' => 'facebook', 'ig' => 'instagram', 'an' => 'audience_network', 'msg' => 'messenger']
+                [strtolower($attribution['platform'])] ?? $attribution['platform'];
+        }
+
+        return $attribution;
+    }
+
     /**
      * Active importer connected to this channel, if any.
      */
@@ -116,7 +175,7 @@ class FacebookLeadImportService
     /**
      * Realtime path: the webhook already fetched the form answers, queue the import.
      */
-    public static function dispatchFromWebhook(Channels $channel, ?string $formId, array $fieldData): void
+    public static function dispatchFromWebhook(Channels $channel, ?string $formId, array $fieldData, array $attribution = []): void
     {
         $importer = self::importerForChannel($channel);
 
@@ -124,7 +183,7 @@ class FacebookLeadImportService
             return;
         }
 
-        ImportLeadJob::dispatch($importer->id, self::normalize($fieldData, $formId));
+        ImportLeadJob::dispatch($importer->id, self::normalize($fieldData, $formId, $attribution));
     }
 
     /**
@@ -160,8 +219,12 @@ class FacebookLeadImportService
                 $params['filtering'] = json_encode([['field' => 'time_created', 'operator' => 'GREATER_THAN', 'value' => $since]]);
             }
 
+            $firstPage = true;
+
             while ($url) {
-                $response = Http::get($url, $params);
+                // The first page asks for the ad fields (with fallbacks); later pages follow Graph's own next URL
+                $response = $firstPage ? self::getLeadWithFieldFallback($url, $params) : Http::get($url, $params);
+                $firstPage = false;
 
                 if (!$response->successful()) {
                     Log::error('[FacebookLeadImportService] Failed to pull leads', [
@@ -183,7 +246,7 @@ class FacebookLeadImportService
                         $fields[$field['name']] = $field['values'][0] ?? null;
                     }
 
-                    ImportLeadJob::dispatch($importer->id, self::normalize($fields, $formId));
+                    ImportLeadJob::dispatch($importer->id, self::normalize($fields, $formId, self::leadAttribution($row, ['form_id' => $formId])));
                     $queued++;
 
                     if (!empty($row['created_time'])) {
@@ -391,7 +454,7 @@ class FacebookLeadImportService
     /**
      * Facebook field_data -> normalized lead understood by LeadImporterService.
      */
-    public static function normalize(array $fieldData, ?string $formId): array
+    public static function normalize(array $fieldData, ?string $formId, array $attribution = []): array
     {
         $picked = [];
         $used = [];
@@ -416,6 +479,8 @@ class FacebookLeadImportService
             'fields' => array_diff_key($fieldData, array_flip($used)),
             'source' => self::SOURCE_TYPE,
             'form'   => $formId,
+            // Which ad/campaign/platform the lead came from (see LeadImporterService attribution)
+            'attribution' => $attribution,
         ];
     }
 

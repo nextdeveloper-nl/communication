@@ -113,7 +113,7 @@ class FacebookWebhookService
             }
 
             UserHelper::runAsAdmin(function () use ($channel, $leadgenId, $adId, $formId) {
-                $fieldData = self::fetchLeadFieldData($leadgenId, $channel);
+                [$fieldData, $attribution] = self::fetchLead($leadgenId, $channel, ['ad_id' => $adId, 'form_id' => $formId]);
 
                 $email = self::extractLeadField($fieldData, ['email']);
                 $fullName = self::extractLeadField($fieldData, ['full_name', 'first_name']) ?? 'Facebook Lead';
@@ -143,33 +143,36 @@ class FacebookWebhookService
                     'metadata'                 => [
                         'form_id'    => $formId,
                         'ad_id'      => $adId,
+                        'attribution' => $attribution,
                         'field_data' => $fieldData,
                     ],
                 ]);
 
                 // Hand the lead to the generic CRM lead importer (account, user, opportunity, flow item).
                 // Only does something when the page has an active, mapped importer.
-                FacebookLeadImportService::dispatchFromWebhook($channel, $formId, $fieldData);
+                FacebookLeadImportService::dispatchFromWebhook($channel, $formId, $fieldData, $attribution);
             });
         }
     }
 
     /**
-     * Fetches the form answers for a lead from the Graph API. Meta does not
-     * include them in the webhook payload itself, only the leadgen_id.
+     * Fetches a lead from the Graph API: its form answers and where it came from (ad, ad set, campaign, platform).
+     * Meta does not include them in the webhook payload itself, only the leadgen_id (and the ad/form ids, used as a
+     * fallback for the attribution when Graph does not return them).
      *
-     * @return array<string, string> field name => answer
+     * @param array $webhookIds ad_id/form_id from the webhook value
+     * @return array{0: array<string, string>, 1: array<string, string|bool>} [field name => answer, attribution]
      */
-    private static function fetchLeadFieldData(string $leadgenId, Channels $channel): array
+    private static function fetchLead(string $leadgenId, Channels $channel, array $webhookIds = []): array
     {
         $accessToken = data_get($channel->credentials, 'page_access_token');
 
         if (!$accessToken) {
             Log::warning('[FacebookWebhookService] Channel has no page_access_token', ['channel_id' => $channel->id]);
-            return [];
+            return [[], FacebookLeadImportService::leadAttribution([], $webhookIds)];
         }
 
-        $response = Http::get(
+        $response = FacebookLeadImportService::getLeadWithFieldFallback(
             sprintf('https://graph.facebook.com/%s/%s', self::GRAPH_API_VERSION, $leadgenId),
             ['access_token' => $accessToken]
         );
@@ -180,7 +183,7 @@ class FacebookWebhookService
                 'status'     => $response->status(),
                 'body'       => $response->body(),
             ]);
-            return [];
+            return [[], FacebookLeadImportService::leadAttribution([], $webhookIds)];
         }
 
         $fields = [];
@@ -188,7 +191,7 @@ class FacebookWebhookService
             $fields[$field['name']] = $field['values'][0] ?? null;
         }
 
-        return $fields;
+        return [$fields, FacebookLeadImportService::leadAttribution((array) $response->json(), $webhookIds)];
     }
 
     private static function extractLeadField(array $fieldData, array $candidateNames): ?string
