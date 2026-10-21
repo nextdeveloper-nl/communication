@@ -275,11 +275,14 @@ class FacebookLeadImportService
      */
     public static function pauseImportersForChannel(Channels $channel): void
     {
-        // Every importer of the channel, whatever its source (a Facebook Page's lead forms, a WhatsApp number's messages)
-        Importers::where('object_type', Channels::class)
+        // Every importer of the channel, whatever its source (a Facebook Page's lead forms, a WhatsApp number's messages).
+        // Looked up without the scope and written through the system-state update: the caller may be an admin taking over a
+        // Page, or an owner whose scope does not cover the importer, and a failed pause would leave the importer pulling.
+        Importers::withoutGlobalScopes()
+            ->where('object_type', Channels::class)
             ->where('object_id', $channel->id)
             ->get()
-            ->each(fn (Importers $importer) => ImportersService::update($importer->uuid, ['status' => 'paused']));
+            ->each(fn (Importers $importer) => ImportersService::updateSystemState($importer->uuid, ['status' => 'paused']));
     }
 
     /**
@@ -349,15 +352,15 @@ class FacebookLeadImportService
     }
 
     /**
-     * Updates an importer row from a context that may have no user (sync command / cron).
-     * ImportersService::update() looks the row up through AuthorizationScope, which hides it when nobody is logged in
-     * ("We cannot find the related object to update"), so without a user the update runs as admin.
+     * Bookkeeping on an importer (cursor, last_synced_at, last_error, status, config) from a context that may have no
+     * user (sync command / cron) or that is not a member of the importer's account (a tenant's Page).
+     * ImportersService::update() finds the row through the AuthorizationScope, which hides other accounts' importers
+     * ("We cannot find the related object to update"), so this uses the system-state update that skips the scope and
+     * accepts only those keys.
      */
     private static function updateImporter(Importers $importer, array $data)
     {
-        $update = fn () => ImportersService::update($importer->uuid, $data);
-
-        return UserHelper::me() ? $update() : UserHelper::runAsAdmin($update);
+        return ImportersService::updateSystemState($importer->uuid, $data);
     }
 
     /**
