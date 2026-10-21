@@ -66,6 +66,9 @@ return [
             'app_secret'    =>  env('WHATSAPP_APP_SECRET'),
             // Shared secret we choose; Meta echoes it back during the webhook verification handshake.
             'verify_token'  =>  env('WHATSAPP_WEBHOOK_VERIFY_TOKEN'),
+            // Meta App id and Embedded Signup configuration id (Meta App > WhatsApp > Configuration), used by the signup popup
+            'app_id'        =>  env('WHATSAPP_APP_ID'),
+            'embedded_signup_config_id' => env('WHATSAPP_EMBEDDED_SIGNUP_CONFIG_ID'),
         ],
     ],
 ];

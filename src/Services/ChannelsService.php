@@ -496,6 +496,76 @@ class ChannelsService extends AbstractChannelsService
     }
 
     /**
+     * What the frontend needs to start Embedded Signup (FB.login). Only public values: the app id and the Embedded
+     * Signup configuration id; the app secret never leaves the server.
+     */
+    public static function whatsAppEmbeddedSignupConfig(): array
+    {
+        return [
+            'app_id'      => config('communication.services.whatsapp.app_id'),
+            'config_id'   => config('communication.services.whatsapp.embedded_signup_config_id'),
+            'graph_version' => \NextDeveloper\Communication\Channels\WhatsAppCloud::GRAPH_API_VERSION,
+            // Passed in FB.login "extras" to onboard an existing WhatsApp Business app number (coexistence)
+            'coexistence_extras' => [
+                'setup'              => new \stdClass(),
+                'featureType'        => 'whatsapp_business_app_onboarding',
+                'sessionInfoVersion' => '3',
+            ],
+        ];
+    }
+
+    /**
+     * Embedded Signup callback: the popup ends with a one-time authorization code and the ids of the number and account
+     * the customer picked. The code is exchanged for the customer's business token on the server (it needs our app
+     * secret), then the ordinary connect runs with that token: it verifies the token against the number, refuses a
+     * number that works for another account, subscribes our app to the account and creates the Channel.
+     * Nothing is registered or verified here (no request_code/verify_code/register): a number onboarded as a
+     * coexistence number stays active in the WhatsApp Business app.
+     */
+    public static function connectWhatsAppEmbeddedSignup(array $data): Channels
+    {
+        $appId = config('communication.services.whatsapp.app_id');
+        $appSecret = config('communication.services.whatsapp.app_secret') ?: config('communication.services.facebook.app_secret');
+
+        if (!$appId || !$appSecret) {
+            throw new NotAllowedException('WhatsApp Embedded Signup is not configured on this platform (app id / secret missing).');
+        }
+
+        // Reject a pipeline the caller cannot see before the one-time code is spent
+        FacebookLeadImportService::assertPipelineAccessible($data['flow_pipeline_id'] ?? null);
+
+        try {
+            // POST with a form body (not GET with a query string): the app secret must not appear in a URL, and so not in
+            // an exception message either
+            $response = Http::asForm()->post(
+                sprintf('https://graph.facebook.com/%s/oauth/access_token', \NextDeveloper\Communication\Channels\WhatsAppCloud::GRAPH_API_VERSION),
+                ['client_id' => $appId, 'client_secret' => $appSecret, 'code' => trim($data['code'])]
+            );
+        } catch (Exception $e) {
+            Log::error('[ChannelsService::connectWhatsAppEmbeddedSignup] Code exchange request failed', ['error' => get_class($e)]);
+
+            throw new NotAllowedException('Could not reach WhatsApp to finish the signup. Please try again.');
+        }
+
+        $token = $response->successful() ? $response->json('access_token') : null;
+
+        if (!$token) {
+            // Neither the code nor the secret is logged: only Meta's error code and message
+            Log::warning('[ChannelsService::connectWhatsAppEmbeddedSignup] Code exchange refused', [
+                'status'      => $response->status(),
+                'graph_error' => $response->json('error.code') . ': ' . $response->json('error.message'),
+            ]);
+
+            throw new NotAllowedException(
+                'WhatsApp refused the signup code. It is valid once and for a few minutes only, so run the signup again.'
+                . ' Meta said (HTTP ' . $response->status() . '): ' . ($response->json('error.message') ?? 'no details')
+            );
+        }
+
+        return self::connectWhatsAppNumber(array_merge($data, ['access_token' => $token]));
+    }
+
+    /**
      * Creates the importer that turns this number's inbound messages into CRM opportunities (needs flow_pipeline_id in
      * the connect request, otherwise there is none). A failure here must not undo the connection (receiving messages
      * still works); it is logged and the importer can be created later.

@@ -344,6 +344,9 @@ Route::prefix('communication')->group(
 
                 // Self-service WhatsApp Business number connect (Meta Cloud API), one Channel per tenant number.
                 Route::post('/whatsapp/connect', 'Channels\ChannelsController@connectWhatsApp');
+                // WhatsApp Embedded Signup (incl. coexistence): the popup's config, and its callback that turns the code into a channel.
+                Route::get('/whatsapp/embedded-signup/config', 'Channels\ChannelsController@whatsAppEmbeddedSignupConfig');
+                Route::post('/whatsapp/embedded-signup', 'Channels\ChannelsController@connectWhatsAppEmbeddedSignup');
                 Route::post('/{communication_channels}/whatsapp/disconnect', 'Channels\ChannelsController@disconnectWhatsApp');
             }
         );

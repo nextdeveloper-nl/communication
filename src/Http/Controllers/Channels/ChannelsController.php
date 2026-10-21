@@ -12,6 +12,7 @@ use NextDeveloper\Communication\Services\ChannelsService;
 use NextDeveloper\Communication\Http\Requests\Channels\ChannelsCreateRequest;
 use NextDeveloper\Communication\Http\Requests\Channels\FacebookConnectRequest;
 use NextDeveloper\Communication\Http\Requests\Channels\WhatsAppConnectRequest;
+use NextDeveloper\Communication\Http\Requests\Channels\WhatsAppEmbeddedSignupRequest;
 use NextDeveloper\Commons\Http\Traits\Tags as TagsTrait;use NextDeveloper\Commons\Http\Traits\Addresses as AddressesTrait;
 class ChannelsController extends AbstractController
 {
@@ -197,5 +198,23 @@ class ChannelsController extends AbstractController
         ChannelsService::disconnectWhatsAppNumber($ref);
 
         return $this->noContent();
+    }
+
+    /**
+     * Values the frontend needs to start WhatsApp Embedded Signup (app id, configuration id, coexistence extras).
+     */
+    public function whatsAppEmbeddedSignupConfig()
+    {
+        return response()->json(['data' => ChannelsService::whatsAppEmbeddedSignupConfig()]);
+    }
+
+    /**
+     * WhatsApp Embedded Signup callback: exchanges the popup's one-time code for a token and connects the number.
+     */
+    public function connectWhatsAppEmbeddedSignup(WhatsAppEmbeddedSignupRequest $request)
+    {
+        $model = ChannelsService::connectWhatsAppEmbeddedSignup($request->validated());
+
+        return ResponsableFactory::makeResponse($this, $model);
     }
 }
