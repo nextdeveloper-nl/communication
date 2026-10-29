@@ -335,6 +335,21 @@ class MessagesQueryFilter extends AbstractQueryFilter
 
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
 
+    /**
+     * Filters messages by the campaign-send they belong to (metadata.send_id).
+     * Added so the Mailing screens can list the messages of one email.
+     */
+    public function sendId($value)
+    {
+        return $this->builder->where('metadata->send_id', '=', $value);
+    }
+
+    //  This is an alias function of sendId
+    public function send_id($value)
+    {
+        return $this->sendId($value);
+    }
+
 
 
 
