@@ -138,6 +138,14 @@ class ContactsQueryFilter extends AbstractQueryFilter
 
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
 
+    /**
+     * Where the contact came from, stored as a 'source:<name>' tag (e.g. ?source=google).
+     */
+    public function source($value)
+    {
+        return $this->builder->whereRaw('tags @> ARRAY[?]::text[]', ['source:' . strtolower(trim($value))]);
+    }
+
 
 
 

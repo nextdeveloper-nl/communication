@@ -33,6 +33,10 @@ class ContactsTransformer extends AbstractContactsTransformer
 
         $transformed = parent::transform($model);
 
+        // Source marker derived from the 'source:<name>' tag (null for contacts that were not imported)
+        $source = collect($model->tags ?? [])->first(fn ($tag) => str_starts_with($tag, 'source:'));
+        $transformed['source'] = $source ? substr($source, 7) : null;
+
         Cache::set(
             CacheHelper::getKey('Contacts', $model->uuid, 'Transformed'),
             $transformed

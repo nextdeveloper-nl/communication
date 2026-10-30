@@ -21,6 +21,8 @@ class GoogleContactsImportService
 {
     public const CHANNEL_TYPE = 'email';
 
+    public const SOURCE_TAG = 'source:google';
+
     private const ENDPOINT = 'https://people.googleapis.com/v1/people/me/connections';
 
     private const PAGE_SIZE = 1000;
@@ -104,8 +106,16 @@ class GoogleContactsImportService
             $name = $person['names'][0]['displayName'] ?? $email;
 
             // Same pattern as the webhook ingestion: contacts are created as the system on behalf of the account
-            UserHelper::runAsAdmin(function () use ($email, $name, $accountId) {
-                ContactsService::findOrCreateByIdentifier($email, self::CHANNEL_TYPE, $name, $accountId);
+            // Source marker: 'source:google' tag on the contact, People API resourceName as external_id on the identifier
+            UserHelper::runAsAdmin(function () use ($email, $name, $accountId, $person) {
+                ContactsService::findOrCreateByIdentifier(
+                    $email,
+                    self::CHANNEL_TYPE,
+                    $name,
+                    $accountId,
+                    [self::SOURCE_TAG],
+                    ['source' => 'google', 'external_id' => $person['resourceName'] ?? null]
+                );
             });
 
             $result['imported']++;

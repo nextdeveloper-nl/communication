@@ -27,7 +27,9 @@ class ContactsService extends AbstractContactsService
         string $identifier,
         string $channelType,
         string $fullName,
-        int $accountId
+        int $accountId,
+        array $tags = [],
+        array $identifierMetadata = []
     ): Contacts {
         // The same identifier (e.g. a WhatsApp phone number) can be a contact of several tenants, so only a contact of
         // THIS account is reused; matching on the identifier alone would hand one tenant another tenant's contact.
@@ -46,6 +48,8 @@ class ContactsService extends AbstractContactsService
         $contact = self::create([
             'full_name'      => $fullName,
             'iam_account_id' => $accountId,
+            // tags carry the source marker (e.g. source:google) when the caller provides one
+            'tags'           => $tags,
         ]);
 
         ContactIdentifiersService::create([
@@ -53,6 +57,7 @@ class ContactsService extends AbstractContactsService
             'channel_type'             => $channelType,
             'identifier'               => $identifier,
             'is_primary'               => true,
+            'metadata'                 => $identifierMetadata,
         ]);
 
         return $contact;
