@@ -58,7 +58,11 @@ class GoogleContactsImportService
                 ]));
 
                 if (!$response->successful()) {
-                    throw new \RuntimeException($response->json('error.message') ?? ('People API error ' . $response->status()));
+                    // the status is the exception code so the catch below can tell an auth failure from a transient one
+                    throw new \RuntimeException(
+                        $response->json('error.message') ?? ('People API error ' . $response->status()),
+                        $response->status()
+                    );
                 }
 
                 foreach ($response->json('connections', []) as $person) {
@@ -70,6 +74,11 @@ class GoogleContactsImportService
         } catch (\Throwable $e) {
             $result['status'] = 'error';
             $result['error']  = $e->getMessage();
+
+            // Google rejected the token (401) or access (403): flag the connection and email the owner once
+            if (in_array($e->getCode(), [401, 403], true)) {
+                GoogleWorkspaceHelper::flagUnauthorized($service, 'contacts');
+            }
 
             Log::warning('[Communication::GoogleContactsImportService] Import failed', [
                 'external_service_uuid' => $service->uuid,
