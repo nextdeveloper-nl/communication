@@ -209,10 +209,33 @@ class Channels extends Model
                 if (is_array($decoded) && isset($decoded['_enc']) && count($decoded) === 1) {
                     try {
                         // decryptString: nothing is unserialized
-                        return json_decode(\Illuminate\Support\Facades\Crypt::decryptString($decoded['_enc']), true);
+                        $plain = \Illuminate\Support\Facades\Crypt::decryptString($decoded['_enc']);
                     } catch (\Throwable) {
+                        try {
+                            // Earlier build of this accessor used encrypt() (serialized payload): still readable, never
+                            // with objects. The backfill command re-encrypts such rows with encryptString().
+                            $plain = unserialize(\Illuminate\Support\Facades\Crypt::decrypt($decoded['_enc'], false), ['allowed_classes' => false]);
+                        } catch (\Throwable $e) {
+                            // Never fail silently: the channel would just look like it has no credentials
+                            \Illuminate\Support\Facades\Log::error('[Communication::Channels] Credentials could not be decrypted', [
+                                'channel_uuid' => $this->attributes['uuid'] ?? null,
+                            ]);
+
+                            return null;
+                        }
+                    }
+
+                    $credentials = is_string($plain) ? json_decode($plain, true) : null;
+
+                    if (!is_array($credentials)) {
+                        \Illuminate\Support\Facades\Log::error('[Communication::Channels] Credentials decrypted but not valid JSON', [
+                            'channel_uuid' => $this->attributes['uuid'] ?? null,
+                        ]);
+
                         return null;
                     }
+
+                    return $credentials;
                 }
 
                 return $decoded;
