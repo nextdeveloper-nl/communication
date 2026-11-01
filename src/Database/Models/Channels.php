@@ -5,6 +5,7 @@ namespace NextDeveloper\Communication\Database\Models;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use NextDeveloper\Commons\Database\Traits\HasStates;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use NextDeveloper\Commons\Database\Traits\Filterable;
 use NextDeveloper\Communication\Database\Observers\ChannelsObserver;
@@ -80,7 +81,6 @@ class Channels extends Model
     'name' => 'string',
     'type' => 'string',
     'configuration' => 'array',
-    'credentials' => 'array',
     'is_active' => 'boolean',
     'priority' => 'integer',
     'created_at' => 'datetime',
@@ -189,4 +189,53 @@ class Channels extends Model
     // connects its own number, the number's phone_number_id (unique across Meta) routes inbound events to the owner.
     const TYPE_WHATSAPP = 'whatsapp';
 
+
+    /**
+     * Channel credentials (OAuth tokens, API keys) are encrypted at rest. The column is json, so the encrypted value is
+     * stored as {"_enc": "<ciphertext>"}. Reading is tolerant: rows that still hold the plain credentials are returned
+     * as they are (the communication:encrypt-channel-credentials command encrypts them), so callers always get the
+     * usable array. Empty credentials are stored as they are (nothing to protect).
+     */
+    public function credentials(): Attribute
+    {
+        return Attribute::make(
+            get: function ($value) {
+                if ($value === null || $value === '') {
+                    return null;
+                }
+
+                $decoded = is_array($value) ? $value : json_decode($value, true);
+
+                if (is_array($decoded) && isset($decoded['_enc']) && count($decoded) === 1) {
+                    try {
+                        return json_decode(decrypt($decoded['_enc']), true);
+                    } catch (\Throwable) {
+                        return null;
+                    }
+                }
+
+                return $decoded;
+            },
+            set: function ($value) {
+                if (is_string($value)) {
+                    $value = json_decode($value, true);
+                }
+
+                if ($value === null) {
+                    return null;
+                }
+
+                // already in the encrypted form (e.g. copied raw): never encrypt twice
+                if (is_array($value) && isset($value['_enc']) && count($value) === 1) {
+                    return json_encode($value);
+                }
+
+                if ($value === []) {
+                    return json_encode([]);
+                }
+
+                return json_encode(['_enc' => encrypt(json_encode($value))]);
+            },
+        );
+    }
 }
