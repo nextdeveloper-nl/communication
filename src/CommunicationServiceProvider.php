@@ -8,6 +8,7 @@ use NextDeveloper\Communication\Jobs\DeliverAllEmails;
 use NextDeveloper\Communication\Console\Commands\DeliverMessagesCommand;
 use NextDeveloper\Communication\Console\Commands\DispatchDueRemindersCommand;
 use NextDeveloper\Communication\Console\Commands\EmailsDeliveryCommand;
+use NextDeveloper\Communication\Console\Commands\EncryptChannelCredentialsCommand;
 use NextDeveloper\Communication\Console\Commands\FetchMailgunEventCommand;
 use NextDeveloper\Communication\Console\Commands\SyncFacebookLeadsCommand;
 /**
@@ -123,6 +124,7 @@ class CommunicationServiceProvider extends AbstractServiceProvider
                     EmailsDeliveryCommand::class,
                     FetchMailgunEventCommand::class,
                     SyncFacebookLeadsCommand::class,
+                    EncryptChannelCredentialsCommand::class,
                 ]
             );
         }
