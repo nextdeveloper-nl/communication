@@ -208,7 +208,8 @@ class Channels extends Model
 
                 if (is_array($decoded) && isset($decoded['_enc']) && count($decoded) === 1) {
                     try {
-                        return json_decode(decrypt($decoded['_enc']), true);
+                        // decryptString: nothing is unserialized
+                        return json_decode(\Illuminate\Support\Facades\Crypt::decryptString($decoded['_enc']), true);
                     } catch (\Throwable) {
                         return null;
                     }
@@ -225,16 +226,17 @@ class Channels extends Model
                     return null;
                 }
 
-                // already in the encrypted form (e.g. copied raw): never encrypt twice
-                if (is_array($value) && isset($value['_enc']) && count($value) === 1) {
-                    return json_encode($value);
+                // Everything handed to the model is plaintext. The encrypted form is never accepted from a caller (it
+                // could be another channel's ciphertext, e.g. from a request): the marker key is rejected.
+                if (is_array($value) && array_key_exists('_enc', $value)) {
+                    throw new \InvalidArgumentException('The credentials key "_enc" is reserved.');
                 }
 
                 if ($value === []) {
                     return json_encode([]);
                 }
 
-                return json_encode(['_enc' => encrypt(json_encode($value))]);
+                return json_encode(['_enc' => \Illuminate\Support\Facades\Crypt::encryptString(json_encode($value))]);
             },
         );
     }

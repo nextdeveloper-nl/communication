@@ -4,8 +4,6 @@ namespace NextDeveloper\Communication\Console\Commands;
 
 use Illuminate\Console\Command;
 use NextDeveloper\Communication\Database\Models\Channels;
-use NextDeveloper\Communication\Services\ChannelsService;
-use NextDeveloper\IAM\Helpers\UserHelper;
 
 /**
  * Encrypts the channel credentials (OAuth tokens, API keys) that were stored in plain text before the model
@@ -21,11 +19,12 @@ class EncryptChannelCredentialsCommand extends Command
     {
         $encrypted = 0;
         $skipped   = 0;
+        $failed    = 0;
 
         Channels::withoutGlobalScopes()
             ->withTrashed()
             ->whereNotNull('credentials')
-            ->chunkById(100, function ($channels) use (&$encrypted, &$skipped) {
+            ->chunkById(100, function ($channels) use (&$encrypted, &$skipped, &$failed) {
                 foreach ($channels as $channel) {
                     $decoded = json_decode((string) $channel->getRawOriginal('credentials'), true);
 
@@ -36,17 +35,34 @@ class EncryptChannelCredentialsCommand extends Command
                         continue;
                     }
 
-                    if (!$this->option('dry-run')) {
-                        // Written through the service, the model accessor encrypts the value
-                        UserHelper::runAsAdmin(fn () => ChannelsService::update($channel->uuid, ['credentials' => $decoded]));
+                    if ($this->option('dry-run')) {
+                        $encrypted++;
+
+                        continue;
                     }
 
-                    $encrypted++;
+                    try {
+                        // Migration of existing rows: written on the row that is already loaded (soft-deleted rows
+                        // included, the service cannot find those); the model accessor encrypts the value.
+                        $channel->credentials = $decoded;
+                        $channel->saveQuietly();
+
+                        // Only counted when the stored value really is the encrypted form now
+                        if (!str_contains((string) $channel->fresh()->getRawOriginal('credentials'), '_enc')) {
+                            throw new \RuntimeException('credentials still stored in plain text');
+                        }
+
+                        $encrypted++;
+                    } catch (\Throwable $e) {
+                        // one row must not stop the batch
+                        $failed++;
+                        $this->error('Channel ' . $channel->uuid . ': ' . $e->getMessage());
+                    }
                 }
             });
 
-        $this->info(($this->option('dry-run') ? 'Would encrypt: ' : 'Encrypted: ') . $encrypted . ', already encrypted or empty: ' . $skipped);
+        $this->info(($this->option('dry-run') ? 'Would encrypt: ' : 'Encrypted: ') . $encrypted . ', already encrypted or empty: ' . $skipped . ', failed: ' . $failed);
 
-        return self::SUCCESS;
+        return $failed > 0 ? self::FAILURE : self::SUCCESS;
     }
 }
