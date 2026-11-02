@@ -12,7 +12,9 @@ use NextDeveloper\Commons\Common\Cache\CacheHelper;
 use NextDeveloper\Commons\Common\Enums\GenericErrorCodes;
 use NextDeveloper\Commons\Helpers\ObjectHelper;
 use NextDeveloper\Communication\Database\Models\Remindables;
+use NextDeveloper\Commons\Exceptions\NotAllowedException;
 use NextDeveloper\Events\Services\Events;
+use NextDeveloper\IAM\Helpers\UserHelper;
 use NextDeveloper\Communication\Services\AbstractServices\AbstractRemindablesService;
 
 /**
@@ -26,6 +28,57 @@ class RemindablesService extends AbstractRemindablesService
 {
 
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
+    /**
+     * Whether the current request asks for every reminder of the account (?reminders=all).
+     * Only the account owner can see them; everybody else, and the owner without the
+     * parameter, gets their own reminders. Used by the authorization roles.
+     */
+    public static function viewsAllReminders(): bool
+    {
+        return request()->query('reminders') === 'all' && UserHelper::isAccountOwner();
+    }
+
+    /**
+     * The account owner can see other users' reminders, but cannot change them: only the
+     * reminder's own user (or the system user, e.g. scheduled jobs) can update or delete it.
+     * Snooze, acknowledge and cancel go through update(), so this covers them too.
+     */
+    private static function assertCanModify(string $ref): void
+    {
+        $reminder = Remindables::where('uuid', $ref)->first();
+
+        // Not found / not visible: the abstract service throws its own error.
+        if (! $reminder) {
+            return;
+        }
+
+        $me = UserHelper::me();
+
+        if ($me && $reminder->iam_user_id == $me->id) {
+            return;
+        }
+
+        if ($me && $me->id === UserHelper::getSystemUser()->id) {
+            return;
+        }
+
+        throw new NotAllowedException('You can only change your own reminders.');
+    }
+
+    public static function update($id, array $data)
+    {
+        self::assertCanModify($id);
+
+        return parent::update($id, $data);
+    }
+
+    public static function delete($id)
+    {
+        self::assertCanModify($id);
+
+        return parent::delete($id);
+    }
 
     /**
      * Snoozes a reminder until the given datetime.

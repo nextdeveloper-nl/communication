@@ -5,6 +5,7 @@ namespace NextDeveloper\Communication\Authorization\Roles;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use NextDeveloper\Communication\Services\RemindablesService;
 use NextDeveloper\IAM\Authorization\Roles\AbstractRole;
 use NextDeveloper\IAM\Authorization\Roles\IAuthorizationRole;
 use NextDeveloper\IAM\Database\Models\Users;
@@ -34,9 +35,9 @@ class CommunicationSupportRole extends AbstractRole implements IAuthorizationRol
             return;
         }
 
-        // Reminders are personal: only the reminder owner, or the account owner (all reminders
-        // of the account), can see them; other support users no longer see the whole account's.
-        if ($table === 'communication_remindables' && ! UserHelper::isAccountOwner()) {
+        // Reminders are personal: users see their own; the account owner can ask for all of the account's with
+        // ?reminders=all (read only).
+        if ($table === 'communication_remindables' && ! RemindablesService::viewsAllReminders()) {
             $builder->where('iam_user_id', UserHelper::me()->id);
         }
 
