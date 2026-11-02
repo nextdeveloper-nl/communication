@@ -34,6 +34,12 @@ class CommunicationSupportRole extends AbstractRole implements IAuthorizationRol
             return;
         }
 
+        // Reminders are personal: only the reminder owner, or the account owner (all reminders
+        // of the account), can see them; other support users no longer see the whole account's.
+        if ($table === 'communication_remindables' && ! UserHelper::isAccountOwner()) {
+            $builder->where('iam_user_id', UserHelper::me()->id);
+        }
+
         $builder->where('iam_account_id', UserHelper::currentAccount()->id);
     }
 

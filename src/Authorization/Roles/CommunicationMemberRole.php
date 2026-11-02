@@ -70,8 +70,20 @@ class CommunicationMemberRole extends AbstractRole implements IAuthorizationRole
             return;
         }
 
+        // Reminders: the reminder owner sees their own; the account owner sees every
+        // reminder of the account.
+        if ($table === 'communication_remindables') {
+            $builder->where('iam_account_id', UserHelper::currentAccount()->id);
+
+            if (! UserHelper::isAccountOwner()) {
+                $builder->where('iam_user_id', UserHelper::me()->id);
+            }
+
+            return;
+        }
+
         // Has both iam_account_id and iam_user_id
-        // (communication_notifications, communication_remindables)
+        // (communication_notifications)
         $builder->where([
             'iam_account_id' => UserHelper::currentAccount()->id,
             'iam_user_id' => UserHelper::me()->id,
