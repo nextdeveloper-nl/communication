@@ -75,6 +75,7 @@ class ChannelHelper
         'mailgun'          => \NextDeveloper\Communication\Channels\Mailgun::class,
         'gmail'            => \NextDeveloper\Communication\Channels\Gmail::class,
         'google_workspace' => \NextDeveloper\Communication\Channels\Gmail::class,
+        'microsoft_365'    => \NextDeveloper\Communication\Channels\Microsoft365::class,
         'mattermost'       => \NextDeveloper\Communication\Channels\Mattermost::class,
         'sms'              => \NextDeveloper\Communication\Channels\Sms::class,
         'whatsapp'         => \NextDeveloper\Communication\Channels\WhatsAppCloud::class,
@@ -125,6 +126,9 @@ class ChannelHelper
         $credentials = self::decodeJsonColumn($channel->credentials);
 
         return match (true) {
+            //  Must come before the access_token check: Microsoft channels carry an access_token too, but it is
+            //  not a Google token and Gmail would try to refresh it against Google
+            ($configuration['provider'] ?? null) === \NextDeveloper\Communication\Channels\Microsoft365::PROVIDER => \NextDeveloper\Communication\Channels\Microsoft365::class,
             ! empty($credentials['access_token']) => \NextDeveloper\Communication\Channels\Gmail::class,
             ! empty($configuration['domain']) && ! empty($credentials['api_key']) => \NextDeveloper\Communication\Channels\Mailgun::class,
             ! empty($configuration['host']) => \NextDeveloper\Communication\Channels\Smtp::class,
