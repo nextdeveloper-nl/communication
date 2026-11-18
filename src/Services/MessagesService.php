@@ -253,6 +253,11 @@ class MessagesService extends AbstractMessagesService
             // Wrap the body in an email template when crm_email_template_id is set in metadata.
             $body = self::applyTemplate($message->body, $metadata, $subject);
 
+            // Open pixel + click redirects for email channels (leo4#1254); off unless enabled for the account/message
+            if (EmailTrackingService::isEnabledFor($message, $channel, $metadata)) {
+                $body = EmailTrackingService::instrument($body, $message->uuid);
+            }
+
             Log::debug('[MessagesService::deliver] Payload before send', [
                 'message_id'          => $message->id,
                 'metadata'            => $metadata,

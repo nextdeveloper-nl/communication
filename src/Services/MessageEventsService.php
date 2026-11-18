@@ -39,7 +39,8 @@ class MessageEventsService extends AbstractMessageEventsService
 
         match ($eventType) {
             'bounced'      => MessagesService::markAsFailed($messageRef, $metadata['error'] ?? 'bounced'),
-            'opened'       => MessagesService::markAsRead($messageRef),
+            // First real open only (leo4#1254): later opens and bot/prefetch hits keep the event but not read_at
+            'opened'       => ($message->read_at || ($metadata['likely_bot'] ?? false)) ? $message : MessagesService::markAsRead($messageRef),
             default        => null,
         };
 
