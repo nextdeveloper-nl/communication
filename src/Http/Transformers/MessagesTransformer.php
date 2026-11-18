@@ -2,6 +2,8 @@
 
 namespace NextDeveloper\Communication\Http\Transformers;
 
+use NextDeveloper\Communication\Services\EmailTrackingService;
+
 use Illuminate\Support\Facades\Cache;
 use NextDeveloper\Commons\Common\Cache\CacheHelper;
 use NextDeveloper\Communication\Database\Models\Messages;
@@ -32,6 +34,10 @@ class MessagesTransformer extends AbstractMessagesTransformer
         }
 
         $transformed = parent::transform($model);
+
+        // Engagement of this message (leo4#1254). The cache of the transformed message is cleared whenever an
+        // open or click is recorded, so these stay current.
+        $transformed = array_merge($transformed, EmailTrackingService::messageEngagement($model->id));
 
         Cache::set(
             CacheHelper::getKey('Messages', $model->uuid, 'Transformed'),

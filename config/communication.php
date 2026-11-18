@@ -71,4 +71,14 @@ return [
             'embedded_signup_config_id' => env('WHATSAPP_EMBEDDED_SIGNUP_CONFIG_ID'),
         ],
     ],
+
+    // Email open pixel and click tracking (leo4#1254). On by default; an account can override with the account meta
+    // `email_tracking`, a single message can switch it off with metadata `tracking` = false.
+    'tracking' => [
+        'enabled'    => env('COMMUNICATION_TRACKING_ENABLED', true),
+        // Signed tracking links stop working after this many days
+        'token_days' => env('COMMUNICATION_TRACKING_TOKEN_DAYS', 365),
+        // Public base URL of the tracking endpoints; defaults to APP_URL
+        'base_url'   => env('COMMUNICATION_TRACKING_BASE_URL'),
+    ],
 ];
