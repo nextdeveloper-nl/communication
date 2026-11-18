@@ -18,7 +18,8 @@ use NextDeveloper\IAM\Helpers\UserHelper;
  * ever goes to the URL embedded when the message was sent (no open redirect), and a token can not be forged.
  *
  * Off by default (COMMUNICATION_TRACKING_ENABLED). An account can turn it on or off with the account meta
- * `email_tracking`, and a single message with metadata `tracking` (true/false), most specific wins.
+ * `email_tracking`; a single message can switch it off with metadata `tracking` = false (never on).
+ * Tokens expire after communication.tracking.token_days (default 365).
  */
 class EmailTrackingService
 {
@@ -66,6 +67,11 @@ class EmailTrackingService
             return null;
         }
 
+        // Tokens expire (a signed link on our domain must not work forever); a token without expiry is refused
+        if (empty($payload['x']) || (int) $payload['x'] < now()->timestamp) {
+            return null;
+        }
+
         return $payload;
     }
 
@@ -90,8 +96,10 @@ class EmailTrackingService
             return false;
         }
 
-        if (array_key_exists('tracking', $metadata)) {
-            return (bool) $metadata['tracking'];
+        // Per-message metadata can only switch tracking OFF; turning it on is an account / global decision, so a
+        // message author can not get signed redirect links on our domain for content of their choosing.
+        if (($metadata['tracking'] ?? null) === false) {
+            return false;
         }
 
         $default = (bool) config('communication.tracking.enabled', env('COMMUNICATION_TRACKING_ENABLED', false));
@@ -287,6 +295,7 @@ class EmailTrackingService
 
     private static function sign(array $payload): string
     {
+        $payload['x'] = now()->timestamp + (int) config('communication.tracking.token_days', 365) * 86400;
         $body = self::b64e(json_encode($payload, JSON_UNESCAPED_SLASHES));
 
         return $body.'.'.self::signature($body);
