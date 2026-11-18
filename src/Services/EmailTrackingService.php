@@ -17,7 +17,7 @@ use NextDeveloper\IAM\Helpers\UserHelper;
  * Tokens are HMAC-signed with the application key: a click token carries the original URL, so the redirect only
  * ever goes to the URL embedded when the message was sent (no open redirect), and a token can not be forged.
  *
- * Off by default (COMMUNICATION_TRACKING_ENABLED). An account can turn it on or off with the account meta
+ * On by default; COMMUNICATION_TRACKING_ENABLED=false turns it off. An account can turn it on or off with the account meta
  * `email_tracking`; a single message can switch it off with metadata `tracking` = false (never on).
  * Tokens expire after communication.tracking.token_days (default 365).
  */
@@ -102,7 +102,7 @@ class EmailTrackingService
             return false;
         }
 
-        $default = (bool) config('communication.tracking.enabled', env('COMMUNICATION_TRACKING_ENABLED', false));
+        $default = (bool) config('communication.tracking.enabled', true);
 
         $account = $message->iam_account_id ? Accounts::withoutGlobalScopes()->find($message->iam_account_id) : null;
 
@@ -315,7 +315,7 @@ class EmailTrackingService
 
     private static function baseUrl(): string
     {
-        return rtrim((string) config('communication.tracking.base_url', config('app.url')), '/');
+        return rtrim((string) (config('communication.tracking.base_url') ?: config('app.url')), '/');
     }
 
     private static function b64e(string $raw): string
