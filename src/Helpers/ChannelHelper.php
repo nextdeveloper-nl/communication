@@ -79,7 +79,34 @@ class ChannelHelper
         'mattermost'       => \NextDeveloper\Communication\Channels\Mattermost::class,
         'sms'              => \NextDeveloper\Communication\Channels\Sms::class,
         'whatsapp'         => \NextDeveloper\Communication\Channels\WhatsAppCloud::class,
+        'facebook'         => \NextDeveloper\Communication\Channels\FacebookMessenger::class,
+        'telegram'         => \NextDeveloper\Communication\Channels\Telegram::class,
+        'slack'            => \NextDeveloper\Communication\Channels\Slack::class,
     ];
+
+    /**
+     * Builds the delivery handler of a channel. Most handlers take the channel itself; the two oldest ones
+     * (Mattermost, Sms) take the plain configuration instead, so they are built from the channel's configuration
+     * and credentials merged.
+     *
+     * @throws \Throwable When the channel has no handler or its configuration is incomplete
+     */
+    public static function makeHandler(Channels $channel): \NextDeveloper\Communication\Channels\ChannelAbstract
+    {
+        $class = self::getChannelClassForChannel($channel);
+
+        if (! $class) {
+            throw new \RuntimeException('No delivery handler is available for channel type "'.$channel->type.'".');
+        }
+
+        $settings = array_merge(self::decodeJsonColumn($channel->configuration), self::decodeJsonColumn($channel->credentials));
+
+        return match (true) {
+            is_a($class, \NextDeveloper\Communication\Channels\Mattermost::class, true) => new $class($settings),
+            is_a($class, \NextDeveloper\Communication\Channels\Sms::class, true) => new $class($settings, null),
+            default => new $class(channel: $channel),
+        };
+    }
 
     /**
      * Resolves the delivery handler for a channel type.

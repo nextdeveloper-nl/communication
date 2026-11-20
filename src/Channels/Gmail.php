@@ -36,7 +36,7 @@ use NextDeveloper\Communication\Exceptions\TokenRefreshedException;
  * to Google_Client. When the access token is expired, it is refreshed automatically
  * and the new credentials are persisted back to the channel record.
  */
-class Gmail implements ChannelAbstract
+class Gmail implements ChannelAbstract, VerifiableChannel
 {
     public const NAME = 'gmail';
 
@@ -159,6 +159,17 @@ class Gmail implements ChannelAbstract
             ]);
             throw new Exception(__METHOD__ . ': Failed to send via Gmail: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Mints a new access token from the stored refresh token. This is the real proof that the grant and the OAuth
+     * client still work; it needs no extra scope (the channel may hold only the send scope).
+     */
+    public function verify(): string
+    {
+        $this->refreshAndPersistToken();
+
+        return 'Google accepted the stored authorization.';
     }
 
     private function doSend(mixed $message): void

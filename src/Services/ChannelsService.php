@@ -186,7 +186,12 @@ class ChannelsService extends AbstractChannelsService
                 'object_type'     => self::CHANNEL_MODEL_TYPE,
             ]);
 
-            Send::dispatch($channel, 'Your verification code is: ' . $code);
+            // The code goes to the requesting user (their email or phone, by channel type); webhook channels post it
+            Send::dispatch(
+                $channel,
+                'Your verification code is: ' . $code,
+                ChannelTestService::defaultRecipient($channel, UserHelper::me())
+            );
 
             Log::info('[ChannelsService::sendCode] Verification code sent', ['channel_id' => $channel->id]);
 

@@ -22,10 +22,14 @@ class Twillio
      * @return array Response from Twilio API
      * @throws Exception If the message fails to send
      */
-    public static function send(string $sms, string $to, ?string $from = null)
+    public static function send(string $sms, string $to, ?string $from = null, ?string $accountSid = null, ?string $authToken = null)
     {
-        $accountSid = config('communication.services.twilio.sid');
-        $authToken = config('communication.services.twilio.token');
+        // A channel can carry its own Twilio account; without one the platform account is used
+        if (empty($accountSid) || empty($authToken)) {
+            $accountSid = config('communication.services.twilio.sid');
+            $authToken = config('communication.services.twilio.token');
+        }
+
         $defaultFrom = config('communication.services.twilio.from');
 
         if (empty($accountSid) || empty($authToken)) {
@@ -104,6 +108,43 @@ class Twillio
         }
 
         return $cleaned;
+    }
+
+    /**
+     * Asks Twilio for the account with the given (or the platform's) SID and token, without sending anything.
+     *
+     * @return array<string, mixed> The Twilio account resource
+     *
+     * @throws \RuntimeException With Twilio's own error text when the credentials are refused
+     */
+    public static function verifyAccount(?string $accountSid = null, ?string $authToken = null): array
+    {
+        if (empty($accountSid) || empty($authToken)) {
+            $accountSid = config('communication.services.twilio.sid');
+            $authToken = config('communication.services.twilio.token');
+        }
+
+        if (empty($accountSid) || empty($authToken)) {
+            throw new \RuntimeException('Twilio credentials not configured (account SID and auth token).');
+        }
+
+        $response = Http::timeout(15)
+            ->withBasicAuth($accountSid, $authToken)
+            ->get(self::API_BASE_URL . '/Accounts/' . rawurlencode($accountSid) . '.json');
+
+        if (!$response->successful()) {
+            throw new \RuntimeException(sprintf(
+                'Twilio API error (%s): %s',
+                $response->json('code') ?? $response->status(),
+                $response->json('message') ?? 'credentials refused'
+            ));
+        }
+
+        if (($response->json('status') ?? 'active') !== 'active') {
+            throw new \RuntimeException('Twilio account is ' . $response->json('status') . '.');
+        }
+
+        return (array) $response->json();
     }
 
     /**
