@@ -28,6 +28,9 @@ use NextDeveloper\Commons\Database\Traits\RunAsAdministrator;
  * @property boolean $is_active
  * @property integer $priority
  * @property integer $iam_account_id
+ * @property \Carbon\Carbon $last_checked_at
+ * @property string $last_check_status
+ * @property string $last_check_message
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  * @property \Carbon\Carbon $deleted_at
@@ -55,6 +58,9 @@ class Channels extends Model
             'is_active',
             'priority',
             'iam_account_id',
+            'last_checked_at',
+            'last_check_status',
+            'last_check_message',
     ];
 
     /**
@@ -83,6 +89,9 @@ class Channels extends Model
     'configuration' => 'array',
     'is_active' => 'boolean',
     'priority' => 'integer',
+    'last_checked_at' => 'datetime',
+    'last_check_status' => 'string',
+    'last_check_message' => 'string',
     'created_at' => 'datetime',
     'updated_at' => 'datetime',
     'deleted_at' => 'datetime',
@@ -94,6 +103,7 @@ class Channels extends Model
      @var array
      */
     protected $dates = [
+    'last_checked_at',
     'created_at',
     'updated_at',
     'deleted_at',

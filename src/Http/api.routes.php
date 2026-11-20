@@ -333,6 +333,9 @@ Route::prefix('communication')->group(
 
         Route::prefix('channels')->group(
             function () {
+                // Checks the credentials with the provider and sends a test message; a real outbound call, so throttled
+                Route::post('/{communication_channels}/test', 'Channels\ChannelsController@test')
+                    ->middleware(\Illuminate\Routing\Middleware\ThrottleRequests::class . ':10,1');
                 Route::post('/{communication_channels}/code/send', 'Channels\ChannelsController@sendCode');
                 Route::post('/{communication_channels}/code/verify', 'Channels\ChannelsController@verifyCode');
 

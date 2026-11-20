@@ -13,7 +13,7 @@ use NextDeveloper\IAM\Database\Models\Users;
  *
  * Handles sending SMS messages via configurable providers (default: Twilio)
  */
-class Sms implements ChannelAbstract
+class Sms implements ChannelAbstract, VerifiableChannel
 {
     /**
      * Channel name identifier
@@ -35,7 +35,7 @@ class Sms implements ChannelAbstract
     /**
      * The user to send SMS to
      */
-    protected Users $user;
+    protected ?Users $user;
 
     /**
      * The phone number to send SMS to
@@ -103,6 +103,11 @@ class Sms implements ChannelAbstract
      */
     public function send(mixed $message): void
     {
+        // An explicit recipient on the message wins over the user's own number
+        if (is_array($message) && !empty($message['to'])) {
+            $this->phoneNumber = (string) $message['to'];
+        }
+
         if (!$this->phoneNumber) {
             Log::warning(__METHOD__ . ': No phone number available for SMS delivery');
             throw new \RuntimeException('No phone number available for SMS delivery');
@@ -123,7 +128,13 @@ class Sms implements ChannelAbstract
             switch ($this->provider) {
                 case 'twilio':
                 default:
-                    Twillio::send($smsContent, $this->phoneNumber);
+                    Twillio::send(
+                        $smsContent,
+                        $this->phoneNumber,
+                        $this->channelFromNumber(),
+                        $this->config['account_sid'] ?? null,
+                        $this->config['auth_token'] ?? null
+                    );
                     break;
             }
 
@@ -140,6 +151,29 @@ class Sms implements ChannelAbstract
             ]);
             throw new \RuntimeException('Failed to send SMS: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Checks the provider account (the channel's own Twilio account when it stores one, else the platform's).
+     */
+    public function verify(): string
+    {
+        $account = Twillio::verifyAccount($this->config['account_sid'] ?? null, $this->config['auth_token'] ?? null);
+
+        return 'Twilio accepted the account SID and token (' . ($account['friendly_name'] ?? 'account') . ').';
+    }
+
+    /**
+     * The channel's own sender number. Only used together with the channel's own Twilio account: without one the
+     * platform account and its configured sender apply.
+     */
+    protected function channelFromNumber(): ?string
+    {
+        if (empty($this->config['account_sid']) || empty($this->config['auth_token'])) {
+            return null;
+        }
+
+        return $this->config['phone_number'] ?? null;
     }
 
     /**

@@ -18,7 +18,7 @@ use Symfony\Component\Mime\Email;
  *   host, port, encryption (tls|ssl|none), username, password,
  *   from_address (optional), from_name (optional), timeout (optional).
  */
-class Smtp implements ChannelAbstract
+class Smtp implements ChannelAbstract, VerifiableChannel
 {
     public const NAME = 'smtp';
 
@@ -35,6 +35,7 @@ class Smtp implements ChannelAbstract
     ];
 
     private Mailer $mailer;
+    private \Symfony\Component\Mailer\Transport\TransportInterface $transport;
     private string $fromAddress;
     private string $fromName;
 
@@ -77,8 +78,21 @@ class Smtp implements ChannelAbstract
             $timeout
         );
 
-        $transport   = Transport::fromDsn($dsn);
-        $this->mailer = new Mailer($transport);
+        $this->transport = Transport::fromDsn($dsn);
+        $this->mailer    = new Mailer($this->transport);
+    }
+
+    /**
+     * Opens the connection and authenticates (EHLO, STARTTLS, AUTH) without sending anything.
+     */
+    public function verify(): string
+    {
+        if ($this->transport instanceof \Symfony\Component\Mailer\Transport\Smtp\SmtpTransport) {
+            $this->transport->start();
+            $this->transport->stop();
+        }
+
+        return 'SMTP connection and authentication succeeded.';
     }
 
     public function send(mixed $message): void

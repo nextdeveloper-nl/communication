@@ -20,7 +20,7 @@ use NextDeveloper\Communication\Database\Models\Channels;
  * Free-form text can only be sent inside the 24 hour customer service window (24h after the customer's last
  * message); outside it Meta rejects the call and the error is surfaced as a failed message.
  */
-class WhatsAppCloud implements ChannelAbstract
+class WhatsAppCloud implements ChannelAbstract, VerifiableChannel
 {
     public const NAME = 'whatsapp';
 
@@ -39,6 +39,35 @@ class WhatsAppCloud implements ChannelAbstract
         if (empty(data_get($channel->configuration, 'phone_number_id'))) {
             throw new InvalidArgumentException(__METHOD__ . ': Missing phone_number_id in channel configuration.');
         }
+    }
+
+    /**
+     * Asks the Graph API for the number with the stored token: the token is valid and still reaches the number.
+     */
+    public function verify(): string
+    {
+        $phoneNumberId = data_get($this->channel->configuration, 'phone_number_id');
+
+        $response = Http::timeout(15)
+            ->withToken(data_get($this->channel->credentials, 'access_token'))
+            ->get(sprintf('https://graph.facebook.com/%s/%s', self::GRAPH_API_VERSION, $phoneNumberId), [
+                'fields' => 'id,display_phone_number,verified_name',
+            ]);
+
+        if (! $response->successful() || (string) $response->json('id') !== (string) $phoneNumberId) {
+            throw new \RuntimeException(sprintf(
+                'Meta error (HTTP %d%s): %s',
+                $response->status(),
+                $response->json('error.code') ? ', code '.$response->json('error.code') : '',
+                $response->json('error.message') ?? 'the token does not reach this number'
+            ));
+        }
+
+        return trim(sprintf(
+            'Meta accepted the token; number %s %s is reachable.',
+            $response->json('display_phone_number') ?? $phoneNumberId,
+            $response->json('verified_name') ? '('.$response->json('verified_name').')' : ''
+        ));
     }
 
     public function validateConfig(array $config): bool

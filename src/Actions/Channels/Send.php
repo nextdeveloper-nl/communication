@@ -5,63 +5,47 @@ namespace NextDeveloper\Communication\Actions\Channels;
 use Illuminate\Support\Facades\Log;
 use NextDeveloper\Commons\Actions\AbstractAction;
 use NextDeveloper\Commons\Exceptions\NotAllowedException;
-use NextDeveloper\Communication\Database\Models\AvailableChannels;
 use NextDeveloper\Communication\Database\Models\Channels;
-use NextDeveloper\Communication\Services\ChannelsService;
+use NextDeveloper\Communication\Services\ChannelTestService;
 
+/**
+ * Delivers a plain text message through a channel (used for the channel verification code).
+ */
 class Send extends AbstractAction
 {
-
     /**
+     * @param  ?string  $recipient  Email address, phone number or chat id depending on the channel type. Channels
+     *                              that post to a fixed destination (webhooks) need none.
+     *
      * @throws NotAllowedException
      */
     public function __construct(
         Channels $channel,
-        private string $message
+        private string $message,
+        private ?string $recipient = null,
+        private string $subject = 'Channel verification'
     ) {
         $this->model = $channel;
+
         return parent::__construct();
     }
 
     /**
-     * @throws \JsonException
+     * @throws \Throwable With the provider's own error, so a failed delivery fails the job instead of passing silently
      */
     public function handle(): void
     {
-        // Get the channel id
-        $availableChannelId = $this->model->communication_available_channel_id;
+        try {
+            ChannelTestService::deliver($this->model, $this->recipient, $this->subject, $this->message);
+        } catch (\Throwable $e) {
+            Log::error('[\NextDeveloper\Communication\Actions\Channels\Send::handle] Delivery failed', [
+                'channel_id' => $this->model->id,
+                'type' => $this->model->type,
+                // Class only: provider and HTTP client messages can echo credentials back
+                'error' => get_class($e),
+            ]);
 
-        // Get the channel
-        $availableChannel = AvailableChannels::withoutGlobalScopes()
-            ->where('id', $availableChannelId)
-            ->first();
-
-        // Check if the channel exists
-        if (!$availableChannel) {
-            Log::error('[\NextDeveloper\Communication\Actions\Channels\Send::handle] Channel not found: ' . $availableChannelId);
-            return;
+            throw $e;
         }
-
-        // Get the class
-        $class = $availableChannel->class;
-
-        // Check if the class exists
-        if (!class_exists($class)) {
-            Log::error('[\NextDeveloper\Communication\Actions\Channels\Send::handle] Class not found: ' . $class);
-            return;
-        }
-
-        // validate channel fields and platform fields
-        if (!ChannelsService::validateChannelConfiguration($this->model, $availableChannel)) {
-            Log::error(
-                '[\NextDeveloper\Communication\Actions\Channels\Send::handle] Channel fields do not match platform fields: '
-            );
-            return;
-        }
-
-        // Send the notification
-        //  (new $class($this->model->config, $this->message))->send();
-
-        //  Notification is not being sent here. This needs to be fixed. Maybe we should handle the whole package here?
     }
 }

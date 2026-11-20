@@ -26,7 +26,7 @@ use Symfony\Component\Mime\Email;
  * kept with the other secrets on the channel, matching how the Gmail channel
  * stores its tokens.
  */
-class Mailgun implements ChannelAbstract
+class Mailgun implements ChannelAbstract, VerifiableChannel
 {
     public const NAME = 'mailgun';
 
@@ -44,6 +44,12 @@ class Mailgun implements ChannelAbstract
     private string $fromAddress;
 
     private string $fromName;
+
+    private string $apiKey;
+
+    private string $domain;
+
+    private string $apiHost;
 
     public function __construct(public readonly Channels $channel)
     {
@@ -75,6 +81,37 @@ class Mailgun implements ChannelAbstract
         );
 
         $this->mailer = new Mailer(Transport::fromDsn($dsn));
+        $this->apiKey = $apiKey;
+        $this->domain = $domain;
+        $this->apiHost = $region === 'eu' ? 'api.eu.mailgun.net' : 'api.mailgun.net';
+    }
+
+    /**
+     * Submits a message in Mailgun's test mode: the key and the domain are checked exactly as for a real send (so it
+     * also works with a domain sending key, which cannot call the account API), but nothing is delivered.
+     */
+    public function verify(): string
+    {
+        $response = \Illuminate\Support\Facades\Http::timeout(15)
+            ->withBasicAuth('api', $this->apiKey)
+            ->asForm()
+            ->post(sprintf('https://%s/v3/%s/messages', $this->apiHost, $this->domain), [
+                'from' => $this->fromAddress,
+                'to' => $this->fromAddress,
+                'subject' => 'Credential check',
+                'text' => 'Credential check',
+                'o:testmode' => 'yes',
+            ]);
+
+        if (! $response->successful()) {
+            throw new Exception(sprintf(
+                'Mailgun error (HTTP %d): %s',
+                $response->status(),
+                $response->json('message') ?? (trim(mb_substr($response->body(), 0, 300)) ?: 'no details')
+            ));
+        }
+
+        return 'Mailgun accepted the API key for '.$this->domain.'.';
     }
 
     public function send(mixed $message): void
