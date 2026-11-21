@@ -10,7 +10,10 @@ use NextDeveloper\Communication\Database\Filters\ChannelsQueryFilter;
 use NextDeveloper\Communication\Database\Models\Channels;
 use NextDeveloper\Communication\Services\ChannelsService;
 use NextDeveloper\Communication\Http\Requests\Channels\ChannelsCreateRequest;
+use NextDeveloper\Communication\Http\Requests\Channels\ChannelsTestRequest;
+use NextDeveloper\Communication\Http\Requests\Channels\ChannelsVerifyCodeRequest;
 use NextDeveloper\Communication\Http\Requests\Channels\FacebookConnectRequest;
+use NextDeveloper\Communication\Services\ChannelTestService;
 use NextDeveloper\Communication\Http\Requests\Channels\WhatsAppConnectRequest;
 use NextDeveloper\Communication\Http\Requests\Channels\WhatsAppEmbeddedSignupRequest;
 use NextDeveloper\Commons\Http\Traits\Tags as TagsTrait;use NextDeveloper\Commons\Http\Traits\Addresses as AddressesTrait;
@@ -156,6 +159,32 @@ class ChannelsController extends AbstractController
     }
 
     // EDIT AFTER HERE - WARNING: ABOVE THIS LINE MAY BE REGENERATED AND YOU MAY LOSE CODE
+
+    /**
+     * Tests the channel against its provider (credentials check, then a test message where the type allows it) and
+     * saves the outcome on the channel. A failed test is a normal answer (status "error" with the provider's text),
+     * not an HTTP error. Credentials are never part of the answer.
+     */
+    public function test($ref, ChannelsTestRequest $request): \Illuminate\Http\JsonResponse
+    {
+        return response()->json(['data' => ChannelTestService::test($ref, $request->validated('recipient'))]);
+    }
+
+    /**
+     * Sends a 6-digit verification code through the channel.
+     */
+    public function sendCode($ref): \Illuminate\Http\JsonResponse
+    {
+        return response()->json(['data' => ['sent' => ChannelsService::sendCode($ref)]]);
+    }
+
+    /**
+     * Checks the verification code and activates the channel when it matches.
+     */
+    public function verifyCode($ref, ChannelsVerifyCodeRequest $request): \Illuminate\Http\JsonResponse
+    {
+        return response()->json(['data' => ['verified' => ChannelsService::verifyCode($request->validated(), $ref)]]);
+    }
 
     /**
      * Self-service Facebook Page connect: validates the customer-supplied

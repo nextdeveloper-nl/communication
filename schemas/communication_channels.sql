@@ -13,6 +13,9 @@ CREATE TABLE communication_channels (
     created_at      timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at      timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at      timestamp with time zone,
+    last_checked_at timestamp with time zone,
+    last_check_status text,
+    last_check_message text,
     CONSTRAINT communication_channels_type_check CHECK ((type = ANY (ARRAY['mattermost'::text, 'gmail'::text, 'pop3'::text, 'imap'::text, 'smtp'::text, 'sms'::text, 'google_workspace'::text, 'email'::text, 'whatsapp'::text, 'telegram'::text, 'slack'::text, 'internal'::text]))),
     CONSTRAINT communication_channels_iam_account_fk FOREIGN KEY (iam_account_id) REFERENCES iam_accounts(id) ON UPDATE RESTRICT ON DELETE RESTRICT,
     CONSTRAINT communication_channels_pkey PRIMARY KEY (id)

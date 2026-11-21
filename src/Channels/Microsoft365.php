@@ -21,7 +21,7 @@ use NextDeveloper\Communication\Database\Models\Channels;
  *
  * OAuth app credentials come from services.microsoft.* (client_id, client_secret, tenant).
  */
-class Microsoft365 implements ChannelAbstract
+class Microsoft365 implements ChannelAbstract, VerifiableChannel
 {
     public const NAME = 'microsoft_365';
 
@@ -115,6 +115,16 @@ class Microsoft365 implements ChannelAbstract
 
             throw new Exception(__METHOD__ . ': Failed to send via Microsoft 365 (' . $response->status() . '): ' . $error);
         }
+    }
+
+    /**
+     * Forces a token refresh: proves the grant and the app credentials still work, with no extra scope needed.
+     */
+    public function verify(): string
+    {
+        $this->accessToken(true);
+
+        return 'Microsoft accepted the stored authorization.';
     }
 
     public function validateConfig(array $config): bool
