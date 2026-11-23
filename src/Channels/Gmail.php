@@ -10,6 +10,7 @@ use Google_Service_Gmail_Message;
 use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 use NextDeveloper\Commons\Database\Models\ExternalServices;
+use NextDeveloper\Commons\Helpers\GoogleWorkspaceHelper;
 use NextDeveloper\Communication\Database\Models\Channels;
 use NextDeveloper\Communication\Exceptions\TokenRefreshedException;
 
@@ -51,6 +52,13 @@ class Gmail implements ChannelAbstract, VerifiableChannel
     protected Google_Service_Gmail $service;
     protected string $fromAddress;
 
+    /**
+     * The google_workspace external service this channel is linked to (via
+     * configuration.external_service_uuid), when there is a live one. null means the
+     * channel sends with the token copy stored in its own credentials.
+     */
+    protected ?ExternalServices $linkedService = null;
+
     public function __construct(public readonly Channels $channel)
     {
         $credentials = $channel->credentials ?? [];
@@ -61,6 +69,16 @@ class Gmail implements ChannelAbstract, VerifiableChannel
         $config = $channel->configuration ?? [];
         if (is_string($config)) {
             $config = json_decode($config, true) ?? [];
+        }
+
+        // The linked Google Workspace connection is the source of truth for the token. The copy
+        // in the channel credentials is never kept up to date (leo:refresh-gmail-tokens only
+        // refreshes the service), so once it died every send failed with invalid_grant while the
+        // integration itself looked healthy. When the link exists, send with the service's token.
+        $this->linkedService = self::resolveLinkedService($config, $channel);
+
+        if ($this->linkedService) {
+            $credentials = $this->credentialsFromLinkedService($this->linkedService, $credentials);
         }
 
         if (!$this->validateConfig($credentials)) {
@@ -107,7 +125,9 @@ class Gmail implements ChannelAbstract, VerifiableChannel
             // Pass the full credentials array so Google_Client can track expiry metadata
             $this->client->setAccessToken($credentials);
 
-            if ($this->client->isAccessTokenExpired()) {
+            // A linked service hands over a token that is valid for the next few minutes, so there
+            // is nothing to refresh (and nothing to write back to the channel).
+            if (!$this->linkedService && $this->client->isAccessTokenExpired()) {
                 $newToken = $this->client->fetchAccessTokenWithRefreshToken($credentials['refresh_token']);
 
                 if (isset($newToken['error'])) {
@@ -226,8 +246,81 @@ class Gmail implements ChannelAbstract, VerifiableChannel
             .($hint ? ' — '.$hint : '');
     }
 
+    /**
+     * Returns the live google_workspace external service the channel points to, or null
+     * when the channel has no link, the service is gone, is not a Google Workspace one,
+     * belongs to another account, or was flagged dead (is_alive = false) — then the channel's own credentials are used.
+     */
+    private static function resolveLinkedService(array $config, Channels $channel): ?ExternalServices
+    {
+        $uuid = data_get($config, 'external_service_uuid');
+
+        if (!$uuid || !$channel->iam_account_id) {
+            return null;
+        }
+
+        // The uuid comes from channel configuration, which is plain data: only accept a
+        // service owned by the channel's own account, so a channel can never send mail
+        // with another account's Google connection.
+        return ExternalServices::withoutGlobalScopes()
+            ->where('uuid', $uuid)
+            ->where('iam_account_id', $channel->iam_account_id)
+            ->where('code', 'google_workspace')
+            ->where('is_alive', true)
+            ->whereNotNull('refresh_token')
+            ->first();
+    }
+
+    /**
+     * Builds the Google_Client credentials array from the linked service: a freshly
+     * refreshed access token plus the service's refresh token.
+     */
+    private function credentialsFromLinkedService(ExternalServices $service, array $channelCredentials): array
+    {
+        $accessToken = GoogleWorkspaceHelper::freshAccessToken($service);
+
+        if (!$accessToken) {
+            throw new Exception(
+                __METHOD__ . ': Failed to initialize Gmail client: the linked Google Workspace connection '
+                . 'could not be refreshed — reconnect the account (external service ' . $service->uuid . ').'
+            );
+        }
+
+        try {
+            $refreshToken = decrypt($service->refresh_token);
+        } catch (\Throwable) {
+            $refreshToken = $service->refresh_token;
+        }
+
+        return array_merge($channelCredentials, [
+            'access_token'  => $accessToken,
+            'refresh_token' => $refreshToken,
+            // freshAccessToken() guarantees at least 5 minutes of validity
+            'created'       => time(),
+            'expires_in'    => 300,
+        ]);
+    }
+
     private function refreshAndPersistToken(): void
     {
+        // Linked channel: refresh through the service so its stored token stays the single truth.
+        if ($this->linkedService) {
+            $token = GoogleWorkspaceHelper::refresh($this->linkedService->fresh())['token'] ?? null;
+
+            if (!$token) {
+                throw new Exception('Token refresh failed: the linked Google Workspace connection needs to be reconnected.');
+            }
+
+            $this->client->setAccessToken([
+                'access_token' => GoogleWorkspaceHelper::freshAccessToken($this->linkedService->fresh()),
+                'created'      => time(),
+                'expires_in'   => 300,
+            ]);
+            $this->service = new Google_Service_Gmail($this->client);
+
+            return;
+        }
+
         $credentials = $this->channel->credentials ?? [];
         if (is_string($credentials)) {
             $credentials = json_decode($credentials, true) ?? [];
