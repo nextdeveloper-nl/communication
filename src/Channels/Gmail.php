@@ -75,7 +75,7 @@ class Gmail implements ChannelAbstract, VerifiableChannel
         // in the channel credentials is never kept up to date (leo:refresh-gmail-tokens only
         // refreshes the service), so once it died every send failed with invalid_grant while the
         // integration itself looked healthy. When the link exists, send with the service's token.
-        $this->linkedService = self::resolveLinkedService($config);
+        $this->linkedService = self::resolveLinkedService($config, $channel);
 
         if ($this->linkedService) {
             $credentials = $this->credentialsFromLinkedService($this->linkedService, $credentials);
@@ -249,18 +249,22 @@ class Gmail implements ChannelAbstract, VerifiableChannel
     /**
      * Returns the live google_workspace external service the channel points to, or null
      * when the channel has no link, the service is gone, is not a Google Workspace one,
-     * or was flagged dead (is_alive = false) — then the channel's own credentials are used.
+     * belongs to another account, or was flagged dead (is_alive = false) — then the channel's own credentials are used.
      */
-    private static function resolveLinkedService(array $config): ?ExternalServices
+    private static function resolveLinkedService(array $config, Channels $channel): ?ExternalServices
     {
         $uuid = data_get($config, 'external_service_uuid');
 
-        if (!$uuid) {
+        if (!$uuid || !$channel->iam_account_id) {
             return null;
         }
 
+        // The uuid comes from channel configuration, which is plain data: only accept a
+        // service owned by the channel's own account, so a channel can never send mail
+        // with another account's Google connection.
         return ExternalServices::withoutGlobalScopes()
             ->where('uuid', $uuid)
+            ->where('iam_account_id', $channel->iam_account_id)
             ->where('code', 'google_workspace')
             ->where('is_alive', true)
             ->whereNotNull('refresh_token')
