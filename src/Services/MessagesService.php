@@ -16,6 +16,7 @@ use NextDeveloper\IAM\Database\Models\Users;
 use NextDeveloper\IAM\Database\Scopes\AuthorizationScope;
 use NextDeveloper\CRM\Database\Models\EmailTemplates;
 use NextDeveloper\IAM\Helpers\UserHelper;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -153,6 +154,79 @@ class MessagesService extends AbstractMessagesService
         self::deliver($message);
 
         return $message->fresh();
+    }
+
+    /**
+     * Statuses that mean "this message already exists or was already sent" for the
+     * idempotency lookup. A 'failed' message does not block a new one: a real failure
+     * has to be retryable.
+     */
+    private const IDEMPOTENT_STATUSES = ['queued', 'sent', 'delivered'];
+
+    /**
+     * Finds the message previously created under an idempotency key on a channel.
+     */
+    public static function findByIdempotencyKey(int $channelId, string $idempotencyKey): ?Messages
+    {
+        return Messages::withoutGlobalScopes()
+            ->where('communication_channel_id', $channelId)
+            ->where('metadata->idempotency_key', $idempotencyKey)
+            ->whereIn('status', self::IDEMPOTENT_STATUSES)
+            ->orderByDesc('id')
+            ->first();
+    }
+
+    /**
+     * Creates a message unless one with the same idempotency key already exists on the
+     * channel (queued, sent or delivered), in which case that message is returned and
+     * nothing new is created.
+     *
+     * Why: when the Gmail daily cap is reached deliver() reschedules the message to a
+     * later day and leaves it queued. A caller that treats "not delivered yet" as a
+     * failure and retries (Flow's email pusher, the hourly SLA check) used to create a
+     * second message for the same email, and both were delivered later. A stable key —
+     * e.g. "<pusher>:<item>:<stage visit>" — makes the retry reuse the first message.
+     *
+     * The caller still calls deliver() on the result: it is a no-op for a message that is
+     * not due yet or already delivered (see claimForDelivery()).
+     *
+     * @param array  $data           same payload as create()
+     * @param string $idempotencyKey stable key for "this one email"; stored in metadata.idempotency_key
+     */
+    public static function createIdempotent(array $data, string $idempotencyKey): Messages
+    {
+        $channelId = $data['communication_channel_id'] ?? null;
+
+        if (!$channelId) {
+            throw new InvalidArgumentException('createIdempotent requires communication_channel_id.');
+        }
+
+        // Two workers can hit the same key at once (retry command + hourly SLA run);
+        // serialise the find-or-create so only one of them creates the message.
+        $lock = Cache::lock('communication:message-idempotency:' . $channelId . ':' . sha1($idempotencyKey), 30);
+
+        return $lock->block(10, function () use ($data, $channelId, $idempotencyKey) {
+            $existing = self::findByIdempotencyKey((int) $channelId, $idempotencyKey);
+
+            if ($existing) {
+                Log::info('[MessagesService::createIdempotent] Message already exists for key — reusing it', [
+                    'message_id'      => $existing->id,
+                    'status'          => $existing->status,
+                    'idempotency_key' => $idempotencyKey,
+                ]);
+
+                return $existing;
+            }
+
+            $metadata = $data['metadata'] ?? [];
+            if (is_string($metadata)) {
+                $metadata = json_decode($metadata, true) ?? [];
+            }
+            $metadata['idempotency_key'] = $idempotencyKey;
+            $data['metadata'] = $metadata;
+
+            return self::create($data);
+        });
     }
 
     /**
